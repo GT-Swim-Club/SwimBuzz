@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { importMeetResults, resolveMeetDate } from "@/lib/meet/meet-import"
+import { importMeetResults, resolveMeetDate, resultSwimmerNames } from "@/lib/meet/meet-import"
 import { normalizeNameMappings, normalizeRejectedNames } from "@/lib/athlete/athlete-match"
 import {
   assertDocTypeMatches,
@@ -7,6 +7,7 @@ import {
   MeetImportValidationError,
 } from "@/lib/meet/meet-import-validate"
 import { parseMeetPdf } from "@/lib/meet/pdf-parser-client"
+import { coercePlaceTimesEvents } from "@/lib/meet/place-times"
 import { prisma } from "@/lib/prisma"
 import { PARSE_TMP_FOLDER, meetFileFolder } from "@/lib/meet/meet-files"
 import { deleteUnreferencedStoredFiles, uploadMeetFile } from "@/lib/meet/meet-storage"
@@ -28,7 +29,7 @@ import {
 } from "@/lib/import-stream"
 import { coerceTeamScores, isStaffRole } from "@swimbuzz/shared"
 import { Prisma } from "@prisma/client"
-import { addPairedAthletesToSeason } from "@/lib/athlete/paired-athlete-seasons"
+import { addPairedAthletesToSeason, joinEmptySeasonFromOtherSeasons } from "@/lib/athlete/paired-athlete-seasons"
 
 function isUpload(value: unknown): value is Blob {
   return value != null && typeof value !== "string" && typeof (value as Blob).arrayBuffer === "function"
@@ -71,6 +72,8 @@ async function applyParsedMeetPdf(input: {
     team_scores?: unknown
     /** The results' own order of events ("Event 1 …" headers). */
     event_order?: unknown
+    /** Every event's champion, 8th and 24th place times, across all teams. */
+    place_times?: unknown
   }
   season: string
   courseDefault: string
@@ -108,6 +111,12 @@ async function applyParsedMeetPdf(input: {
 
   // Athletes paired from another season join this one before anything reads its roster.
   await addPairedAthletesToSeason(nameMappings, season)
+  // A season with no roster yet (a past one): swimmers are matched by name from every season.
+  const { rosterless } = await joinEmptySeasonFromOtherSeasons({
+    season,
+    names: resultSwimmerNames(parsed.results ?? [], coerceParsedRelayResults(parsed.relay_results)),
+    rejectedNames,
+  })
 
   const { onProgress } = input
   // Women and men scored separately: the results' combined places and points are recomputed.
@@ -139,6 +148,7 @@ async function applyParsedMeetPdf(input: {
     allResults: results,
     allRelayResults: coerceParsedRelayResults(parsed.relay_results),
     rescored: byGender != null,
+    pairAcrossSeasons: rosterless,
     onProgress: scaleProgress(onProgress, 0.03, 0.97),
   })
 
@@ -160,6 +170,7 @@ async function applyParsedMeetPdf(input: {
   if (meet?.id && !pairOnly && resultsPdfUrl) {
     try {
       const teamScores = byGender ? byGender.teamScores : coerceTeamScores(parsed.team_scores)
+      const placeTimes = coercePlaceTimesEvents(parsed.place_times)
       await prisma.meet.update({
         where: { id: meet.id },
         data: {
@@ -171,6 +182,12 @@ async function applyParsedMeetPdf(input: {
           teamScores: teamScores
             ? ({ ...teamScores, importedAt: new Date().toISOString() } as Prisma.InputJsonValue)
             : Prisma.DbNull,
+          // The field's champion, 8th and 24th place times (a Nationals meet's show on next
+          // season's qualifiers PDF).
+          placeTimes:
+            placeTimes.length > 0
+              ? ({ importedAt: new Date().toISOString(), events: placeTimes } as Prisma.InputJsonValue)
+              : Prisma.DbNull,
           // Without a meet packet, the results' event numbers are the meet's order of events.
           ...(!meet.packetUrl && isEventOrder(parsed.event_order)
             ? { eventOrder: parsed.event_order as unknown as Prisma.InputJsonValue }
@@ -307,6 +324,7 @@ export async function POST(req: Request) {
     relay_results?: unknown[]
     team_scores?: unknown
     event_order?: unknown
+    place_times?: unknown
   }
 
   const applyParsed = (

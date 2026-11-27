@@ -51,7 +51,7 @@ export default function RosterSkeleton({ layout }: { layout: ListLayout }) {
  */
 export function RosterResultsSkeleton({ layout }: { layout: ListLayout }) {
   return (
-    <div className="relative flex items-start gap-1 min-[1040px]:block">
+    <div className="jump-rail-layout">
       <div className="min-w-0 flex-1">
         {layout === "list" ? (
           <div className="overflow-hidden rounded-xl border border-border bg-background">
@@ -95,8 +95,8 @@ export function RosterResultsSkeleton({ layout }: { layout: ListLayout }) {
           </div>
         )}
       </div>
-      {/* Same slot as RosterView's JumpRail: beside the list, just outside it in the right margin when wide. */}
-      <div className="shrink-0 self-stretch min-[1040px]:absolute min-[1040px]:inset-y-0 min-[1040px]:left-full min-[1040px]:ml-3">
+      {/* Same slot as RosterView's JumpRail: just right of the list, out in the page's right margin. */}
+      <div className="jump-rail-slot">
         <div className="flex flex-col items-center gap-[7px] py-[5px]">
           {Array.from({ length: 26 }, (_, i) => (
             <Skeleton key={i} className="h-2.5 w-2.5 rounded-sm" />

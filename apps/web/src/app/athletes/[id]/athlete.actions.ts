@@ -13,6 +13,7 @@ import { isRelayLeadoffSwimTag } from "@/lib/meet/relay-results"
 import { syncTeamRecordsSafely } from "@/lib/records/record-sync"
 import { removeAthleteSeasons } from "@/lib/athlete/athlete-seasons"
 import { applyYearEdits } from "@/lib/athlete/athlete-year"
+import { isPlaceholderEmail } from "@/lib/auth/gatech-email"
 
 export type UpdateAthleteInput = {
   firstName?: string
@@ -118,12 +119,20 @@ export async function updateAthlete(athleteId: string, input: UpdateAthleteInput
   let email: string | null = null
   if (typeof input.email === "string") {
     email = input.email.trim().toLowerCase()
-    if (!email) throw new Error("Email cannot be empty")
+    // Blank keeps an athlete without an email on their placeholder (the form shows it blank).
+    if (!email) {
+      const current = await prisma.user.findUnique({ where: { id: athlete.userId }, select: { email: true } })
+      if (!current || !isPlaceholderEmail(current.email)) throw new Error("Email cannot be empty")
+    }
+  }
+  if (email) {
     const existingUser = await prisma.user.findUnique({ where: { email } })
     if (existingUser && existingUser.id !== athlete.userId) {
       throw new Error("Another user already has this email")
     }
   }
+
+  if (email === "") email = null
 
   if (Object.keys(data).length === 0 && email === null) {
     throw new Error("No valid fields to update")

@@ -97,6 +97,256 @@
   },
   "meet_date": "2022-02-26",
   "meet_name": "7th Annual Garnet & Black Invitational",
+  "place_times": [
+    {
+      "champion": "2:02.81",
+      "eighth": "2:23.09",
+      "event": "200 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:49.06",
+      "eighth": "2:05.01",
+      "event": "200 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:04.44",
+      "eighth": "1:07.34",
+      "event": "100 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:15.48"
+    },
+    {
+      "champion": "55.44",
+      "eighth": "58.59",
+      "event": "100 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "1:06.62"
+    },
+    {
+      "champion": "29.59",
+      "eighth": "32.85",
+      "event": "50 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "35.39"
+    },
+    {
+      "champion": "25.44",
+      "eighth": "28.41",
+      "event": "50 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "56.37",
+      "eighth": "1:00.72",
+      "event": "100 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:07.11"
+    },
+    {
+      "champion": "48.60",
+      "eighth": "52.06",
+      "event": "100 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "56.92"
+    },
+    {
+      "champion": "1:11.30",
+      "eighth": "1:23.46",
+      "event": "100 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "59.42",
+      "eighth": "1:06.32",
+      "event": "100 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "28.31",
+      "eighth": "30.04",
+      "event": "50 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "33.05"
+    },
+    {
+      "champion": "24.00",
+      "eighth": "25.65",
+      "event": "50 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "28.09"
+    },
+    {
+      "champion": "32.44",
+      "eighth": "36.33",
+      "event": "50 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "44.43"
+    },
+    {
+      "champion": "28.40",
+      "eighth": "30.43",
+      "event": "50 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "35.83"
+    },
+    {
+      "champion": "1:03.17",
+      "eighth": null,
+      "event": "100 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "56.38",
+      "eighth": null,
+      "event": "100 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "26.13",
+      "eighth": "27.21",
+      "event": "50 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "29.24"
+    },
+    {
+      "champion": "22.17",
+      "eighth": "23.04",
+      "event": "50 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "24.25"
+    },
+    {
+      "champion": "2:16.13",
+      "eighth": "2:39.94",
+      "event": "200 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:03.30",
+      "eighth": null,
+      "event": "200 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:03.82",
+      "eighth": "1:13.98",
+      "event": "100 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "53.69",
+      "eighth": "1:01.37",
+      "event": "100 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "5:47.68",
+      "eighth": "7:04.52",
+      "event": "500 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "5:23.47",
+      "eighth": "6:03.25",
+      "event": "500 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:27.10",
+      "eighth": null,
+      "event": "200 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:09.95",
+      "eighth": null,
+      "event": "200 Back",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "4:31.71",
+      "eighth": null,
+      "event": "400 IM",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:56.50",
+      "eighth": "2:09.96",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:39.81",
+      "eighth": "1:52.96",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:44.76",
+      "eighth": "2:00.32",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:30.14",
+      "eighth": "1:44.37",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    }
+  ],
   "relay_results": [
     {
       "course": "SCY",
@@ -255,7 +505,7 @@
         },
         {
           "leg": 2,
-          "name": "Lyons, Mary"
+          "name": "Lyons, Mary Kate"
         },
         {
           "leg": 3,
@@ -1062,7 +1312,7 @@
       "course": "SCY",
       "event": "200 Free",
       "gender": "F",
-      "name": "Lyons, Mary",
+      "name": "Lyons, Mary Kate",
       "place": 13,
       "tags": "",
       "team": "Gamecock Club Swimming-NI",
@@ -1508,7 +1758,7 @@
       "course": "SCY",
       "event": "100 IM",
       "gender": "F",
-      "name": "Lyons, Mary",
+      "name": "Lyons, Mary Kate",
       "place": 30,
       "tags": "",
       "team": "Gamecock Club Swimming-NI",
@@ -1921,7 +2171,7 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "F",
-      "name": "Lipe, Sarah",
+      "name": "Lipe, Sarah Grace",
       "place": 4,
       "points": 5.0,
       "seedTime": "30.42",
@@ -2559,7 +2809,7 @@
       "course": "SCY",
       "event": "100 Free",
       "gender": "F",
-      "name": "Reese, Mary",
+      "name": "Reese, Mary Lauren",
       "place": 8,
       "points": 1.0,
       "seedTime": "1:02.71",
@@ -2654,7 +2904,7 @@
       "course": "SCY",
       "event": "100 Free",
       "gender": "F",
-      "name": "Lipe, Sarah",
+      "name": "Lipe, Sarah Grace",
       "place": 17,
       "seedTime": "1:01.28",
       "tags": "",
@@ -3603,7 +3853,7 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "F",
-      "name": "Reese, Mary",
+      "name": "Reese, Mary Lauren",
       "place": 15,
       "seedTime": "30.97",
       "tags": "",
@@ -3749,7 +3999,7 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "F",
-      "name": "Lyons, Mary",
+      "name": "Lyons, Mary Kate",
       "place": 29,
       "tags": "",
       "team": "Gamecock Club Swimming-NI",
@@ -4932,7 +5182,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "Lipe, Sarah",
+      "name": "Lipe, Sarah Grace",
       "place": 13,
       "seedTime": "27.01",
       "tags": "",
@@ -5267,7 +5517,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "Lyons, Mary",
+      "name": "Lyons, Mary Kate",
       "place": 45,
       "tags": "",
       "team": "Gamecock Club Swimming-NI",
@@ -6323,7 +6573,7 @@
       "course": "SCY",
       "event": "100 Back",
       "gender": "F",
-      "name": "Lipe, Sarah",
+      "name": "Lipe, Sarah Grace",
       "place": 6,
       "points": 3.0,
       "seedTime": "1:07.32",
@@ -6629,7 +6879,7 @@
       "course": "SCY",
       "event": "500 Free",
       "gender": "F",
-      "name": "Lyons, Mary",
+      "name": "Lyons, Mary Kate",
       "place": 8,
       "points": 1.0,
       "tags": "",

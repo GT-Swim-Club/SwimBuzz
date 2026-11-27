@@ -13,8 +13,7 @@ import { prisma } from "@/lib/prisma"
 import { athletePath } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
 
-export const metadata = {
-  title: "Settings — SwimBuzz"}
+export const metadata = { title: "Settings" }
 
 /** Gold section heading above a bordered card, like the athlete page's Personal bests. */
 function SettingsSection({

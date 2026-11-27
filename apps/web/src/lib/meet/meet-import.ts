@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma"
 import {
   buildAthleteLookup,
+  buildExactAthleteIndex,
+  exactNameMatches,
   findNearMatchAthlete,
   isAutomaticallyMatched,
   isPairedPdfName,
@@ -73,6 +75,8 @@ export type RosterPairingOption = {
   id: string
   firstName: string
   lastName: string
+  /** Set when the list holds every season's athletes, to tag the ones from other seasons. */
+  seasons?: string[]
 }
 
 export type MeetImportSummary = {
@@ -91,10 +95,50 @@ export type MeetImportSummary = {
   /** The season the roster is from; the pairing dialog searches other seasons and adds athletes to it. */
   pairingSeason: string
   /**
+   * The season had no roster, so rosterForPairing (and the suggestions) are every season's
+   * athletes rather than the season roster.
+   */
+  pairingAllSeasons: boolean
+  /**
    * Each matched swimmer's team, by athlete id, from the rows imported (individual swims and relay
    * legs) — the meet's resultTeams when they name several teams.
    */
   athleteTeams: Record<string, string>
+}
+
+/** Every swimmer's name in the results: individual rows and relay legs (not relay leadoff rows). */
+export function resultSwimmerNames(
+  results: ParsedMeetResult[],
+  relayResults: ParsedRelayResult[]
+): string[] {
+  const names: string[] = []
+  for (const row of results) {
+    if (isRelayLeadoffSwimTag(row.tags ?? "")) continue
+    if (!isRealRelaySwimmerName(row.name)) continue
+    names.push(row.name)
+  }
+  for (const relay of relayResults) {
+    for (const leg of relay.relaySwimmers ?? []) {
+      if (isRealRelaySwimmerName(leg.name)) names.push(leg.name)
+    }
+  }
+  return names
+}
+
+/**
+ * A suggested athlete for an unmatched name from every season's athletes: the one the roster
+ * matcher would pick (a nickname or initial), else a near spelling. None when several athletes
+ * share the exact name — the coach picks.
+ */
+function suggestFromEveryone(
+  pdfName: string,
+  everyone: { athletes: RosterAthlete[]; lookup: ReturnType<typeof buildAthleteLookup>; index: ReturnType<typeof buildExactAthleteIndex> }
+): { athleteId: string; firstName: string; lastName: string } | null {
+  if (exactNameMatches(pdfName, everyone.index).length > 1) return null
+  const id = matchAthleteIdFast(pdfName, everyone.lookup)
+  const athlete = id ? everyone.athletes.find((a) => a.id === id) : undefined
+  if (athlete) return { athleteId: athlete.id, firstName: athlete.firstName, lastName: athlete.lastName }
+  return findNearMatchAthlete(pdfName, everyone.athletes)
 }
 
 export function collectNameConfirmations(
@@ -102,7 +146,9 @@ export function collectNameConfirmations(
   roster: RosterAthlete[],
   lookup: ReturnType<typeof buildAthleteLookup>,
   nameMappings: Record<string, string> | null | undefined,
-  rejectedNames: string[] | null | undefined
+  rejectedNames: string[] | null | undefined,
+  /** Suggest from these athletes (every season's) instead of the roster. */
+  suggestFrom?: RosterAthlete[] | null
 ): NameConfirmation[] {
   const counts = new Map<string, { pdfName: string; count: number }>()
   for (const raw of names) {
@@ -116,9 +162,12 @@ export function collectNameConfirmations(
     else counts.set(key, { pdfName: name, count: 1 })
   }
 
+  const everyone = suggestFrom
+    ? { athletes: suggestFrom, lookup: buildAthleteLookup(suggestFrom), index: buildExactAthleteIndex(suggestFrom) }
+    : null
   const out: NameConfirmation[] = []
   for (const { pdfName, count } of counts.values()) {
-    const near = findNearMatchAthlete(pdfName, roster)
+    const near = everyone ? suggestFromEveryone(pdfName, everyone) : findNearMatchAthlete(pdfName, roster)
     out.push({
       pdfName,
       athleteId: near?.athleteId,
@@ -147,6 +196,7 @@ export async function importMeetResults({
   allResults = null,
   allRelayResults = null,
   rescored = false,
+  pairAcrossSeasons = false,
   onProgress,
 }: {
   season: string
@@ -171,6 +221,11 @@ export async function importMeetResults({
    * onto existing swims even when cleared, rather than keeping the old ones.
    */
   rescored?: boolean
+  /**
+   * The season had no roster (joinEmptySeasonFromOtherSeasons): pairing suggests and lists every
+   * season's athletes.
+   */
+  pairAcrossSeasons?: boolean
   /** Live progress, 0–1 across this import's own steps. */
   onProgress?: (progress: ImportStreamProgress) => void
 }): Promise<MeetImportSummary> {
@@ -188,51 +243,43 @@ export async function importMeetResults({
   const resultsForConfirm = allResults ?? results
   const relayResultsForConfirm = allRelayResults ?? relayResults
 
+  // Re-importing after pairing: only the paired names' rows. Every paired name went unmatched on
+  // the first pass, so don't skip one that matches the roster now — an athlete created from the
+  // pairing dialog, or added from another season, has exactly that name and would be dropped.
   const activeResults =
     pairOnly && nameMappings
-      ? results.filter(
-          (row) =>
-            isPairedPdfName(row.name, nameMappings) &&
-            !isAutomaticallyMatched(row.name, lookup)
-        )
+      ? results.filter((row) => isPairedPdfName(row.name, nameMappings))
       : results
 
   const activeRelayResults =
     pairOnly && nameMappings
       ? relayResults.filter((relay) =>
-          (relay.relaySwimmers ?? []).some(
-            (leg) =>
-              isPairedPdfName(leg.name, nameMappings) &&
-              !isAutomaticallyMatched(leg.name, lookup)
-          )
+          (relay.relaySwimmers ?? []).some((leg) => isPairedPdfName(leg.name, nameMappings))
         )
       : relayResults
 
-  const namesForConfirm: string[] = []
-  for (const row of resultsForConfirm) {
-    if (isRelayLeadoffSwimTag(row.tags ?? "")) continue
-    if (!isRealRelaySwimmerName(row.name)) continue
-    namesForConfirm.push(row.name)
-  }
-  for (const relay of relayResultsForConfirm) {
-    for (const leg of relay.relaySwimmers ?? []) {
-      if (isRealRelaySwimmerName(leg.name)) namesForConfirm.push(leg.name)
-    }
-  }
+  const namesForConfirm = resultSwimmerNames(resultsForConfirm, relayResultsForConfirm)
+  const everyone = pairAcrossSeasons
+    ? await prisma.athlete.findMany({
+        select: { id: true, firstName: true, lastName: true, preferredName: true, seasons: true },
+      })
+    : null
   const nameConfirmations = collectNameConfirmations(
     namesForConfirm,
     roster,
     lookup,
     nameMappings,
-    rejectedNames
+    rejectedNames,
+    everyone
   )
   const rosterForPairing: RosterPairingOption[] =
     nameConfirmations.length > 0
-      ? roster
+      ? (everyone ?? roster)
           .map((a) => ({
             id: a.id,
             firstName: a.firstName,
             lastName: a.lastName,
+            ...("seasons" in a ? { seasons: a.seasons } : {}),
           }))
           .sort(
             (a, b) =>
@@ -720,6 +767,7 @@ export async function importMeetResults({
     nameConfirmations,
     rosterForPairing,
     pairingSeason: season,
+    pairingAllSeasons: everyone != null,
     athleteTeams,
   }
 }

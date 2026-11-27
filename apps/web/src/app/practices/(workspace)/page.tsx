@@ -14,6 +14,8 @@ import ReplaceUrl from "./ReplaceUrl"
 // sidebar next to an empty pane and only then loading the detail. If there
 // truly are none, render the empty state here directly — PracticesSidebar
 // always mounts `children`, so this is the only place it can live.
+export const metadata = { title: "Practices" }
+
 export default async function PracticesIndexPage() {
   const session = await getSession()
   if (!session) redirect("/signin?callbackUrl=/practices")

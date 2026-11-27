@@ -8,8 +8,7 @@ import {
   STAFF_LINK_REQUIRED_ERROR,
 } from "@swimbuzz/shared"
 
-export const metadata = {
-  title: "Sign in — SwimBuzz"}
+export const metadata = { title: "Sign in" }
 
 export default async function SignInPage({
   searchParams}: {

@@ -58,8 +58,8 @@ export default function NewAthleteScreen() {
     const ln = lastName.trim()
     const em = email.trim().toLowerCase()
     const seasonLabel = season.trim()
-    if (!fn || !ln || !em) {
-      Alert.alert("Required fields", "First name, last name, and email are required.")
+    if (!fn || !ln) {
+      Alert.alert("Required fields", "First name and last name are required.")
       return
     }
     if (!seasonLabel) {
@@ -76,7 +76,8 @@ export default function NewAthleteScreen() {
       const body: Record<string, unknown> = {
         firstName: fn,
         lastName: ln,
-        email: em,
+        // Optional: the API gives an athlete without one a placeholder.
+        ...(em ? { email: em } : {}),
         gender,
         seasons: [seasonLabel],
       }

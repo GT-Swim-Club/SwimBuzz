@@ -126,7 +126,7 @@ export default function StaffSignInForm({
             required
             value={code}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-            className="mt-2 w-full rounded-xl border border-border bg-background px-4 py-3 text-center font-mono text-lg tracking-[0.35em] text-foreground outline-none ring-primary/20 transition focus:border-primary focus:ring-4 dark:border-border dark:bg-background-elevated"
+            className="mt-2 w-full rounded-xl border border-border bg-background px-4 py-3 text-center font-mono text-lg tracking-[0.35em] text-foreground outline-none transition dark:border-border dark:bg-background-elevated"
             placeholder="000000"
             autoFocus
           />
@@ -190,7 +190,7 @@ export default function StaffSignInForm({
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mt-2 w-full rounded-xl border border-border bg-background px-4 py-3 text-[15px] text-foreground outline-none ring-primary/20 transition focus:border-primary focus:ring-4 dark:border-border dark:bg-background-elevated"
+          className="mt-2 w-full rounded-xl border border-border bg-background px-4 py-3 text-[15px] text-foreground outline-none transition dark:border-border dark:bg-background-elevated"
           placeholder="gburdell3@gatech.edu"
           autoFocus
         />

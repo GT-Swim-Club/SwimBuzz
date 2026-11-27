@@ -77,6 +77,208 @@
   },
   "meet_date": "2022-01-23",
   "meet_name": "GT Auburn Dual Meet",
+  "place_times": [
+    {
+      "champion": "1:02.96",
+      "eighth": "1:15.85",
+      "event": "100 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "54.77",
+      "eighth": "1:01.71",
+      "event": "100 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "29.33",
+      "eighth": "37.48",
+      "event": "50 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "24.94",
+      "eighth": "39.49",
+      "event": "50 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "57.60",
+      "eighth": "1:11.72",
+      "event": "100 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "48.41",
+      "eighth": "53.78",
+      "event": "100 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "32.62",
+      "eighth": "39.21",
+      "event": "50 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "28.76",
+      "eighth": "31.74",
+      "event": "50 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:07.51",
+      "eighth": "2:30.81",
+      "event": "200 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:50.52",
+      "eighth": null,
+      "event": "200 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:28.35",
+      "eighth": null,
+      "event": "100 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "55.00",
+      "eighth": null,
+      "event": "100 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:03.04",
+      "eighth": "1:19.52",
+      "event": "100 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "56.23",
+      "eighth": null,
+      "event": "100 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "25.57",
+      "eighth": "29.18",
+      "event": "50 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "21.65",
+      "eighth": null,
+      "event": "50 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "28.29"
+    },
+    {
+      "champion": "1:11.89",
+      "eighth": null,
+      "event": "100 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:02.58",
+      "eighth": "1:20.46",
+      "event": "100 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "27.76",
+      "eighth": "32.12",
+      "event": "50 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "24.32",
+      "eighth": "25.91",
+      "event": "50 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "5:14.10",
+      "eighth": null,
+      "event": "500 Free",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:44.88",
+      "eighth": null,
+      "event": "200 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:29.22",
+      "eighth": null,
+      "event": "200 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:57.63",
+      "eighth": null,
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:40.95",
+      "eighth": null,
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    }
+  ],
   "relay_results": [
     {
       "course": "SCY",
@@ -4855,31 +5057,31 @@
       "points": 15.0,
       "splits": [
         {
-          "distance": 71,
+          "distance": 50,
           "splitTime": "31.39"
         },
         {
-          "distance": 142,
+          "distance": 100,
           "splitTime": "35.01"
         },
         {
-          "distance": 213,
+          "distance": 200,
           "splitTime": "1:13.61"
         },
         {
-          "distance": 284,
+          "distance": 250,
           "splitTime": "38.32"
         },
         {
-          "distance": 355,
+          "distance": 300,
           "splitTime": "38.55"
         },
         {
-          "distance": 426,
+          "distance": 400,
           "splitTime": "1:18.91"
         },
         {
-          "distance": 497,
+          "distance": 500,
           "splitTime": "1:19.14"
         }
       ],

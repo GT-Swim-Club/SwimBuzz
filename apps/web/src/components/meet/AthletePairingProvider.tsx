@@ -47,6 +47,11 @@ export type PairingRequest = {
    * another season is added to this one by the import) and create an athlete on this roster.
    */
   season?: string
+  /**
+   * `roster` is already every season's athletes (the season had no roster yet): no "Search all
+   * seasons" row, and athletes from other seasons are tagged in the list.
+   */
+  allSeasons?: boolean
   description: string
   /** What one occurrence of a name is, singular and plural, e.g. ["result", "results"]. */
   occurrenceNoun: [string, string]
@@ -324,7 +329,12 @@ export default function AthletePairingProvider({ children }: { children: ReactNo
                       roster={current.roster}
                       onChange={(athleteId) => select(c.pdfName, athleteId)}
                       season={current.season}
-                      allSeasons={current.season ? { athletes: allAthletes, load: loadAllAthletes } : undefined}
+                      allSeasons={
+                        current.season && !current.allSeasons
+                          ? { athletes: allAthletes, load: loadAllAthletes }
+                          : undefined
+                      }
+                      tagOtherSeasons={current.allSeasons}
                       createLabel={
                         current.season ? `Create athlete “${displayName(c.pdfName)}”…` : undefined
                       }

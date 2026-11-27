@@ -293,7 +293,7 @@ function RelaySummaryGrid({
                 }}
                 aria-label={`${event.pills.some((p) => p.tone === "published") ? "Edit" : "Build"} ${event.name} Relay${event.editor ? ` (${event.editor})` : ""}`}
                 // Padded out into the grid gap so the hover fills the header, cards and gaps as one card.
-                className="group -m-2 flex flex-col gap-2 rounded-xl p-2 transition-colors hover:bg-background-hover-strong focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/35"
+                className="group -m-2 flex flex-col gap-2 rounded-xl p-2 transition-colors hover:bg-background-hover-strong"
               >
                 {content}
               </Link>

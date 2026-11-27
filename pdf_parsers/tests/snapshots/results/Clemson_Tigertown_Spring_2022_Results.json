@@ -107,6 +107,280 @@
   },
   "meet_date": "2022-03-12",
   "meet_name": "Clemson Tigertown Invitational Spring 2022",
+  "place_times": [
+    {
+      "champion": "1:12.98",
+      "eighth": "1:22.97",
+      "event": "100 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "59.73",
+      "eighth": "1:05.59",
+      "event": "100 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "28.15",
+      "eighth": "30.01",
+      "event": "50 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "33.97"
+    },
+    {
+      "champion": "24.29",
+      "eighth": "25.29",
+      "event": "50 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "26.86"
+    },
+    {
+      "champion": "6:06.09",
+      "eighth": null,
+      "event": "500 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "4:52.35",
+      "eighth": "6:39.56",
+      "event": "500 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:10.89",
+      "eighth": "1:10.83",
+      "event": "100 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:19.09"
+    },
+    {
+      "champion": "54.16",
+      "eighth": "58.58",
+      "event": "100 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "1:14.23"
+    },
+    {
+      "champion": "29.01",
+      "eighth": "33.00",
+      "event": "50 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "26.76",
+      "eighth": "28.56",
+      "event": "50 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "56.48",
+      "eighth": "1:02.60",
+      "event": "100 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:12.27"
+    },
+    {
+      "champion": "49.31",
+      "eighth": "52.42",
+      "event": "100 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:10.32",
+      "eighth": "2:23.38",
+      "event": "200 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:49.10",
+      "eighth": "2:07.08",
+      "event": "200 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "32.82",
+      "eighth": "36.90",
+      "event": "50 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "27.26",
+      "eighth": null,
+      "event": "50 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "32.48"
+    },
+    {
+      "champion": "1:02.77",
+      "eighth": "1:19.21",
+      "event": "100 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "59.22",
+      "eighth": "1:04.59",
+      "event": "100 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:02.42",
+      "eighth": null,
+      "event": "100 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "53.29",
+      "eighth": "59.06",
+      "event": "100 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:25.88",
+      "eighth": null,
+      "event": "200 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:00.62",
+      "eighth": "2:17.34",
+      "event": "200 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "26.47",
+      "eighth": "27.89",
+      "event": "50 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "30.20"
+    },
+    {
+      "champion": "22.12",
+      "eighth": "23.21",
+      "event": "50 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "24.88"
+    },
+    {
+      "champion": "4:29.99",
+      "eighth": null,
+      "event": "400 IM",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:18.42",
+      "eighth": null,
+      "event": "200 Back",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:14.37",
+      "eighth": null,
+      "event": "200 Breast",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:05.09",
+      "eighth": null,
+      "event": "200 Fly",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:44.44",
+      "eighth": "2:00.84",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:17.81",
+      "eighth": "1:44.73",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:00.06",
+      "eighth": null,
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:40.36",
+      "eighth": null,
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "4:03.59",
+      "eighth": null,
+      "event": "400 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "3:31.60",
+      "eighth": null,
+      "event": "400 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    }
+  ],
   "relay_results": [
     {
       "course": "SCY",
@@ -3188,7 +3462,7 @@
       "course": "SCY",
       "event": "500 Free",
       "gender": "F",
-      "name": "Fields, Faith",
+      "name": "Fields, Faith Ann",
       "place": 4,
       "points": 15.0,
       "seedTime": "6:50.00",
@@ -5771,7 +6045,7 @@
       "course": "SCY",
       "event": "100 Free",
       "gender": "F",
-      "name": "Fields, Faith",
+      "name": "Fields, Faith Ann",
       "place": 18,
       "seedTime": "1:07.00",
       "splits": [
@@ -9516,7 +9790,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "Fields, Faith",
+      "name": "Fields, Faith Ann",
       "place": null,
       "seedTime": "30.00",
       "tags": "",

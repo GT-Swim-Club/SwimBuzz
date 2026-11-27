@@ -582,7 +582,7 @@ export default function ImportMeetResourcesButton({
             placeholder="e.g., GTSC"
             aria-label="Team code"
             autoFocus={teamEditing}
-            className="box-border min-w-11 max-w-[200px] rounded-md border border-border bg-background px-1.5 py-0.5 text-xs leading-4 text-foreground outline-none [field-sizing:content] focus:border-primary focus:ring-[3px] focus:ring-primary/35"
+            className="box-border min-w-11 max-w-[200px] rounded-md border border-border bg-background px-1.5 py-0.5 text-xs leading-4 text-foreground outline-none [field-sizing:content]"
           />
           <button
             type="button"

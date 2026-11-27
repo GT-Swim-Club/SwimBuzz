@@ -14,6 +14,7 @@ import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
 import { redactAthleteForViewer } from "@/lib/athlete/athlete-privacy"
 import { clearanceSummary, clearanceSummarySelect } from "@/lib/athlete/athlete-clearance"
+import { newPlaceholderEmail } from "@/lib/auth/gatech-email"
 
 export async function GET() {
   const session = await getSession()
@@ -49,13 +50,14 @@ export async function POST(req: Request) {
   const body = await req.json()
   const firstName = String(body.firstName ?? "").trim()
   const lastName = String(body.lastName ?? "").trim()
-  const email = String(body.email ?? "").trim().toLowerCase()
+  // Optional: blank gets a placeholder (see newPlaceholderEmail).
+  const email = String(body.email ?? "").trim().toLowerCase() || newPlaceholderEmail()
   const preferredName = normalizePreferredName(body.preferredName)
   const gender = body.gender === "F" ? Gender.F : Gender.M
   const seasons = parseSeasonList(body.seasons)
 
-  if (!firstName || !lastName || !email) {
-    return NextResponse.json({ error: "First name, last name, and email are required" }, { status: 400 })
+  if (!firstName || !lastName) {
+    return NextResponse.json({ error: "First name and last name are required" }, { status: 400 })
   }
   if (seasons.length === 0) {
     return NextResponse.json({ error: "Season is required (e.g. 2025–2026)" }, { status: 400 })

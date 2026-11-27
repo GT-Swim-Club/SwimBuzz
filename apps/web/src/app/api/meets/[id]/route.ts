@@ -66,18 +66,6 @@ export async function GET(
   if (!meet) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
   const isStaff = isStaffRole(session.user.role)
-  const [linked, seasonRoster] = await Promise.all([
-    prisma.athlete.findUnique({
-      where: { userId: session.user.id },
-      select: { id: true },
-    }),
-    prisma.athlete.findMany({
-      where: { seasons: { has: meet.season } },
-      select: { id: true, slug: true, firstName: true, lastName: true, preferredName: true, gender: true },
-    }),
-  ])
-  const viewerAthleteId = linked?.id ?? null
-
   const ended = meetHasEndedFn({
     startsAt: meet.startsAt ?? meet.createdAt,
     endsAt: meet.endsAt,
@@ -109,6 +97,24 @@ export async function GET(
     isRelayResultsSummary(meet.relayResultsSummary) ? meet.relayResultsSummary.entries : null,
     meet.scoringTable
   )
+  // The viewer, roster and highlights each need only the meet, so they load together.
+  const [linked, seasonRoster, highlights] = await Promise.all([
+    prisma.athlete.findUnique({
+      where: { userId: session.user.id },
+      select: { id: true },
+    }),
+    prisma.athlete.findMany({
+      where: { seasons: { has: meet.season } },
+      select: { id: true, slug: true, firstName: true, lastName: true, preferredName: true, gender: true },
+    }),
+    loadMeetHighlights({
+      meet: { ...meet, swims: scoredSwims },
+      results,
+      relayResults,
+      hasImportedResults: meetHasImportedResults({ individualResults: results, relayResults }),
+    }),
+  ])
+  const viewerAthleteId = linked?.id ?? null
   // Roster names and genders, so mobile can show "Baumann, Matthew (Matt)" and title its
   // by-event groups "Women 50 Free" — and the rows cleaned up as the web summary shows them.
   const rosterGenders = new Map(
@@ -150,13 +156,6 @@ export async function GET(
       : null,
     rosterGenders
   )
-
-  const highlights = await loadMeetHighlights({
-    meet: { ...meet, swims: scoredSwims },
-    results,
-    relayResults,
-    hasImportedResults: meetHasImportedResults({ individualResults: results, relayResults }),
-  })
 
   // Each swimmer's team goes out as the summary's short side names ("Gold"), not as imported.
   const { swims: _swims, resultTeams, ...meetRow } = meet

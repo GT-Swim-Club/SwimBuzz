@@ -58,7 +58,7 @@ type ImportFilter = (typeof IMPORT_FILTERS)[number]["value"]
 const DAY_MS = 24 * 60 * 60 * 1000
 
 const ICON_BUTTON =
-  "inline-flex shrink-0 items-center justify-center rounded-md text-foreground-tertiary transition-colors duration-200 hover:bg-fill-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/34"
+  "inline-flex shrink-0 items-center justify-center rounded-md text-foreground-tertiary transition-colors duration-200 hover:bg-fill-secondary hover:text-foreground"
 const LINK_BUTTON =
   "text-xs font-medium text-accent transition-colors duration-200 hover:text-primary"
 const SECTION_HEADER =

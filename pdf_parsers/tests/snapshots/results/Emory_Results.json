@@ -97,6 +97,280 @@
   },
   "meet_date": "2020-02-01",
   "meet_name": "2020 Emory Club Swimming Invitational",
+  "place_times": [
+    {
+      "champion": "2:15.37",
+      "eighth": null,
+      "event": "200 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:03.38",
+      "eighth": "2:28.64",
+      "event": "200 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:01.89",
+      "eighth": "1:10.32",
+      "event": "100 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "55.85",
+      "eighth": "1:03.43",
+      "event": "100 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "32.20",
+      "eighth": "35.17",
+      "event": "50 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "40.83"
+    },
+    {
+      "champion": "27.03",
+      "eighth": "29.17",
+      "event": "50 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "31.78"
+    },
+    {
+      "champion": "2:25.17",
+      "eighth": null,
+      "event": "200 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:57.44",
+      "eighth": null,
+      "event": "200 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "57.19",
+      "eighth": "1:00.38",
+      "event": "100 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:04.74"
+    },
+    {
+      "champion": "48.03",
+      "eighth": "51.67",
+      "event": "100 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "54.49"
+    },
+    {
+      "champion": "5:27.90",
+      "eighth": null,
+      "event": "500 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "5:02.69",
+      "eighth": "6:55.96",
+      "event": "500 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "28.72",
+      "eighth": "31.59",
+      "event": "50 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "39.75"
+    },
+    {
+      "champion": "26.04",
+      "eighth": "29.88",
+      "event": "50 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:40.27",
+      "eighth": null,
+      "event": "200 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:12.57",
+      "eighth": null,
+      "event": "200 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:00.97",
+      "eighth": "1:16.01",
+      "event": "100 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "54.31",
+      "eighth": "57.50",
+      "event": "100 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "25.37",
+      "eighth": "27.12",
+      "event": "50 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "21.41",
+      "eighth": "22.57",
+      "event": "50 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "24.32"
+    },
+    {
+      "champion": "1:07.69",
+      "eighth": "1:12.51",
+      "event": "100 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "55.85",
+      "eighth": "1:01.14",
+      "event": "100 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "1:24.37"
+    },
+    {
+      "champion": "2:14.73",
+      "eighth": null,
+      "event": "200 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:04.61",
+      "eighth": null,
+      "event": "200 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:11.44",
+      "eighth": "1:21.62",
+      "event": "100 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:02.05",
+      "eighth": "1:10.81",
+      "event": "100 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "28.32",
+      "eighth": "29.78",
+      "event": "50 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "34.51"
+    },
+    {
+      "champion": "23.08",
+      "eighth": "25.37",
+      "event": "50 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "28.23"
+    },
+    {
+      "champion": "2:11.42",
+      "eighth": "2:57.31",
+      "event": "200 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:50.26",
+      "eighth": "1:56.83",
+      "event": "200 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:54.28",
+      "eighth": "2:31.34",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:38.16",
+      "eighth": "2:01.19",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:43.14",
+      "eighth": null,
+      "event": "200 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:29.84",
+      "eighth": "1:44.39",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    }
+  ],
   "relay_results": [
     {
       "course": "SCY",
@@ -1461,7 +1735,7 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "F",
-      "name": "Bailey, Emma",
+      "name": "Bailey, Emma Rose",
       "place": 16,
       "tags": "",
       "team": "Mercer University Swim Club-GA",
@@ -2151,7 +2425,7 @@
       "course": "SCY",
       "event": "100 Free",
       "gender": "F",
-      "name": "Bailey, Emma",
+      "name": "Bailey, Emma Rose",
       "place": 8,
       "tags": "",
       "team": "Mercer University Swim Club-GA",
@@ -3131,7 +3405,7 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "F",
-      "name": "Bailey, Emma",
+      "name": "Bailey, Emma Rose",
       "place": 13,
       "tags": "",
       "team": "Mercer University Swim Club-GA",
@@ -3911,7 +4185,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "Bailey, Emma",
+      "name": "Bailey, Emma Rose",
       "place": 7,
       "tags": "",
       "team": "Mercer University Swim Club-GA",

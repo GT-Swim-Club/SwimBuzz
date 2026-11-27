@@ -9,7 +9,7 @@ import { useDontReloadWhileBusy } from "@/lib/use-dont-reload"
 /** Status-list building blocks shared by the meet resource, travel and photo modals. */
 
 export const resourceInputClass =
-  "box-border w-full min-w-0 rounded-lg border border-border bg-background px-2.5 py-[7px] text-[13px] text-foreground outline-none transition-[border-color,box-shadow] focus:border-primary focus:ring-[3px] focus:ring-primary/35"
+  "box-border w-full min-w-0 rounded-lg border border-border bg-background px-2.5 py-[7px] text-[13px] text-foreground outline-none transition-[border-color,box-shadow]"
 
 export const RESOURCE_FILE_ACCEPT = ".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt"
 

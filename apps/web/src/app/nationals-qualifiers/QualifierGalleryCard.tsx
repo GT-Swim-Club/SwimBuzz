@@ -6,6 +6,7 @@ import { athletePreferredInitials, athletePreferredName } from "@swimbuzz/shared
 import type { QualifierAthlete } from "@/lib/qualifiers/nationals-qualifiers"
 import { qualifierMarginLabel } from "@/lib/qualifiers/qualifier-events"
 import { athletePath } from "@/lib/slug"
+import { EventBadge } from "@/components/meet/EventBadge"
 import { GallerySwimTime, QualifierSwimRow, SwimDetailPanel } from "./QualifierSwimRow"
 import { athleteCutsLabel, meTintClass, qualifierAvatarClass, youPillClass } from "./qualifier-styles"
 
@@ -60,8 +61,9 @@ export default function QualifierGalleryCard({
             className={galleryRowClass}
             ariaLabel={`${event.event}, ${event.time}, margin ${qualifierMarginLabel(event)}, ${event.meetName || "qualifying swim"}, ${event.date || "date unavailable"}${event.cut ? `, standard ${event.cut}` : ""}`}
           >
-            <span className="min-w-0 truncate text-sm font-medium text-foreground-secondary">
-              {event.event}
+            <span className="flex min-w-0 items-center gap-2">
+              {event.eventNumber ? <EventBadge number={event.eventNumber} compact /> : null}
+              <span className="min-w-0 truncate text-sm font-medium text-foreground-secondary">{event.event}</span>
             </span>
             <GallerySwimTime swim={event} />
             <SwimDetailPanel

@@ -88,7 +88,7 @@ export default function Loading() {
               <Skeleton className="h-[38px] w-[38px] shrink-0 rounded-lg" />
               <Skeleton className="h-[38px] w-[38px] shrink-0 rounded-lg" />
             </div>
-            <div className="relative flex items-start gap-1 min-[1040px]:block">
+            <div className="jump-rail-layout">
               <div className="min-w-0 flex-1 overflow-hidden rounded-xl border border-border bg-background">
                 <div className="px-4 py-3">
                   <Skeleton className="h-4 w-16" />
@@ -106,8 +106,8 @@ export default function Loading() {
                   </div>
                 ))}
               </div>
-              {/* Same slot as the summary's JumpRail: beside the cards, out in the right margin when wide. */}
-              <div className="shrink-0 self-stretch min-[1040px]:absolute min-[1040px]:inset-y-0 min-[1040px]:left-full min-[1040px]:ml-3">
+              {/* Same slot as the summary's JumpRail: just right of the cards, out in the page's right margin. */}
+              <div className="jump-rail-slot">
                 <div className="flex flex-col items-center gap-[7px] py-[5px]">
                   {Array.from({ length: 26 }, (_, i) => (
                     <Skeleton key={i} className="h-2.5 w-2.5 rounded-sm" />

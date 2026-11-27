@@ -107,6 +107,312 @@
   },
   "meet_date": "2026-09-26",
   "meet_name": "GTSC Ramblin Splash & Dash",
+  "place_times": [
+    {
+      "champion": "1:58.92",
+      "eighth": "2:14.80",
+      "event": "200 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:45.61",
+      "eighth": "1:55.38",
+      "event": "200 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:21.58",
+      "eighth": "2:47.81",
+      "event": "200 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:03.55",
+      "eighth": "2:36.69",
+      "event": "200 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "27.60",
+      "eighth": "29.83",
+      "event": "50 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "33.30"
+    },
+    {
+      "champion": "23.62",
+      "eighth": "25.31",
+      "event": "50 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "29.92"
+    },
+    {
+      "champion": "3:49.30",
+      "eighth": null,
+      "event": "200 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:13.33",
+      "eighth": null,
+      "event": "200 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "25.06",
+      "eighth": "26.32",
+      "event": "50 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "27.48"
+    },
+    {
+      "champion": "21.66",
+      "eighth": "22.42",
+      "event": "50 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "23.12"
+    },
+    {
+      "champion": "59.49",
+      "eighth": "1:06.39",
+      "event": "100 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "52.94",
+      "eighth": "56.06",
+      "event": "100 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "1:05.93"
+    },
+    {
+      "champion": "2:20.75",
+      "eighth": null,
+      "event": "200 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:53.70",
+      "eighth": null,
+      "event": "200 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "5:34.05",
+      "eighth": null,
+      "event": "400 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "4:16.86",
+      "eighth": null,
+      "event": "400 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "27.29",
+      "eighth": "28.94",
+      "event": "50 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "32.33"
+    },
+    {
+      "champion": "24.02",
+      "eighth": "25.12",
+      "event": "50 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "26.46"
+    },
+    {
+      "champion": "1:11.84",
+      "eighth": "1:17.30",
+      "event": "100 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:28.91"
+    },
+    {
+      "champion": "1:00.15",
+      "eighth": "1:05.37",
+      "event": "100 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "1:13.79"
+    },
+    {
+      "champion": "1:02.84",
+      "eighth": "1:07.33",
+      "event": "100 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:16.12"
+    },
+    {
+      "champion": "52.57",
+      "eighth": "1:00.32",
+      "event": "100 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "56.16",
+      "eighth": "1:01.45",
+      "event": "100 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:09.25"
+    },
+    {
+      "champion": "47.50",
+      "eighth": "50.01",
+      "event": "100 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "53.54"
+    },
+    {
+      "champion": "2:12.10",
+      "eighth": null,
+      "event": "200 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:58.93",
+      "eighth": null,
+      "event": "200 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "59.47",
+      "eighth": "1:08.05",
+      "event": "100 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "52.42",
+      "eighth": "1:04.27",
+      "event": "100 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "33.06",
+      "eighth": "35.20",
+      "event": "50 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "39.41"
+    },
+    {
+      "champion": "27.50",
+      "eighth": "28.32",
+      "event": "50 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "31.77"
+    },
+    {
+      "champion": "5:20.86",
+      "eighth": null,
+      "event": "500 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "5:11.02",
+      "eighth": null,
+      "event": "500 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:55.40",
+      "eighth": "2:04.59",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:38.24",
+      "eighth": "1:43.54",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:45.78",
+      "eighth": "1:52.58",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:29.15",
+      "eighth": "1:34.35",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "3:56.35",
+      "eighth": null,
+      "event": "400 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "3:21.42",
+      "eighth": "3:56.71",
+      "event": "400 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    }
+  ],
   "relay_results": [
     {
       "course": "SCY",
@@ -124,7 +430,7 @@
         },
         {
           "leg": 2,
-          "name": "Lindauer, Sophia",
+          "name": "Lindauer, Sophia Lucca",
           "splitTime": "32.21"
         },
         {
@@ -2538,7 +2844,7 @@
         },
         {
           "leg": 4,
-          "name": "Lindauer, Sophia",
+          "name": "Lindauer, Sophia Lucca",
           "splitTime": "54.59",
           "splits": [
             {
@@ -3894,15 +4200,15 @@
       "points": 13.0,
       "splits": [
         {
-          "distance": 66,
+          "distance": 50,
           "splitTime": "29.13"
         },
         {
-          "distance": 132,
+          "distance": 100,
           "splitTime": "32.81"
         },
         {
-          "distance": 198,
+          "distance": 200,
           "splitTime": "1:14.83"
         }
       ],
@@ -4656,20 +4962,6 @@
       "gender": "M",
       "name": "George, Daniel",
       "place": null,
-      "splits": [
-        {
-          "distance": 66,
-          "splitTime": "35.86"
-        },
-        {
-          "distance": 132,
-          "splitTime": "44.46"
-        },
-        {
-          "distance": 198,
-          "splitTime": "48.31"
-        }
-      ],
       "tags": "",
       "team": "UTC",
       "time": "DQ"
@@ -5248,7 +5540,7 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "F",
-      "name": "Lindauer, Sophia",
+      "name": "Lindauer, Sophia Lucca",
       "place": 2,
       "points": 22.0,
       "tags": "",
@@ -6432,7 +6724,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "Lindauer, Sophia",
+      "name": "Lindauer, Sophia Lucca",
       "place": 3,
       "points": 20.0,
       "tags": "",
@@ -8740,7 +9032,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "M",
-      "name": "Fowler, Matty",
+      "name": "Fowler, Matty Ice",
       "place": null,
       "tags": "",
       "team": "CLT-NC",
@@ -11461,7 +11753,7 @@
       "course": "SCY",
       "event": "100 Breast",
       "gender": "F",
-      "name": "Lindauer, Sophia",
+      "name": "Lindauer, Sophia Lucca",
       "place": 1,
       "points": 25.0,
       "splits": [
@@ -13959,7 +14251,7 @@
       "course": "SCY",
       "event": "100 IM",
       "gender": "M",
-      "name": "Fowler, Matty",
+      "name": "Fowler, Matty Ice",
       "place": null,
       "tags": "",
       "team": "CLT-NC",
@@ -17792,7 +18084,7 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "M",
-      "name": "Fowler, Matty",
+      "name": "Fowler, Matty Ice",
       "place": null,
       "tags": "",
       "team": "CLT-NC",

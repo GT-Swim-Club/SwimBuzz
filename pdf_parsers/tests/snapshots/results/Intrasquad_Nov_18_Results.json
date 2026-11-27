@@ -92,6 +92,136 @@
   },
   "meet_date": "2026-11-18",
   "meet_name": "GTSC Intrasquad Meet - Gold vs. White",
+  "place_times": [
+    {
+      "champion": "24.53",
+      "eighth": null,
+      "event": "50 Back",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "10.34",
+      "eighth": "13.75",
+      "event": "25 Fly",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "12.15",
+      "eighth": null,
+      "event": "25 Breast",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "47.83",
+      "eighth": null,
+      "event": "100 Free",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "57.13",
+      "eighth": null,
+      "event": "100 Fly",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "11.34",
+      "eighth": null,
+      "event": "25 Back",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "56.25",
+      "eighth": null,
+      "event": "100 IM",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "9.48",
+      "eighth": "12.06",
+      "event": "25 Free",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "58.13",
+      "eighth": null,
+      "event": "100 Back",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:04.72",
+      "eighth": null,
+      "event": "100 Breast",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "22.32",
+      "eighth": "24.56",
+      "event": "50 Free",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "28.75",
+      "eighth": null,
+      "event": "50 Breast",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:09.37",
+      "eighth": null,
+      "event": "200 Free",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:25.83",
+      "eighth": null,
+      "event": "200 Breast",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "24.03",
+      "eighth": null,
+      "event": "50 Fly",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "42.55",
+      "eighth": null,
+      "event": "100 Free Relay",
+      "gender": "X",
+      "relay": true,
+      "twentyFourth": null
+    }
+  ],
   "relay_results": [
     {
       "course": "SCY",

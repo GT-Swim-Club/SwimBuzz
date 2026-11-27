@@ -37,14 +37,14 @@ export default function AlertSoundSettings({ initialEnabled }: { initialEnabled:
       <div className="flex items-center justify-between gap-4 px-4 py-3">
         <SettingsRowLabel
           icon="volume"
-          title="Cloudflare Verification"
-          description="Play a chime when an import needs a Cloudflare verification and you’re in another window"
+          title="Cloudflare & CAPTCHA Verification"
+          description="Play a sound when an import needs verification and you’re in another window"
         />
         <button
           type="button"
           role="switch"
           aria-checked={enabled}
-          aria-label="Cloudflare Verification"
+          aria-label="Cloudflare and CAPTCHA Verification"
           onClick={toggle}
           className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
             enabled ? "bg-primary" : "bg-fill-secondary"

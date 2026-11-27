@@ -2080,7 +2080,7 @@ export default function MeetSheetSummarySection({
             placeholder={searchPlaceholder}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-[38px] min-w-0 flex-1 basis-32 rounded-lg border border-border bg-background px-3 text-sm text-foreground outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/35"
+            className="h-[38px] min-w-0 flex-1 basis-32 rounded-lg border border-border bg-background px-3 text-sm text-foreground outline-none"
           />
 
           <SummaryViewSwitch value={currentView} onChange={pickView} />
@@ -2320,8 +2320,8 @@ export default function MeetSheetSummarySection({
             ) : null}
           </div>
         ) : (
-          // The jump rail sits beside the cards, or out in the page's right margin when it's wide
-          // enough (see JumpRail).
+          // The jump rail sits just right of the cards, out in the page's right margin as far as
+          // it fits (see JumpRail).
           <div className={JUMP_RAIL_LAYOUT_CLASS}>
             <div className="min-w-0 flex-1">
               {viewMode === "roster" ? (

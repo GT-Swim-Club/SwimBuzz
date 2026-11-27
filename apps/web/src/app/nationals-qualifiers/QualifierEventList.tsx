@@ -1,4 +1,5 @@
 import { athletePreferredName } from "@swimbuzz/shared"
+import { EventBadge } from "@/components/meet/EventBadge"
 import { eventGroupTitle, qualifierCountLabel, type QualifierEventGroup } from "@/lib/qualifiers/qualifier-events"
 import { QualifierSwimRow } from "./QualifierSwimRow"
 import {
@@ -27,6 +28,7 @@ export default function QualifierEventList({
       {groups.map((group) => (
         <section key={group.key} className={qualifierSectionClass}>
           <QualifierSectionHeader meta={`${group.cut} · ${qualifierCountLabel(group.swims.length)}`}>
+            {group.eventNumber ? <EventBadge number={group.eventNumber} compact={false} /> : null}
             <span className="truncate text-base font-semibold text-foreground">{eventGroupTitle(group, splitGender)}</span>
           </QualifierSectionHeader>
           <div>

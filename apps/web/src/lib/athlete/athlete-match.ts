@@ -369,6 +369,35 @@ export function buildAthleteLookup(roster: RosterAthlete[]): AthleteLookup {
   return { exact, roster }
 }
 
+/** Each exact-name key → every athlete with it (several when two athletes share a name). */
+export type ExactAthleteIndex = Map<string, Set<string>>
+
+export function buildExactAthleteIndex(athletes: RosterAthlete[]): ExactAthleteIndex {
+  const index: ExactAthleteIndex = new Map()
+  for (const athlete of athletes) {
+    for (const key of rosterKeys(athlete)) {
+      const ids = index.get(key)
+      if (ids) ids.add(athlete.id)
+      else index.set(key, new Set([athlete.id]))
+    }
+  }
+  return index
+}
+
+/**
+ * The athletes whose name is exactly the results name, in either order — the roster's exact
+ * match without its fuzzy fallback, and without picking one when several share the name.
+ */
+export function exactNameMatches(pdfName: string, index: ExactAthleteIndex): string[] {
+  const parsed = parsePdfName(pdfName)
+  if (!parsed) return []
+  const ids = new Set<string>()
+  for (const key of [normalize(`${parsed.first} ${parsed.last}`), normalize(`${parsed.last} ${parsed.first}`)]) {
+    for (const id of index.get(key) ?? []) ids.add(id)
+  }
+  return [...ids]
+}
+
 export function matchAthleteIdFast(
   pdfName: string,
   lookup: AthleteLookup,

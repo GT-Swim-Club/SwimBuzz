@@ -64,7 +64,8 @@ export async function loadMeetHighlights({
   results: MeetResultEntry[]
   relayResults: SheetEntry[] | null
   hasImportedResults: boolean
-  athleteHrefById?: Map<string, string>
+  /** May be a promise, so the caller can start these queries before its roster query finishes. */
+  athleteHrefById?: Map<string, string> | Promise<Map<string, string>>
 }): Promise<MeetHighlights | null> {
   const teamScores = coerceTeamScores(meet.teamScores)
   if (!hasImportedResults && meet.swims.length === 0 && !teamScores) return null
@@ -109,7 +110,7 @@ export async function loadMeetHighlights({
     swimAthleteIds.length > 0
       ? prisma.swim.groupBy({ by: ["athleteId", "event", "course"], where, _min: { timeMs: true } })
       : Promise.resolve([])
-  const [priorBests, priorSeasonBests, priorSeasonCutBests, nationalsCuts, namedAthletes, records] = await Promise.all([
+  const [priorBests, priorSeasonBests, priorSeasonCutBests, nationalsCuts, namedAthletes, records, athleteHrefs] = await Promise.all([
     fastestBy(priorWhere),
     fastestBy(priorSeasonWhere),
     // Relay leadoffs and unofficial meets never make a cut (isRelayLeadoffSwimTag).
@@ -131,6 +132,7 @@ export async function loadMeetHighlights({
         })
       : [],
     loadMeetRecordsWithHolders(meet.id),
+    athleteHrefById,
   ])
   const fastest = (rows: typeof priorBests) =>
     rows.flatMap((row) =>
@@ -176,7 +178,7 @@ export async function loadMeetHighlights({
       nationalsCuts: cuts,
       priorSeasonBestMap,
       priorSeasonCutSwims,
-      athleteHrefById,
+      athleteHrefById: athleteHrefs,
       relayResults: part.relayResults,
       teamScores: part.teamScores,
       nameById,

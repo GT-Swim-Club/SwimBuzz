@@ -81,7 +81,7 @@ export const emptyPractice: PracticeFormState = {
 }
 
 const inputCls =
-  "w-full rounded-lg border border-border bg-background px-3 py-2 transition-shadow focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10"
+  "w-full rounded-lg border border-border bg-background px-3 py-2 transition-shadow"
 const metaIconCls = "h-4 w-4"
 const labelCls = "mb-1 block text-xs font-medium text-foreground-secondary"
 type AutosaveState = "idle" | "saving" | "saved" | "error"
@@ -1368,7 +1368,7 @@ export default function PracticeEditor({
             onChange={(e) =>
               updateForm((form) => ({ ...form, title: e.target.value }), { historyKey: "title" })
             }
-            className="w-full min-w-0 appearance-none rounded-lg border border-border bg-transparent px-3 py-1.5 text-inherit outline-none placeholder:text-foreground-tertiary focus:border-primary focus:ring-2 focus:ring-primary/10"
+            className="w-full min-w-0 appearance-none rounded-lg border border-border bg-transparent px-3 py-1.5 text-inherit outline-none placeholder:text-foreground-tertiary"
           />
         </h1>
 
@@ -1455,10 +1455,10 @@ export default function PracticeEditor({
                   updateForm((form) => ({ ...form, location: e.target.value }), { historyKey: "location" })
                 }
                 aria-invalid={missingLocation || undefined}
-                className={`min-w-0 flex-1 basis-0 rounded-lg border bg-background px-3 py-2 text-foreground outline-none transition focus:ring-2 ${
+                className={`min-w-0 flex-1 basis-0 rounded-lg border bg-background px-3 py-2 text-foreground outline-none transition ${
                   missingLocation
-                    ? "border-error focus:border-error focus:ring-error/10"
-                    : "border-border focus:border-primary focus:ring-primary/10"
+                    ? "border-error"
+                    : "border-border"
                 }`}
               />
             </div>
@@ -1472,7 +1472,7 @@ export default function PracticeEditor({
                 id="practice-course"
                 value={form.course}
                 onChange={(e) => updateForm((form) => ({ ...form, course: e.target.value }))}
-                className="w-28 shrink-0 rounded-lg border border-border bg-background px-2 py-2 text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+                className="w-28 shrink-0 rounded-lg border border-border bg-background px-2 py-2 text-foreground outline-none transition"
               >
                 <option value="SCY">SCY</option>
                 <option value="LCM">LCM</option>
@@ -1554,7 +1554,7 @@ export default function PracticeEditor({
                     ? dropZone
                     : null
                 const targetFieldClass = isDropTarget
-                  ? "border-primary/50 bg-primary/5 focus:ring-primary/20"
+                  ? "border-primary/50 bg-primary/5"
                   : ""
 
                 return (

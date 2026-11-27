@@ -122,6 +122,360 @@
   },
   "meet_date": "2019-03-29",
   "meet_name": "2019 FINIS College Club Swimming Nationals",
+  "place_times": [
+    {
+      "champion": "4:32.94",
+      "eighth": "5:00.91",
+      "event": "400 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "4:02.45",
+      "eighth": "4:18.97",
+      "event": "400 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:05.24",
+      "eighth": "2:13.35",
+      "event": "200 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "2:21.55"
+    },
+    {
+      "champion": "1:50.49",
+      "eighth": "1:55.34",
+      "event": "200 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "2:00.59"
+    },
+    {
+      "champion": "2:04.74",
+      "eighth": "2:14.30",
+      "event": "200 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:49.25",
+      "eighth": "1:54.59",
+      "event": "200 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "2:01.38"
+    },
+    {
+      "champion": "2:22.18",
+      "eighth": "2:33.20",
+      "event": "200 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "2:42.53"
+    },
+    {
+      "champion": "1:59.60",
+      "eighth": "2:08.80",
+      "event": "200 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "2:16.01"
+    },
+    {
+      "champion": "4:51.74",
+      "eighth": "5:21.17",
+      "event": "500 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "5:41.08"
+    },
+    {
+      "champion": "4:30.65",
+      "eighth": "4:44.97",
+      "event": "500 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "4:56.99"
+    },
+    {
+      "champion": "24.91",
+      "eighth": "26.76",
+      "event": "50 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "27.52"
+    },
+    {
+      "champion": "22.00",
+      "eighth": "23.08",
+      "event": "50 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:03.66",
+      "eighth": "2:15.59",
+      "event": "200 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "2:19.83"
+    },
+    {
+      "champion": "1:50.04",
+      "eighth": "1:57.42",
+      "event": "200 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "2:00.10"
+    },
+    {
+      "champion": "23.60",
+      "eighth": "24.91",
+      "event": "50 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "25.42"
+    },
+    {
+      "champion": "20.64",
+      "eighth": "21.23",
+      "event": "50 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "21.63"
+    },
+    {
+      "champion": "1:05.54",
+      "eighth": "1:09.31",
+      "event": "100 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:12.64"
+    },
+    {
+      "champion": "54.01",
+      "eighth": "58.07",
+      "event": "100 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "59.85"
+    },
+    {
+      "champion": "1:53.12",
+      "eighth": "2:00.41",
+      "event": "200 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "2:03.14"
+    },
+    {
+      "champion": "1:38.86",
+      "eighth": "1:43.76",
+      "event": "200 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "1:46.17"
+    },
+    {
+      "champion": "56.73",
+      "eighth": "1:00.46",
+      "event": "100 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:02.45"
+    },
+    {
+      "champion": "49.43",
+      "eighth": "51.46",
+      "event": "100 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "53.35"
+    },
+    {
+      "champion": "10:27.18",
+      "eighth": "11:17.70",
+      "event": "1000 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "12:32.78"
+    },
+    {
+      "champion": "9:27.49",
+      "eighth": "10:01.42",
+      "event": "1000 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "10:30.96"
+    },
+    {
+      "champion": "25.95",
+      "eighth": "28.02",
+      "event": "50 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "29.06"
+    },
+    {
+      "champion": "22.63",
+      "eighth": "23.97",
+      "event": "50 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "25.03"
+    },
+    {
+      "champion": "55.98",
+      "eighth": "59.65",
+      "event": "100 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:01.73"
+    },
+    {
+      "champion": "48.10",
+      "eighth": "50.68",
+      "event": "100 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "52.45"
+    },
+    {
+      "champion": "29.53",
+      "eighth": "31.56",
+      "event": "50 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "33.11"
+    },
+    {
+      "champion": "25.52",
+      "eighth": "26.82",
+      "event": "50 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "52.03",
+      "eighth": "54.17",
+      "event": "100 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "55.48"
+    },
+    {
+      "champion": "44.65",
+      "eighth": "46.78",
+      "event": "100 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "47.51"
+    },
+    {
+      "champion": "57.99",
+      "eighth": "1:02.35",
+      "event": "100 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:04.15"
+    },
+    {
+      "champion": "49.42",
+      "eighth": "52.83",
+      "event": "100 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "54.16"
+    },
+    {
+      "champion": "7:43.46",
+      "eighth": "8:22.09",
+      "event": "800 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": "8:55.49"
+    },
+    {
+      "champion": "6:52.07",
+      "eighth": "7:07.74",
+      "event": "800 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": "7:32.90"
+    },
+    {
+      "champion": "3:54.79",
+      "eighth": "4:08.45",
+      "event": "400 Medley Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": "4:19.86"
+    },
+    {
+      "champion": "3:21.58",
+      "eighth": "3:30.59",
+      "event": "400 Medley Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": "3:38.99"
+    },
+    {
+      "champion": "1:47.00",
+      "eighth": "1:54.41",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": "1:57.50"
+    },
+    {
+      "champion": "1:30.31",
+      "eighth": "1:36.10",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": "1:38.80"
+    },
+    {
+      "champion": "3:31.40",
+      "eighth": "3:44.12",
+      "event": "400 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": "3:54.46"
+    },
+    {
+      "champion": "3:05.04",
+      "eighth": "3:11.18",
+      "event": "400 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": "3:16.09"
+    },
+    {
+      "champion": "1:37.10",
+      "eighth": "1:42.09",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": "1:45.13"
+    },
+    {
+      "champion": "1:22.63",
+      "eighth": "1:26.13",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": "1:28.07"
+    }
+  ],
   "relay_results": [
     {
       "course": "SCY",
@@ -2648,7 +3002,7 @@
         },
         {
           "leg": 4,
-          "name": "Leung, Lok",
+          "name": "Leung, Lok Man June",
           "splitTime": "2:03.24",
           "splits": [
             {
@@ -4957,7 +5311,7 @@
         },
         {
           "leg": 3,
-          "name": "Wong, Jun",
+          "name": "Wong, Jun Bin",
           "splitTime": "1:48.47",
           "splits": [
             {
@@ -11662,7 +12016,7 @@
       "relaySwimmers": [
         {
           "leg": 1,
-          "name": "Leung, Lok",
+          "name": "Leung, Lok Man June",
           "splitTime": "1:10.08",
           "splits": [
             {
@@ -13445,7 +13799,7 @@
         },
         {
           "leg": 4,
-          "name": "Jerothe, Lauren",
+          "name": "Jerothe, Lauren Ashley",
           "splitTime": "1:03.46",
           "splits": [
             {
@@ -21859,7 +22213,7 @@
       "relaySwimmers": [
         {
           "leg": 1,
-          "name": "Leung, Lok",
+          "name": "Leung, Lok Man June",
           "splitTime": "32.52"
         },
         {
@@ -22034,7 +22388,7 @@
         },
         {
           "leg": 3,
-          "name": "Erlandsen, Mary",
+          "name": "Erlandsen, Mary Katharine",
           "splitTime": "32.24"
         },
         {
@@ -22105,7 +22459,7 @@
         },
         {
           "leg": 4,
-          "name": "Bailey, Emma",
+          "name": "Bailey, Emma Rose",
           "splitTime": "27.07"
         }
       ],
@@ -22680,7 +23034,7 @@
         },
         {
           "leg": 4,
-          "name": "Skilling, Mary",
+          "name": "Skilling, Mary Kate",
           "splitTime": "27.03"
         }
       ],
@@ -22924,7 +23278,7 @@
       "relaySwimmers": [
         {
           "leg": 1,
-          "name": "Baudinet, Mary",
+          "name": "Baudinet, Mary Helen",
           "splitTime": "32.64"
         },
         {
@@ -23203,7 +23557,7 @@
         },
         {
           "leg": 4,
-          "name": "Jerothe, Lauren",
+          "name": "Jerothe, Lauren Ashley",
           "splitTime": "27.73"
         }
       ],
@@ -25680,7 +26034,7 @@
         },
         {
           "leg": 3,
-          "name": "Ruiz, Juan",
+          "name": "Ruiz, Juan Pablo",
           "splitTime": "26.06"
         },
         {
@@ -26673,7 +27027,7 @@
       "relaySwimmers": [
         {
           "leg": 1,
-          "name": "Wong, Jun",
+          "name": "Wong, Jun Bin",
           "splitTime": "25.67"
         },
         {
@@ -31599,7 +31953,7 @@
         },
         {
           "leg": 2,
-          "name": "Skilling, Mary",
+          "name": "Skilling, Mary Kate",
           "splitTime": "1:00.18",
           "splits": [
             {
@@ -32387,7 +32741,7 @@
       "relaySwimmers": [
         {
           "leg": 1,
-          "name": "Jerothe, Lauren",
+          "name": "Jerothe, Lauren Ashley",
           "splitTime": "1:03.75",
           "splits": [
             {
@@ -32432,7 +32786,7 @@
         },
         {
           "leg": 4,
-          "name": "Leung, Lok",
+          "name": "Leung, Lok Man June",
           "splitTime": "55.53",
           "splits": [
             {
@@ -32578,7 +32932,7 @@
         },
         {
           "leg": 4,
-          "name": "Bailey, Emma",
+          "name": "Bailey, Emma Rose",
           "splitTime": "58.22",
           "splits": [
             {
@@ -33205,7 +33559,7 @@
         },
         {
           "leg": 2,
-          "name": "Erlandsen, Mary",
+          "name": "Erlandsen, Mary Katharine",
           "splitTime": "1:03.45",
           "splits": [
             {
@@ -41482,7 +41836,7 @@
       "relaySwimmers": [
         {
           "leg": 1,
-          "name": "Wong, Jun",
+          "name": "Wong, Jun Bin",
           "splitTime": "50.48",
           "splits": [
             {
@@ -42796,7 +43150,7 @@
       "relaySwimmers": [
         {
           "leg": 1,
-          "name": "Martinez Diaz, Ramon",
+          "name": "Martinez Diaz, Ramon Enrique",
           "splitTime": "52.17",
           "splits": [
             {
@@ -45589,7 +45943,7 @@
         },
         {
           "leg": 4,
-          "name": "Leung, Lok",
+          "name": "Leung, Lok Man June",
           "splitTime": "25.75"
         }
       ],
@@ -46014,7 +46368,7 @@
         },
         {
           "leg": 4,
-          "name": "Bailey, Emma",
+          "name": "Bailey, Emma Rose",
           "splitTime": "27.03"
         }
       ],
@@ -46071,7 +46425,7 @@
         },
         {
           "leg": 3,
-          "name": "Erlandsen, Mary",
+          "name": "Erlandsen, Mary Katharine",
           "splitTime": "29.42"
         },
         {
@@ -46754,7 +47108,7 @@
         },
         {
           "leg": 4,
-          "name": "Baudinet, Mary",
+          "name": "Baudinet, Mary Helen",
           "splitTime": "27.60"
         }
       ],
@@ -46947,7 +47301,7 @@
         },
         {
           "leg": 4,
-          "name": "Jerothe, Lauren",
+          "name": "Jerothe, Lauren Ashley",
           "splitTime": "27.03"
         }
       ],
@@ -50885,7 +51239,7 @@
         },
         {
           "leg": 2,
-          "name": "Wong, Jun",
+          "name": "Wong, Jun Bin",
           "splitTime": "22.70"
         },
         {
@@ -58451,15 +58805,15 @@
       "seedTime": "2:43.53",
       "splits": [
         {
-          "distance": 66,
+          "distance": 50,
           "splitTime": "35.81"
         },
         {
-          "distance": 132,
+          "distance": 100,
           "splitTime": "40.47"
         },
         {
-          "distance": 198,
+          "distance": 200,
           "splitTime": "1:27.20"
         }
       ],
@@ -59917,15 +60271,15 @@
       "seedTime": "2:25.90",
       "splits": [
         {
-          "distance": 66,
+          "distance": 50,
           "splitTime": "30.65"
         },
         {
-          "distance": 132,
+          "distance": 100,
           "splitTime": "35.62"
         },
         {
-          "distance": 198,
+          "distance": 200,
           "splitTime": "1:14.00"
         }
       ],
@@ -66621,7 +66975,7 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "F",
-      "name": "Simmons, Sarah",
+      "name": "Simmons, Sarah Kate",
       "place": 117,
       "tags": "P",
       "team": "Virginia Tech Swim Club",
@@ -70651,7 +71005,7 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "M",
-      "name": "Fike, Jonah",
+      "name": "Fike, Jonah Paul",
       "place": 225,
       "tags": "P",
       "team": "Virginia Tech Swim Club",
@@ -70971,7 +71325,7 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "M",
-      "name": "Ruiz, Juan",
+      "name": "Ruiz, Juan Pablo",
       "place": 258,
       "tags": "P",
       "team": "Grand Canyon University Club S",
@@ -79362,7 +79716,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "Bailey, Emma",
+      "name": "Bailey, Emma Rose",
       "place": 144,
       "tags": "P",
       "team": "Mercer Swim Club",
@@ -79752,7 +80106,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "Jerothe, Lauren",
+      "name": "Jerothe, Lauren Ashley",
       "place": 182,
       "tags": "P",
       "team": "Mason Swim Club",
@@ -83334,7 +83688,6 @@
       "gender": "M",
       "name": "Vale, Adam",
       "place": 271,
-      "points": 23.7,
       "tags": "P",
       "team": "UC Club Swimming",
       "time": "23.70"
@@ -88183,7 +88536,7 @@
       "course": "SCY",
       "event": "100 Breast",
       "gender": "F",
-      "name": "Erlandsen, Mary",
+      "name": "Erlandsen, Mary Katharine",
       "place": null,
       "tags": "P",
       "team": "Loyola Club Swimming",
@@ -93897,7 +94250,7 @@
       "course": "SCY",
       "event": "200 Free",
       "gender": "F",
-      "name": "Leung, Lok",
+      "name": "Leung, Lok Man June",
       "place": 19,
       "splits": [
         {
@@ -95269,7 +95622,7 @@
       "course": "SCY",
       "event": "200 Free",
       "gender": "F",
-      "name": "Bailey, Emma",
+      "name": "Bailey, Emma Rose",
       "place": 68,
       "splits": [
         {
@@ -97009,15 +97362,15 @@
       "place": 130,
       "splits": [
         {
-          "distance": 66,
+          "distance": 50,
           "splitTime": "30.69"
         },
         {
-          "distance": 132,
+          "distance": 100,
           "splitTime": "34.48"
         },
         {
-          "distance": 198,
+          "distance": 200,
           "splitTime": "1:10.88"
         }
       ],
@@ -101525,7 +101878,7 @@
       "course": "SCY",
       "event": "200 Free",
       "gender": "M",
-      "name": "Emnett, Jon",
+      "name": "Emnett, Jon Travis",
       "place": 97,
       "splits": [
         {
@@ -105921,7 +106274,7 @@
       "course": "SCY",
       "event": "100 Back",
       "gender": "F",
-      "name": "Baudinet, Mary",
+      "name": "Baudinet, Mary Helen",
       "place": 136,
       "splits": [
         {
@@ -107141,7 +107494,7 @@
       "course": "SCY",
       "event": "100 Back",
       "gender": "F",
-      "name": "Simmons, Sarah",
+      "name": "Simmons, Sarah Kate",
       "place": 197,
       "splits": [
         {
@@ -117706,7 +118059,7 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "F",
-      "name": "Baudinet, Mary",
+      "name": "Baudinet, Mary Helen",
       "place": 145,
       "tags": "P",
       "team": "Villanova Club Swimming",
@@ -117758,7 +118111,6 @@
       "gender": "F",
       "name": "Eckardt, Kayla",
       "place": 150,
-      "points": 32.04,
       "tags": "P",
       "team": "Slu Club Swimming",
       "time": "32.04"
@@ -117907,7 +118259,7 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "F",
-      "name": "Bailey, Emma",
+      "name": "Bailey, Emma Rose",
       "place": 165,
       "tags": "P",
       "team": "Mercer Swim Club",
@@ -121096,7 +121448,7 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "M",
-      "name": "Martinez Diaz, Ramon",
+      "name": "Martinez Diaz, Ramon Enrique",
       "place": 218,
       "tags": "P",
       "team": "Mason Swim Club",
@@ -130275,7 +130627,7 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "F",
-      "name": "Erlandsen, Mary",
+      "name": "Erlandsen, Mary Katharine",
       "place": null,
       "tags": "P",
       "team": "Loyola Club Swimming",
@@ -132797,7 +133149,6 @@
       "gender": "M",
       "name": "Yanez, Armando",
       "place": 219,
-      "points": 31.57,
       "tags": "P",
       "team": "Grand Canyon University Club S",
       "time": "31.57"
@@ -133973,7 +134324,7 @@
       "course": "SCY",
       "event": "100 Free",
       "gender": "F",
-      "name": "Leung, Lok",
+      "name": "Leung, Lok Man June",
       "place": 13,
       "splits": [
         {
@@ -135473,7 +135824,7 @@
       "course": "SCY",
       "event": "100 Free",
       "gender": "F",
-      "name": "Bailey, Emma",
+      "name": "Bailey, Emma Rose",
       "place": 88,
       "splits": [
         {
@@ -137413,7 +137764,7 @@
       "course": "SCY",
       "event": "100 Free",
       "gender": "F",
-      "name": "Skilling, Mary",
+      "name": "Skilling, Mary Kate",
       "place": 184,
       "splits": [
         {
@@ -139553,7 +139904,7 @@
       "course": "SCY",
       "event": "100 Free",
       "gender": "F",
-      "name": "Jerothe, Lauren",
+      "name": "Jerothe, Lauren Ashley",
       "place": 291,
       "splits": [
         {
@@ -149093,7 +149444,7 @@
       "course": "SCY",
       "event": "100 IM",
       "gender": "F",
-      "name": "Leung, Lok",
+      "name": "Leung, Lok Man June",
       "place": 38,
       "splits": [
         {
@@ -151403,7 +151754,7 @@
       "course": "SCY",
       "event": "100 IM",
       "gender": "F",
-      "name": "Simmons, Sarah",
+      "name": "Simmons, Sarah Kate",
       "place": 155,
       "splits": [
         {
@@ -151603,7 +151954,7 @@
       "course": "SCY",
       "event": "100 IM",
       "gender": "F",
-      "name": "Skilling, Mary",
+      "name": "Skilling, Mary Kate",
       "place": 165,
       "splits": [
         {
@@ -157883,7 +158234,7 @@
       "course": "SCY",
       "event": "100 IM",
       "gender": "M",
-      "name": "Fike, Jonah",
+      "name": "Fike, Jonah Paul",
       "place": 233,
       "splits": [
         {

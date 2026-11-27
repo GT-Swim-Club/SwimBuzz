@@ -70,6 +70,7 @@ import {
 } from "@swimbuzz/shared"
 import LoadingComponent from "./loading"
 import { parseSummaryView, searchParamsString } from "@/lib/meet/roster-summary-view"
+import { meetPageMetadata } from "@/lib/page-title"
 
 type SearchParams = Record<string, string | string[] | undefined>
 
@@ -257,31 +258,47 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
   lastActiveDate.setHours(0, 0, 0, 0)
 
   const meetHasEnded = lastActiveDate <= yesterday
-  await deleteEndedMeetRelayDrafts(meet, meetHasEnded)
-
   const showSignupCard = !meetHasEnded && isCoach
 
-  const seasonRoster = await prisma.athlete.findMany({
+  // Everything below needs only the meet, so its queries run together rather than one by one.
+  const seasonRosterQuery = prisma.athlete.findMany({
     where: { seasons: { has: meet.season } },
     orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
-    select: { 
+    select: {
       id: true,
       slug: true,
-      firstName: true, 
-      lastName: true, 
+      firstName: true,
+      lastName: true,
       preferredName: true,
       gender: true,
       swimCloudIds: true,
       timesSyncedAt: true,
       user: { select: { image: true, staffTitle: true } }
     }})
+  const athleteHrefs = seasonRosterQuery.then(
+    (roster) => new Map(roster.map((a) => [a.id, athletePath(a.slug ?? a.id)]))
+  )
+  // The highlights can return before awaiting this; a roster failure still fails the page below.
+  athleteHrefs.catch(() => {})
+  const [, seasonRoster, relaySplitSwims, meetHighlights] = await Promise.all([
+    deleteEndedMeetRelayDrafts(meet, meetHasEnded),
+    seasonRosterQuery,
+    loadMeetRelaySplitSwims(meet.id),
+    loadMeetHighlights({
+      meet: { ...meet, swims: scoredSwims },
+      results,
+      relayResults,
+      hasImportedResults,
+      athleteHrefById: athleteHrefs,
+    }),
+  ])
   const relayLineupCount = buildRelayLineups(meet, seasonRoster).length
   // Relay leadoff and split swims have no rows of their own: they anchor on their relay's row.
   const relayLegSwims: RelayLegSwim[] = [
     ...meet.swims
       .filter((s) => isRelayLeadoffSwimTag(s.tags))
       .map((s) => ({ id: s.id, athleteId: s.athleteId, tags: s.tags })),
-    ...(await loadMeetRelaySplitSwims(meet.id)),
+    ...relaySplitSwims,
   ]
   const rosterAthletes = seasonRoster.map((a) => ({
     id: a.id,
@@ -313,14 +330,6 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
     psychSummary,
     heatSummary
   )
-
-  const meetHighlights = await loadMeetHighlights({
-    meet: { ...meet, swims: scoredSwims },
-    results,
-    relayResults,
-    hasImportedResults,
-    athleteHrefById: new Map(seasonRoster.map((a) => [a.id, athletePath(a.slug ?? a.id)])),
-  })
 
   const header = (
     <>
@@ -580,6 +589,11 @@ const travelTexts = TRAVEL_TEXT_SECTIONS.filter((s) => !isHtmlEmpty(meet[s.key])
       </main>
     </div>
   )
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id: param } = await params
+  return meetPageMetadata(param)
 }
 
 export default function MeetPage(props: {

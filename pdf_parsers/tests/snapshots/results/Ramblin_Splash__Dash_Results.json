@@ -107,6 +107,312 @@
   },
   "meet_date": "2025-09-27",
   "meet_name": "GTSC Ramblin Splash & Dash",
+  "place_times": [
+    {
+      "champion": "1:59.13",
+      "eighth": "2:06.96",
+      "event": "200 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "2:21.23"
+    },
+    {
+      "champion": "1:46.80",
+      "eighth": "1:52.43",
+      "event": "200 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "2:03.16"
+    },
+    {
+      "champion": "2:23.07",
+      "eighth": "2:32.62",
+      "event": "200 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:59.52",
+      "eighth": "2:18.98",
+      "event": "200 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "28.35",
+      "eighth": null,
+      "event": "50 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "24.13",
+      "eighth": null,
+      "event": "50 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "28.70"
+    },
+    {
+      "champion": "2:30.13",
+      "eighth": null,
+      "event": "200 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:09.25",
+      "eighth": "2:28.25",
+      "event": "200 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "24.83",
+      "eighth": "25.76",
+      "event": "50 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "26.82"
+    },
+    {
+      "champion": "21.68",
+      "eighth": "22.15",
+      "event": "50 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "22.91"
+    },
+    {
+      "champion": "1:01.15",
+      "eighth": "1:05.38",
+      "event": "100 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:11.88"
+    },
+    {
+      "champion": "49.44",
+      "eighth": "53.67",
+      "event": "100 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "58.10"
+    },
+    {
+      "champion": "2:14.89",
+      "eighth": null,
+      "event": "200 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:59.79",
+      "eighth": null,
+      "event": "200 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "5:28.50",
+      "eighth": null,
+      "event": "400 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "4:19.52",
+      "eighth": null,
+      "event": "400 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "27.08",
+      "eighth": "28.47",
+      "event": "50 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "29.94"
+    },
+    {
+      "champion": "22.46",
+      "eighth": "24.65",
+      "event": "50 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "25.46"
+    },
+    {
+      "champion": "1:10.30",
+      "eighth": "1:15.73",
+      "event": "100 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:23.80"
+    },
+    {
+      "champion": "58.08",
+      "eighth": "1:03.42",
+      "event": "100 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "1:15.36"
+    },
+    {
+      "champion": "1:02.81",
+      "eighth": "1:06.07",
+      "event": "100 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:09.50"
+    },
+    {
+      "champion": "52.35",
+      "eighth": "58.30",
+      "event": "100 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "1:10.01"
+    },
+    {
+      "champion": "55.78",
+      "eighth": "58.81",
+      "event": "100 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:03.18"
+    },
+    {
+      "champion": "47.74",
+      "eighth": "49.31",
+      "event": "100 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "52.43"
+    },
+    {
+      "champion": "2:22.93",
+      "eighth": null,
+      "event": "200 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:00.19",
+      "eighth": null,
+      "event": "200 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:00.27",
+      "eighth": "1:07.39",
+      "event": "100 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "52.36",
+      "eighth": "58.25",
+      "event": "100 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "1:27.99"
+    },
+    {
+      "champion": "32.98",
+      "eighth": "35.52",
+      "event": "50 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "37.71"
+    },
+    {
+      "champion": "25.90",
+      "eighth": "28.47",
+      "event": "50 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "30.37"
+    },
+    {
+      "champion": "5:19.93",
+      "eighth": "7:14.84",
+      "event": "500 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "5:00.77",
+      "eighth": "5:33.97",
+      "event": "500 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:52.14",
+      "eighth": "2:02.24",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": "2:21.06"
+    },
+    {
+      "champion": "1:34.47",
+      "eighth": "1:40.54",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": "1:54.72"
+    },
+    {
+      "champion": "1:42.48",
+      "eighth": "1:49.79",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:26.19",
+      "eighth": "1:31.67",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": "1:52.56"
+    },
+    {
+      "champion": "3:50.14",
+      "eighth": null,
+      "event": "400 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "3:18.02",
+      "eighth": "3:31.90",
+      "event": "400 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    }
+  ],
   "relay_results": [
     {
       "course": "SCY",
@@ -1009,7 +1315,7 @@
         },
         {
           "leg": 4,
-          "name": "Roller, Mary",
+          "name": "Roller, Mary Quin",
           "splitTime": "23.16"
         }
       ],
@@ -2388,7 +2694,7 @@
         },
         {
           "leg": 4,
-          "name": "Roller, Mary",
+          "name": "Roller, Mary Quin",
           "splitTime": "25.05"
         }
       ],
@@ -2422,7 +2728,7 @@
         },
         {
           "leg": 4,
-          "name": "Stone, Mary",
+          "name": "Stone, Mary Margaret",
           "splitTime": "25.92"
         }
       ],
@@ -2610,7 +2916,7 @@
       "relaySwimmers": [
         {
           "leg": 1,
-          "name": "Milligan, Mary",
+          "name": "Milligan, Mary Ella",
           "splitTime": "29.93"
         },
         {
@@ -3561,7 +3867,7 @@
         },
         {
           "leg": 2,
-          "name": "Johnson, Benjamin",
+          "name": "Johnson, Benjamin Scott",
           "splitTime": "27.45"
         },
         {
@@ -3883,7 +4189,7 @@
         },
         {
           "leg": 4,
-          "name": "Rasmussen, Isabel",
+          "name": "Rasmussen, Isabel Katherine",
           "splitTime": "58.01",
           "splits": [
             {
@@ -4215,7 +4521,7 @@
         },
         {
           "leg": 3,
-          "name": "Roller, Mary"
+          "name": "Roller, Mary Quin"
         },
         {
           "leg": 4,
@@ -6140,15 +6446,15 @@
       "place": 33,
       "splits": [
         {
-          "distance": 66,
+          "distance": 50,
           "splitTime": "34.10"
         },
         {
-          "distance": 132,
+          "distance": 150,
           "splitTime": "1:25.56"
         },
         {
-          "distance": 198,
+          "distance": 200,
           "splitTime": "42.25"
         }
       ],
@@ -8238,7 +8544,7 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "F",
-      "name": "Milligan, Mary",
+      "name": "Milligan, Mary Ella",
       "place": 32,
       "tags": "",
       "team": "AUB-SE",
@@ -8248,7 +8554,7 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "F",
-      "name": "Bal, Anna",
+      "name": "Bal, Anna Marie",
       "place": 33,
       "tags": "",
       "team": "UNCCH-NC",
@@ -9478,15 +9784,15 @@
       "points": 12.0,
       "splits": [
         {
-          "distance": 66,
+          "distance": 50,
           "splitTime": "36.96"
         },
         {
-          "distance": 132,
+          "distance": 100,
           "splitTime": "42.89"
         },
         {
-          "distance": 198,
+          "distance": 200,
           "splitTime": "1:37.16"
         }
       ],
@@ -9621,7 +9927,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "Roller, Mary",
+      "name": "Roller, Mary Quin",
       "place": 7,
       "points": 15.0,
       "tags": "",
@@ -9720,7 +10026,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "Stone, Mary",
+      "name": "Stone, Mary Margaret",
       "place": 16,
       "points": 5.0,
       "tags": "",
@@ -10325,7 +10631,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "Milligan, Mary",
+      "name": "Milligan, Mary Ella",
       "place": 75,
       "tags": "",
       "team": "AUB-SE",
@@ -12065,7 +12371,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "M",
-      "name": "Johnson, Benjamin",
+      "name": "Johnson, Benjamin Scott",
       "place": 113,
       "tags": "",
       "team": "FSUC",
@@ -12737,7 +13043,7 @@
       "course": "SCY",
       "event": "100 Fly",
       "gender": "F",
-      "name": "Smith, Elinor",
+      "name": "Smith, Elinor James",
       "place": 18,
       "splits": [
         {
@@ -13750,7 +14056,7 @@
       "course": "SCY",
       "event": "200 Back",
       "gender": "F",
-      "name": "Rasmussen, Isabel",
+      "name": "Rasmussen, Isabel Katherine",
       "place": 1,
       "points": 25.0,
       "splits": [
@@ -14383,31 +14689,31 @@
       "points": 17.0,
       "splits": [
         {
-          "distance": 57,
+          "distance": 50,
           "splitTime": "32.11"
         },
         {
-          "distance": 114,
+          "distance": 100,
           "splitTime": "36.21"
         },
         {
-          "distance": 171,
+          "distance": 200,
           "splitTime": "1:15.53"
         },
         {
-          "distance": 228,
+          "distance": 250,
           "splitTime": "41.65"
         },
         {
-          "distance": 285,
+          "distance": 300,
           "splitTime": "43.29"
         },
         {
-          "distance": 342,
+          "distance": 350,
           "splitTime": "35.99"
         },
         {
-          "distance": 399,
+          "distance": 400,
           "splitTime": "33.82"
         }
       ],
@@ -14819,7 +15125,7 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "F",
-      "name": "Smith, Elinor",
+      "name": "Smith, Elinor James",
       "place": 38,
       "tags": "",
       "team": "FLOR-FL",
@@ -14909,7 +15215,7 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "F",
-      "name": "Stone, Mary",
+      "name": "Stone, Mary Margaret",
       "place": 47,
       "tags": "",
       "team": "AUB-SE",
@@ -14999,7 +15305,7 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "F",
-      "name": "Milligan, Mary",
+      "name": "Milligan, Mary Ella",
       "place": 56,
       "tags": "",
       "team": "AUB-SE",
@@ -16318,7 +16624,7 @@
       "course": "SCY",
       "event": "100 Breast",
       "gender": "F",
-      "name": "Bal, Anna",
+      "name": "Bal, Anna Marie",
       "place": 10,
       "splits": [
         {
@@ -16485,7 +16791,7 @@
       "course": "SCY",
       "event": "100 Breast",
       "gender": "F",
-      "name": "Smith, Elinor",
+      "name": "Smith, Elinor James",
       "place": 18,
       "points": 4.0,
       "splits": [
@@ -19460,7 +19766,7 @@
       "course": "SCY",
       "event": "100 Free",
       "gender": "F",
-      "name": "Roller, Mary",
+      "name": "Roller, Mary Quin",
       "place": 2,
       "points": 22.0,
       "splits": [
@@ -21759,7 +22065,7 @@
       "course": "SCY",
       "event": "100 Free",
       "gender": "M",
-      "name": "Johnson, Benjamin",
+      "name": "Johnson, Benjamin Scott",
       "place": 62,
       "splits": [
         {
@@ -22326,7 +22632,7 @@
       "course": "SCY",
       "event": "100 Back",
       "gender": "F",
-      "name": "Rasmussen, Isabel",
+      "name": "Rasmussen, Isabel Katherine",
       "place": 2,
       "points": 22.0,
       "splits": [
@@ -23442,7 +23748,7 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "F",
-      "name": "Bal, Anna",
+      "name": "Bal, Anna Marie",
       "place": 9,
       "points": 13.0,
       "tags": "",
@@ -24624,7 +24930,7 @@
       "course": "SCY",
       "event": "500 Free",
       "gender": "F",
-      "name": "Rasmussen, Isabel",
+      "name": "Rasmussen, Isabel Katherine",
       "place": 1,
       "points": 25.0,
       "splits": [
@@ -24998,40 +25304,6 @@
       "name": "Butlak, Hannah",
       "place": 8,
       "points": 14.0,
-      "splits": [
-        {
-          "distance": 62,
-          "splitTime": "36.38"
-        },
-        {
-          "distance": 124,
-          "splitTime": "41.33"
-        },
-        {
-          "distance": 186,
-          "splitTime": "43.12"
-        },
-        {
-          "distance": 248,
-          "splitTime": "43.99"
-        },
-        {
-          "distance": 310,
-          "splitTime": "45.28"
-        },
-        {
-          "distance": 372,
-          "splitTime": "45.01"
-        },
-        {
-          "distance": 434,
-          "splitTime": "44.68"
-        },
-        {
-          "distance": 496,
-          "splitTime": "43.67"
-        }
-      ],
       "tags": "",
       "team": "FUCST",
       "time": "7:14.84"
@@ -25204,31 +25476,31 @@
       "points": 22.0,
       "splits": [
         {
-          "distance": 71,
+          "distance": 50,
           "splitTime": "25.83"
         },
         {
-          "distance": 142,
+          "distance": 100,
           "splitTime": "28.20"
         },
         {
-          "distance": 213,
+          "distance": 150,
           "splitTime": "29.31"
         },
         {
-          "distance": 284,
+          "distance": 200,
           "splitTime": "30.76"
         },
         {
-          "distance": 355,
+          "distance": 350,
           "splitTime": "1:34.94"
         },
         {
-          "distance": 426,
+          "distance": 400,
           "splitTime": "32.03"
         },
         {
-          "distance": 497,
+          "distance": 500,
           "splitTime": "1:02.76"
         }
       ],
@@ -25772,36 +26044,6 @@
       "gender": "M",
       "name": "Essig, Jackson",
       "place": null,
-      "splits": [
-        {
-          "distance": 71,
-          "splitTime": "34.01"
-        },
-        {
-          "distance": 142,
-          "splitTime": "4.04"
-        },
-        {
-          "distance": 213,
-          "splitTime": "2.18"
-        },
-        {
-          "distance": 284,
-          "splitTime": "7.53"
-        },
-        {
-          "distance": 355,
-          "splitTime": "1.58"
-        },
-        {
-          "distance": 426,
-          "splitTime": "9.12"
-        },
-        {
-          "distance": 497,
-          "splitTime": "14.01"
-        }
-      ],
       "tags": "",
       "team": "FSUC",
       "time": "DQ"

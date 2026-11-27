@@ -4,6 +4,7 @@ import { athletePreferredInitials, athletePreferredName } from "@swimbuzz/shared
 import type { QualifierAthlete, QualifierRow } from "@/lib/qualifiers/nationals-qualifiers"
 import { qualifierMarginLabel } from "@/lib/qualifiers/qualifier-events"
 import { athletePath } from "@/lib/slug"
+import { EventBadge } from "@/components/meet/EventBadge"
 import { QualifierSwimRow } from "./QualifierSwimRow"
 import {
   athleteCutsLabel,
@@ -130,7 +131,10 @@ export default function QualifiersList({
             <div>
               {athlete.events.map((event) => (
                 <QualifierSwimRow key={event.id} swim={event} className={swimRowClass(QUALIFIER_LIST_COLS)}>
-                  <span className={swimLeadCellClass}>{event.event}</span>
+                  <span className={`flex items-center gap-2 ${swimLeadCellClass}`}>
+                    {event.eventNumber ? <EventBadge number={event.eventNumber} compact /> : null}
+                    <span className="truncate">{event.event}</span>
+                  </span>
                   <SwimCells swim={event} />
                 </QualifierSwimRow>
               ))}

@@ -366,7 +366,7 @@ function HelpButton({ label, onClick }: { label: string; onClick: () => void }) 
       type="button"
       aria-label={label}
       onClick={onClick}
-      className="inline-grid h-4 w-4 place-items-center rounded-full border border-border text-[10px] font-semibold leading-none text-foreground-secondary transition-colors hover:bg-fill hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/35"
+      className="inline-grid h-4 w-4 place-items-center rounded-full border border-border text-[10px] font-semibold leading-none text-foreground-secondary transition-colors hover:bg-fill hover:text-foreground"
     >
       ?
     </button>
@@ -521,7 +521,7 @@ function LegOrderDropdown({
               <button
                 type="button"
                 aria-label={`What does Auto do? ${autoHelp.join(" ")}`}
-                className="relative inline-grid h-4 w-4 place-items-center rounded-full border border-border text-[10px] font-semibold leading-none text-foreground-secondary transition-colors hover:bg-fill hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/35"
+                className="relative inline-grid h-4 w-4 place-items-center rounded-full border border-border text-[10px] font-semibold leading-none text-foreground-secondary transition-colors hover:bg-fill hover:text-foreground"
               >
                 ?
                 <HoverDetail label={autoHelp} />
@@ -2652,7 +2652,7 @@ export default function MeetRelayBuilder({
           value={athleteQuery}
           onChange={(e) => setAthleteQuery(e.target.value)}
           placeholder="Search athletes"
-          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none"
         />
 
         {visibleAthletes.length === 0 ? (

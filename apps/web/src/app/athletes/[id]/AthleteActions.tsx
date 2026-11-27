@@ -222,7 +222,7 @@ export default function AthleteActions({
             required
             value={form.firstName}
             onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-[border-color,box-shadow] focus:border-primary focus:ring-[3px] focus:ring-primary/35"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-[border-color,box-shadow]"
           />
         </div>
         <div>
@@ -233,7 +233,7 @@ export default function AthleteActions({
               required
               value={form.lastName}
               onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-[border-color,box-shadow] focus:border-primary focus:ring-[3px] focus:ring-primary/35"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-[border-color,box-shadow]"
             />
           </div>
         </div>
@@ -247,7 +247,7 @@ export default function AthleteActions({
               type="text"
               value={form.preferredName}
               onChange={(e) => setForm((f) => ({ ...f, preferredName: e.target.value }))}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-[border-color,box-shadow] focus:border-primary focus:ring-[3px] focus:ring-primary/35"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-[border-color,box-shadow]"
             />
           </div>
           <div>
@@ -260,7 +260,7 @@ export default function AthleteActions({
                 required
                 value={form.gender}
                 onChange={(e) => setForm((f) => ({ ...f, gender: e.target.value as "M" | "F" }))}
-                className="w-full appearance-none rounded-lg border border-border bg-background py-2 pl-3 pr-9 text-sm text-foreground outline-none transition-[border-color,box-shadow] focus:border-primary focus:ring-[3px] focus:ring-primary/35"
+                className="w-full appearance-none rounded-lg border border-border bg-background py-2 pl-3 pr-9 text-sm text-foreground outline-none transition-[border-color,box-shadow]"
               >
                 <option value="F">Women</option>
                 <option value="M">Men</option>
@@ -275,14 +275,13 @@ export default function AthleteActions({
 
         <div>
           <label className="block text-xs font-medium text-foreground-secondary text-foreground-secondary mb-1">
-            Email <span className="text-error">*</span>
+            Email
           </label>
           <input
-            required
             type="email"
             value={form.email}
             onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-[border-color,box-shadow] focus:border-primary focus:ring-[3px] focus:ring-primary/35"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-[border-color,box-shadow]"
           />
         </div>
 
@@ -299,7 +298,7 @@ export default function AthleteActions({
               onChange={(e) =>
                 setForm((f) => ({ ...f, gtid: e.target.value.replace(/\D/g, "").slice(0, GTID_LENGTH) }))
               }
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-[border-color,box-shadow] focus:border-primary focus:ring-[3px] focus:ring-primary/35"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-[border-color,box-shadow]"
               aria-invalid={!gtidOk}
               aria-describedby={!gtidOk ? "edit-gtid-hint" : undefined}
             />
@@ -315,7 +314,7 @@ export default function AthleteActions({
               type="date"
               value={form.dob}
               onChange={(e) => setForm((f) => ({ ...f, dob: e.target.value }))}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-[border-color,box-shadow] focus:border-primary focus:ring-[3px] focus:ring-primary/35"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-[border-color,box-shadow]"
             />
           </div>
         </div>
@@ -336,7 +335,7 @@ export default function AthleteActions({
                 placeholder="e.g. 2, SO, Masters"
                 value={years[season] ?? ""}
                 onChange={(e) => setYears((y) => ({ ...y, [season]: e.target.value }))}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-[border-color,box-shadow] focus:border-primary focus:ring-[3px] focus:ring-primary/35"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-[border-color,box-shadow]"
               />
             </div>
           ))}

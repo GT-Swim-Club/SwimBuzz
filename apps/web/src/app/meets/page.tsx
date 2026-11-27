@@ -113,6 +113,8 @@ async function MeetsListSection({
   )
 }
 
+export const metadata = { title: "Meets" }
+
 export default async function MeetsPage({
   searchParams,
 }: {

@@ -26,6 +26,8 @@ import { GalleryViewToggle } from "../../../src/components/GalleryViewToggle"
 type QualifierSwim = {
   id?: string
   event: string
+  /** The event's number at Nationals for the athlete's gender, once a coach links the Nationals meet. */
+  eventNumber?: number | null
   time?: string
   timeMs?: number
   cut?: string
@@ -352,9 +354,16 @@ export default function NationalsScreen() {
                   const margin = marginLabel(swim)
                   return (
                     <View key={swim.id ?? `${swim.event}-${swimIndex}`} style={styles.cutLine}>
-                      <Text numberOfLines={1} style={styles.cutEvent}>
-                        {swim.event}
-                      </Text>
+                      <View style={styles.cutEventLead}>
+                        {swim.eventNumber ? (
+                          <View style={styles.eventBadge}>
+                            <Text style={styles.eventBadgeText}>{swim.eventNumber}</Text>
+                          </View>
+                        ) : null}
+                        <Text numberOfLines={1} style={styles.cutEvent}>
+                          {swim.event}
+                        </Text>
+                      </View>
                       <Text style={styles.cutTimeText}>
                         {swimTime(swim)}
                         {margin ? <Text style={styles.cutMargin}>{`  ${margin}`}</Text> : null}
@@ -605,11 +614,25 @@ function makeStyles(c: ColorPalette) {
     },
     cutLines: { gap: 2, marginLeft: 32 + spacing.sm, marginTop: spacing.xs },
     cutLine: {
-      alignItems: "baseline",
+      alignItems: "center",
       flexDirection: "row",
       gap: spacing.sm,
       justifyContent: "space-between",
     },
+    cutEventLead: { alignItems: "center", flexDirection: "row", flexShrink: 1, gap: spacing.xs },
+    // Gold-outlined, like the web EventBadge.
+    eventBadge: {
+      alignItems: "center",
+      justifyContent: "center",
+      minWidth: 20,
+      height: 20,
+      paddingHorizontal: 3,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: c.accent,
+      backgroundColor: c.primaryBg,
+    },
+    eventBadgeText: { color: c.accent, fontSize: 10, fontWeight: "700", fontVariant: ["tabular-nums"] },
     cutEvent: {
       color: c.textSecondary,
       flexShrink: 1,

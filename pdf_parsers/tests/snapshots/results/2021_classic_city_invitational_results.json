@@ -82,6 +82,232 @@
   },
   "meet_date": "2021-11-13",
   "meet_name": "2021 Classic City Invitational",
+  "place_times": [
+    {
+      "champion": "2:06.73",
+      "eighth": "2:16.16",
+      "event": "200 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "2:44.73"
+    },
+    {
+      "champion": "1:50.46",
+      "eighth": "2:00.95",
+      "event": "200 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "31.97",
+      "eighth": "35.82",
+      "event": "50 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "39.19"
+    },
+    {
+      "champion": "27.29",
+      "eighth": "29.93",
+      "event": "50 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "32.44"
+    },
+    {
+      "champion": "56.04",
+      "eighth": "58.84",
+      "event": "100 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:01.37"
+    },
+    {
+      "champion": "48.07",
+      "eighth": "50.53",
+      "event": "100 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "52.81"
+    },
+    {
+      "champion": "2:15.77",
+      "eighth": "2:34.88",
+      "event": "200 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:06.26",
+      "eighth": "2:23.25",
+      "event": "200 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "28.45",
+      "eighth": "31.88",
+      "event": "50 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "34.58"
+    },
+    {
+      "champion": "25.39",
+      "eighth": "26.86",
+      "event": "50 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "29.85"
+    },
+    {
+      "champion": "1:01.14",
+      "eighth": "1:06.90",
+      "event": "100 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "52.11",
+      "eighth": "57.24",
+      "event": "100 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:02.69",
+      "eighth": "1:09.22",
+      "event": "100 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:11.72"
+    },
+    {
+      "champion": "53.32",
+      "eighth": "58.21",
+      "event": "100 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "1:02.10"
+    },
+    {
+      "champion": "26.51",
+      "eighth": "27.12",
+      "event": "50 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "28.14"
+    },
+    {
+      "champion": "21.77",
+      "eighth": "22.79",
+      "event": "50 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "23.80"
+    },
+    {
+      "champion": "1:10.98",
+      "eighth": "1:18.69",
+      "event": "100 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:33.58"
+    },
+    {
+      "champion": "59.77",
+      "eighth": "1:05.34",
+      "event": "100 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "1:16.97"
+    },
+    {
+      "champion": "27.85",
+      "eighth": "29.72",
+      "event": "50 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "31.43"
+    },
+    {
+      "champion": "23.96",
+      "eighth": "25.36",
+      "event": "50 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "26.45"
+    },
+    {
+      "champion": "1:00.47",
+      "eighth": "1:11.23",
+      "event": "100 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "54.19",
+      "eighth": "1:02.03",
+      "event": "100 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "5:50.49",
+      "eighth": null,
+      "event": "500 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "4:57.28",
+      "eighth": null,
+      "event": "500 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:55.83",
+      "eighth": "2:08.03",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:35.73",
+      "eighth": "1:44.95",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": "2:09.88"
+    },
+    {
+      "champion": "1:45.66",
+      "eighth": "1:57.08",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:28.66",
+      "eighth": "1:35.07",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    }
+  ],
   "relay_results": [
     {
       "course": "SCY",
@@ -268,7 +494,7 @@
         },
         {
           "leg": 2,
-          "name": "Ammons, Hannah"
+          "name": "Ammons, Hannah Kate"
         },
         {
           "leg": 3,
@@ -1979,7 +2205,7 @@
         },
         {
           "leg": 3,
-          "name": "Lyons, Mary",
+          "name": "Lyons, Mary Kate",
           "splitTime": "29.00"
         },
         {
@@ -4314,7 +4540,7 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "F",
-      "name": "Ammons, Hannah",
+      "name": "Ammons, Hannah Kate",
       "place": 7,
       "points": 12.0,
       "tags": "",
@@ -4549,7 +4775,7 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "F",
-      "name": "Lyons, Mary",
+      "name": "Lyons, Mary Kate",
       "place": 28,
       "seedTime": "40.85",
       "tags": "",
@@ -4739,7 +4965,7 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "F",
-      "name": "Cordle, Ansley",
+      "name": "Cordle, Ansley Kate",
       "place": 46,
       "tags": "",
       "team": "University of North Georgia-GA",
@@ -5297,7 +5523,7 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "M",
-      "name": "Xu, Ran",
+      "name": "Xu, Ran Sheng",
       "place": 46,
       "tags": "",
       "team": "Knights Swim Club-FL",
@@ -5900,7 +6126,7 @@
       "course": "SCY",
       "event": "100 Free",
       "gender": "F",
-      "name": "Lipe, Sarah",
+      "name": "Lipe, Sarah Grace",
       "place": 23,
       "splits": [
         {
@@ -8577,9 +8803,39 @@
       "name": "Roncal, Nicolas",
       "place": 71,
       "seedTime": "1:12.24",
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "31.36"
+        },
+        {
+          "distance": 100,
+          "splitTime": "39.52"
+        }
+      ],
       "tags": "",
       "team": "Kennesaw State University-GA",
       "time": "1:10.88"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Free",
+      "gender": "M",
+      "name": "Ibarra Jr., Luis",
+      "place": 72,
+      "splits": [
+        {
+          "distance": 50,
+          "splitTime": "33.84"
+        },
+        {
+          "distance": 100,
+          "splitTime": "37.44"
+        }
+      ],
+      "tags": "",
+      "team": "Kennesaw State University-GA",
+      "time": "1:11.28"
     },
     {
       "course": "SCY",
@@ -9443,7 +9699,7 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "F",
-      "name": "Lipe, Sarah",
+      "name": "Lipe, Sarah Grace",
       "place": 4,
       "points": 15.0,
       "seedTime": "30.42",
@@ -9806,7 +10062,7 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "F",
-      "name": "Lyons, Mary",
+      "name": "Lyons, Mary Kate",
       "place": 37,
       "tags": "",
       "team": "Gamecock Club Swimming-SC",
@@ -10119,7 +10375,7 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "M",
-      "name": "Xu, Ran",
+      "name": "Xu, Ran Sheng",
       "place": 19,
       "tags": "",
       "team": "Knights Swim Club-FL",
@@ -11349,7 +11605,7 @@
       "course": "SCY",
       "event": "100 IM",
       "gender": "F",
-      "name": "Ammons, Hannah",
+      "name": "Ammons, Hannah Kate",
       "place": 14,
       "points": 2.5,
       "splits": [
@@ -11579,7 +11835,7 @@
       "course": "SCY",
       "event": "100 IM",
       "gender": "F",
-      "name": "Lipe, Sarah",
+      "name": "Lipe, Sarah Grace",
       "place": 26,
       "seedTime": "1:13.04",
       "splits": [
@@ -12093,7 +12349,7 @@
       "course": "SCY",
       "event": "100 IM",
       "gender": "F",
-      "name": "Lyons, Mary",
+      "name": "Lyons, Mary Kate",
       "place": 51,
       "seedTime": "1:20.04",
       "splits": [
@@ -14162,7 +14418,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "Ammons, Hannah",
+      "name": "Ammons, Hannah Kate",
       "place": 68,
       "tags": "",
       "team": "Gamecock Club Swimming-SC",
@@ -14354,7 +14610,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "Cordle, Ansley",
+      "name": "Cordle, Ansley Kate",
       "place": 86,
       "tags": "",
       "team": "University of North Georgia-GA",
@@ -14631,7 +14887,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "M",
-      "name": "Xu, Ran",
+      "name": "Xu, Ran Sheng",
       "place": 14,
       "points": 3.0,
       "tags": "",
@@ -15468,6 +15724,17 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "M",
+      "name": "Ibarra Jr., Luis",
+      "place": 92,
+      "seedTime": "29.89",
+      "tags": "",
+      "team": "Kennesaw State University-GA",
+      "time": "29.42"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Free",
+      "gender": "M",
       "name": "Milkey, Tyler",
       "place": 93,
       "seedTime": "29.18",
@@ -15620,7 +15887,7 @@
       "course": "SCY",
       "event": "100 Breast",
       "gender": "F",
-      "name": "Ammons, Hannah",
+      "name": "Ammons, Hannah Kate",
       "place": 5,
       "points": 14.0,
       "splits": [
@@ -17266,7 +17533,7 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "F",
-      "name": "Lyons, Mary",
+      "name": "Lyons, Mary Kate",
       "place": 44,
       "seedTime": "34.54",
       "tags": "",

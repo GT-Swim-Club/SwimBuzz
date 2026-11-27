@@ -15,8 +15,9 @@ import {
   type QualifierGenderFilter,
 } from "@/lib/qualifiers/qualifier-events"
 import StandardsTableModal from "./StandardsTableModal"
-import DownloadQualifiersPdfButton from "./DownloadQualifiersPdfButton"
+import ShareQualifiersButton from "./ShareQualifiersButton"
 import UploadStandardsButton from "./UploadStandardsButton"
+import NationalsMeetSelect from "./NationalsMeetSelect"
 import QualifiersList from "./QualifiersList"
 import QualifierGalleryCard from "./QualifierGalleryCard"
 import QualifierEventList from "./QualifierEventList"
@@ -47,6 +48,8 @@ export default function QualifiersView({
   standards,
   qualifiers,
   eventRank,
+  nationalsMeetId,
+  meetOptions,
   currentAthleteId,
   isCoach,
 }: {
@@ -55,6 +58,10 @@ export default function QualifiersView({
   standards: { yearLabel: string | null; sourceUrl: string | null; course: string } | null
   qualifiers: QualifierAthlete[]
   eventRank: Record<string, number>
+  /** The meet linked as the season's Nationals (numbers the events). */
+  nationalsMeetId: string | null
+  /** Staff only: the season's meets, to pick its Nationals from. */
+  meetOptions: { id: string; name: string }[]
   currentAthleteId: string | null
   isCoach: boolean
 }) {
@@ -229,15 +236,18 @@ export default function QualifiersView({
             </ToolbarSelect>
             <ListLayoutToggle />
             {standards ? (
-              <DownloadQualifiersPdfButton season={season} gender={gender} byEvent={byEvent} query={query} />
+              <ShareQualifiersButton season={season} gender={gender} byEvent={byEvent} query={query} />
+            ) : null}
+            {isCoach && standards ? (
+              <NationalsMeetSelect season={season} meets={meetOptions} currentMeetId={nationalsMeetId} />
             ) : null}
             {isCoach ? <UploadStandardsButton season={season} course={standards?.course ?? "SCY"} /> : null}
           </>
         }
       />
       {standards && !isEmpty && !byEvent ? (
-        // The A–Z rail sits beside the qualifiers, or out in the page's right margin once that's wide
-        // enough (see JumpRail), as on the roster — keep in step with QualifiersSkeleton.
+        // The A–Z rail sits just right of the qualifiers, out in the page's right margin as far as
+        // it fits (see JumpRail), as on the roster — keep in step with QualifiersSkeleton.
         <div className={JUMP_RAIL_LAYOUT_CLASS}>
           <div className="min-w-0 flex-1">{content}</div>
           <JumpRail label="Jump to letter" items={railItems} />

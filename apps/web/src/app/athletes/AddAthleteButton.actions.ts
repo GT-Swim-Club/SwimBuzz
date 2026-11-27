@@ -9,11 +9,13 @@ import { resolveSwimCloudProfilesUpdate } from "@/lib/swim/swimcloud-profiles"
 import { uniqueAthleteSlug } from "@/lib/slug"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
+import { newPlaceholderEmail } from "@/lib/auth/gatech-email"
 
 export type AddAthleteInput = {
   firstName: string
   lastName: string
-  email: string
+  /** Optional: blank gets a placeholder (see newPlaceholderEmail). */
+  email?: string
   swimCloudIds?: number[]
   preferredName?: string
   gender: "M" | "F"
@@ -29,13 +31,13 @@ export async function addAthlete(input: AddAthleteInput) {
 
   const firstName = input.firstName.trim()
   const lastName = input.lastName.trim()
-  const email = input.email.trim().toLowerCase()
+  const email = input.email?.trim().toLowerCase() || newPlaceholderEmail()
   const preferredName = normalizePreferredName(input.preferredName)
   const gender = input.gender === "F" ? Gender.F : Gender.M
   const seasons = parseSeasonList(input.seasons)
 
-  if (!firstName || !lastName || !email) {
-    throw new Error("First name, last name, and email are required")
+  if (!firstName || !lastName) {
+    throw new Error("First name and last name are required")
   }
   if (seasons.length === 0) {
     throw new Error("Season is required (e.g. 2025–2026)")

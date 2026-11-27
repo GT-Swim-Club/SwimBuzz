@@ -33,9 +33,10 @@ const HOVER_DELAY_MS = 500
  * dragging along the rail scrubs through the entries, jumping as the pointer crosses each one
  * (like the iOS contacts index). When the entries don't fit the window, they shrink to fit.
  *
- * Wrap the list and the rail in `JUMP_RAIL_LAYOUT_CLASS` with the list in a `min-w-0 flex-1` box:
- * the rail then sits beside the list, or out in the page's right margin once that's wide enough
- * to hold it. Targets are scrolled to their `scroll-margin-top` below the top of the page area.
+ * Wrap the list and the rail in `JUMP_RAIL_LAYOUT_CLASS`: the rail sits just right of the list, out
+ * in the page's right margin, and where that margin is too narrow (phones) the list narrows only by
+ * what the margin can't hold (the jump-rail-layout utility in globals.css). Targets are scrolled to
+ * their `scroll-margin-top` below the top of the page area.
  */
 export default function JumpRail({ label, items }: { label: string; items: JumpRailItem[] }) {
   const navRef = useRef<HTMLElement>(null)
@@ -132,10 +133,9 @@ export default function JumpRail({ label, items }: { label: string; items: JumpR
   const activeLabel = activeIndex != null ? items[activeIndex]?.hoverLabel : undefined
 
   return (
-    // The slot stretches to the list's height so the nav inside can stick while scrolling. From
-    // 1040px wide the page gutter (--page-gutter-x) is 38px+, room for the rail and its 12px gap,
-    // so it moves out into the right margin, just beside the list, instead of narrowing it.
-    <div className="shrink-0 self-stretch min-[1040px]:absolute min-[1040px]:inset-y-0 min-[1040px]:left-full min-[1040px]:ml-3">
+    // The slot spans the list's height so the nav inside can stick while scrolling, and sits in
+    // the page's right margin (see the jump-rail-slot utility in globals.css).
+    <div className="jump-rail-slot">
       <nav
         ref={navRef}
         aria-label={label}
@@ -177,7 +177,7 @@ export default function JumpRail({ label, items }: { label: string; items: JumpR
               if (e.detail === 0) jumpTo(index)
             }}
             style={{ height: itemPx, fontSize: fontPx, lineHeight: `${itemPx}px` }}
-            className={`w-4 cursor-pointer rounded text-center font-semibold tabular-nums transition-colors hover:text-primary min-[1040px]:w-5 ${
+            className={`w-full cursor-pointer rounded text-center font-semibold tabular-nums transition-colors hover:text-primary ${
               scrubIndex === index ? "text-primary" : "text-foreground-secondary"
             }`}
           >
@@ -201,5 +201,5 @@ export default function JumpRail({ label, items }: { label: string; items: JumpR
   )
 }
 
-/** The box around a list and its JumpRail (see JumpRail). */
-export const JUMP_RAIL_LAYOUT_CLASS = "relative flex items-start gap-1 min-[1040px]:block"
+/** The box around a list and its JumpRail (see JumpRail); the jump-rail-layout utility in globals.css. */
+export const JUMP_RAIL_LAYOUT_CLASS = "jump-rail-layout"

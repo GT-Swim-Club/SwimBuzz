@@ -102,6 +102,304 @@
   },
   "meet_date": "2021-10-16",
   "meet_name": "2021 White and Gold Invitational",
+  "place_times": [
+    {
+      "champion": "2:37.50",
+      "eighth": null,
+      "event": "200 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:18.27",
+      "eighth": null,
+      "event": "200 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "26.06",
+      "eighth": "28.28",
+      "event": "50 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "30.81"
+    },
+    {
+      "champion": "21.73",
+      "eighth": "23.04",
+      "event": "50 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "24.18"
+    },
+    {
+      "champion": "1:04.24",
+      "eighth": "1:14.58",
+      "event": "100 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "55.14",
+      "eighth": "1:04.67",
+      "event": "100 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:05.80",
+      "eighth": "1:16.97",
+      "event": "100 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "56.73",
+      "eighth": "1:01.57",
+      "event": "100 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "1:11.41"
+    },
+    {
+      "champion": "2:14.36",
+      "eighth": null,
+      "event": "200 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:48.69",
+      "eighth": "2:01.37",
+      "event": "200 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "33.56",
+      "eighth": "37.35",
+      "event": "50 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "28.95",
+      "eighth": "31.49",
+      "event": "50 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "50.37"
+    },
+    {
+      "champion": "1:03.83",
+      "eighth": null,
+      "event": "100 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "54.87",
+      "eighth": "1:11.06",
+      "event": "100 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "5:11.03",
+      "eighth": null,
+      "event": "400 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "4:30.50",
+      "eighth": null,
+      "event": "400 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:19.11",
+      "eighth": null,
+      "event": "200 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:05.93",
+      "eighth": null,
+      "event": "200 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "28.77",
+      "eighth": "32.96",
+      "event": "50 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "24.12",
+      "eighth": "26.25",
+      "event": "50 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "5:30.87",
+      "eighth": null,
+      "event": "500 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "5:01.04",
+      "eighth": "6:36.36",
+      "event": "500 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "30.00",
+      "eighth": "32.62",
+      "event": "50 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "25.91",
+      "eighth": "28.92",
+      "event": "50 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:12.48",
+      "eighth": "1:38.67",
+      "event": "100 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:00.55",
+      "eighth": "1:09.73",
+      "event": "100 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:31.43",
+      "eighth": null,
+      "event": "200 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:09.22",
+      "eighth": null,
+      "event": "200 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:28.37",
+      "eighth": null,
+      "event": "200 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:05.48",
+      "eighth": null,
+      "event": "200 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "58.05",
+      "eighth": "1:05.52",
+      "event": "100 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "48.59",
+      "eighth": "51.66",
+      "event": "100 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "55.70"
+    },
+    {
+      "champion": "2:02.17",
+      "eighth": "3:37.46",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:41.86",
+      "eighth": null,
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:47.50",
+      "eighth": "2:14.74",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:30.17",
+      "eighth": "1:50.44",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:41.98",
+      "eighth": "2:26.60",
+      "event": "200 Free Relay",
+      "gender": "X",
+      "relay": true,
+      "twentyFourth": null
+    }
+  ],
   "relay_results": [
     {
       "course": "SCY",
@@ -1703,7 +2001,7 @@
       "course": "SCY",
       "event": "200 Breast",
       "gender": "F",
-      "name": "Lee, Hannah",
+      "name": "Lee, Hannah Grace",
       "place": 2,
       "points": 17.0,
       "splits": [
@@ -2289,7 +2587,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "Schmidt, Leigh",
+      "name": "Schmidt, Leigh Ann",
       "place": 29,
       "tags": "",
       "team": "UTC-ZZ",
@@ -2309,7 +2607,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "Cordle, Ansley",
+      "name": "Cordle, Ansley Kate",
       "place": 31,
       "tags": "",
       "team": "UNG-GA",
@@ -4051,7 +4349,7 @@
       "course": "SCY",
       "event": "100 IM",
       "gender": "F",
-      "name": "Schmidt, Leigh",
+      "name": "Schmidt, Leigh Ann",
       "place": null,
       "tags": "",
       "team": "UTC-ZZ",
@@ -4827,7 +5125,7 @@
       "points": 13.0,
       "splits": [
         {
-          "distance": 100,
+          "distance": 50,
           "splitTime": "37.39"
         },
         {
@@ -5509,7 +5807,7 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "F",
-      "name": "Cordle, Ansley",
+      "name": "Cordle, Ansley Kate",
       "place": 13,
       "points": 4.0,
       "tags": "",
@@ -5520,7 +5818,7 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "F",
-      "name": "Schmidt, Leigh",
+      "name": "Schmidt, Leigh Ann",
       "place": 14,
       "points": 3.0,
       "tags": "",
@@ -8028,7 +8326,7 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "F",
-      "name": "Schmidt, Leigh",
+      "name": "Schmidt, Leigh Ann",
       "place": 18,
       "tags": "",
       "team": "UTC-ZZ",
@@ -8394,7 +8692,7 @@
       "course": "SCY",
       "event": "100 Breast",
       "gender": "F",
-      "name": "Lee, Hannah",
+      "name": "Lee, Hannah Grace",
       "place": 3,
       "points": 16.0,
       "splits": [
@@ -8478,7 +8776,7 @@
       "course": "SCY",
       "event": "100 Breast",
       "gender": "F",
-      "name": "Cordle, Ansley",
+      "name": "Cordle, Ansley Kate",
       "place": 7,
       "points": 12.0,
       "splits": [
@@ -8873,7 +9171,7 @@
       "course": "SCY",
       "event": "200 Fly",
       "gender": "F",
-      "name": "Lee, Hannah",
+      "name": "Lee, Hannah Grace",
       "place": 1,
       "points": 20.0,
       "splits": [
@@ -9410,7 +9708,7 @@
       "course": "SCY",
       "event": "100 Free",
       "gender": "F",
-      "name": "Cordle, Ansley",
+      "name": "Cordle, Ansley Kate",
       "place": null,
       "tags": "",
       "team": "UNG-GA",

@@ -52,6 +52,136 @@
   },
   "meet_date": "2021-09-07",
   "meet_name": "Fall 2021 Intrasquad Meet",
+  "place_times": [
+    {
+      "champion": "27.68",
+      "eighth": "33.46",
+      "event": "50 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "24.28",
+      "eighth": "26.90",
+      "event": "50 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:01.39",
+      "eighth": null,
+      "event": "100 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "49.28",
+      "eighth": "55.89",
+      "event": "100 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "33.00",
+      "eighth": null,
+      "event": "50 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "24.28",
+      "eighth": null,
+      "event": "50 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "34.38",
+      "eighth": null,
+      "event": "50 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "28.47",
+      "eighth": null,
+      "event": "50 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:05.22",
+      "eighth": null,
+      "event": "100 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "56.89",
+      "eighth": "1:02.50",
+      "event": "100 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "26.33",
+      "eighth": null,
+      "event": "50 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "22.70",
+      "eighth": "24.71",
+      "event": "50 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:50.06",
+      "eighth": null,
+      "event": "200 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:35.14",
+      "eighth": null,
+      "event": "200 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:02.75",
+      "eighth": null,
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:35.94",
+      "eighth": null,
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    }
+  ],
   "relay_results": [
     {
       "course": "SCY",

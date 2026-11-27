@@ -9,6 +9,8 @@ export type QualifierEventGroup = {
   key: string
   gender: QualifierAthlete["gender"]
   event: string
+  /** The event's number at Nationals for this group's gender, if known. */
+  eventNumber: number | null
   cut: string
   /** Fastest first. */
   swims: QualifierSwim[]
@@ -56,7 +58,14 @@ export function groupQualifiersByEvent(
       const key = `${splitGender ? athlete.gender : ""}|${swim.event}`
       let group = groups.get(key)
       if (!group) {
-        group = { key, gender: athlete.gender, event: swim.event, cut: swim.cut, swims: [] }
+        group = {
+          key,
+          gender: athlete.gender,
+          event: swim.event,
+          eventNumber: swim.eventNumber,
+          cut: swim.cut,
+          swims: [],
+        }
         groups.set(key, group)
       }
       group.swims.push({ athlete, swim })

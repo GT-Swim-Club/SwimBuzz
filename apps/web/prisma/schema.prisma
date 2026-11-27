@@ -226,6 +226,11 @@ model Meet {
   /// kept only when the results name several of our teams (an intrasquad's team codes "GTSC Gold, GTSC
   /// White") — the meet's highlights split per team. Null otherwise.
   resultTeams Json?
+  /// Every event's champion, 8th and 24th place times across all teams, from the last results PDF
+  /// import: { importedAt, events: [{ gender: "F" | "M" | "X", event, relay, champion, eighth,
+  /// twentyFourth }] } (8th / 24th from prelims when the event had them). The next season's
+  /// Nationals qualifiers PDF shows a Nationals meet's alongside its order of events.
+  placeTimes Json?
   /// Coach-added heat/lane/start time for roster summary rows: { entries: HeatLaneOverride[] }.
   /// Only shown where no import supplies that field; survives re-imports.
   heatLaneOverrides Json?
@@ -239,6 +244,8 @@ model Meet {
   roomForm      MeetRoomForm?
   signupMonitorEvents MeetSignupMonitorEvent[]
   relayEditLocks RelayEditLock[]
+  /// Seasons this meet is the Nationals of (see NationalsMeet).
+  nationalsFor  NationalsMeet[]
 
   @@index([startsAt])
   @@index([season])
@@ -658,6 +665,17 @@ model NationalsStandardSet {
 
   @@unique([season, course])
   @@index([season])
+}
+
+/// The meet a coach picked as a season's Nationals: its order of events numbers the Nationals
+/// page's events. Kept apart from NationalsStandardSet so re-uploading the standards keeps it.
+model NationalsMeet {
+  season    String   @id
+  meetId    String
+  meet      Meet     @relation(fields: [meetId], references: [id], onDelete: Cascade)
+  updatedAt DateTime @updatedAt
+
+  @@index([meetId])
 }
 
 model NationalsCut {

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { athletePreferredName } from "@swimbuzz/shared"
+import { EventBadge } from "@/components/meet/EventBadge"
 import {
   eventGroupTitle,
   qualifierCountLabel,
@@ -28,10 +29,13 @@ export default function QualifierEventCard({
 
   return (
     <div className={`${galleryCardClass} bg-background`}>
-      <div className="flex min-w-0 items-baseline justify-between gap-2">
-        <h3 className="min-w-0 truncate text-[15px] font-semibold leading-5 text-foreground">
-          {eventGroupTitle(group, splitGender)}
-        </h3>
+      <div className="flex min-w-0 items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2">
+          {group.eventNumber ? <EventBadge number={group.eventNumber} /> : null}
+          <h3 className="min-w-0 truncate text-[15px] font-semibold leading-5 text-foreground">
+            {eventGroupTitle(group, splitGender)}
+          </h3>
+        </div>
         <p className="shrink-0 whitespace-nowrap text-right text-xs text-foreground-secondary">
           {group.cut} · {qualifierCountLabel(group.swims.length)}
         </p>

@@ -82,6 +82,232 @@
   },
   "meet_date": "2018-02-03",
   "meet_name": "Fear the Spear Invitational 2018",
+  "place_times": [
+    {
+      "champion": "2:03.00",
+      "eighth": "2:24.48",
+      "event": "200 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:46.99",
+      "eighth": "2:04.84",
+      "event": "200 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "34.32",
+      "eighth": "36.70",
+      "event": "50 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "27.58",
+      "eighth": "31.29",
+      "event": "50 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "55.34",
+      "eighth": "1:01.60",
+      "event": "100 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:07.17"
+    },
+    {
+      "champion": "48.40",
+      "eighth": "52.54",
+      "event": "100 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "56.02"
+    },
+    {
+      "champion": "2:23.29",
+      "eighth": null,
+      "event": "200 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:00.87",
+      "eighth": "2:20.30",
+      "event": "200 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "28.35",
+      "eighth": "34.01",
+      "event": "50 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "27.08",
+      "eighth": "29.93",
+      "event": "50 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "58.94",
+      "eighth": "1:11.44",
+      "event": "100 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "51.67",
+      "eighth": "1:00.24",
+      "event": "100 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "5:32.02",
+      "eighth": null,
+      "event": "500 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "5:11.43",
+      "eighth": null,
+      "event": "500 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:08.31",
+      "eighth": "1:14.90",
+      "event": "100 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "55.80",
+      "eighth": "1:01.74",
+      "event": "100 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "25.73",
+      "eighth": "28.04",
+      "event": "50 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "30.77"
+    },
+    {
+      "champion": "21.34",
+      "eighth": "23.22",
+      "event": "50 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "25.35"
+    },
+    {
+      "champion": "1:15.60",
+      "eighth": "1:21.87",
+      "event": "100 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:00.40",
+      "eighth": "1:14.25",
+      "event": "100 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "26.79",
+      "eighth": "31.34",
+      "event": "50 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "23.37",
+      "eighth": "26.57",
+      "event": "50 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:04.40",
+      "eighth": "1:14.84",
+      "event": "100 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "56.78",
+      "eighth": "1:06.66",
+      "event": "100 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:55.86",
+      "eighth": "2:14.84",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:39.54",
+      "eighth": "1:52.90",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:45.68",
+      "eighth": "2:04.36",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:30.06",
+      "eighth": "1:41.41",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    }
+  ],
   "relay_results": [
     {
       "course": "SCY",
@@ -791,6 +1017,7 @@
       "name": "Hollander, Jennifer",
       "place": 6,
       "points": 13.0,
+      "seedTime": "2:20.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "2:18.51"
@@ -802,6 +1029,7 @@
       "name": "Foster, Darby",
       "place": 9,
       "points": 9.0,
+      "seedTime": "2:20.86",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:25.94"
@@ -813,6 +1041,7 @@
       "name": "Dziedzic, Alyssa",
       "place": 10,
       "points": 7.0,
+      "seedTime": "2:20.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "2:26.52"
@@ -824,6 +1053,7 @@
       "name": "Fieger, Lindsay",
       "place": 11,
       "points": 6.0,
+      "seedTime": "2:35.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "2:35.35"
@@ -835,6 +1065,7 @@
       "name": "Short, Julianna",
       "place": 12,
       "points": 5.0,
+      "seedTime": "2:25.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "2:37.91"
@@ -846,6 +1077,7 @@
       "name": "Knapp, Lindsay",
       "place": 1,
       "points": 20.0,
+      "seedTime": "2:03.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:03.00"
@@ -857,6 +1089,7 @@
       "name": "Nastasi, Allison",
       "place": 2,
       "points": 17.0,
+      "seedTime": "2:05.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:03.84"
@@ -868,6 +1101,7 @@
       "name": "Sibilia, Maddie",
       "place": 3,
       "points": 16.0,
+      "seedTime": "2:10.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:10.59"
@@ -879,6 +1113,7 @@
       "name": "Herrod, Ashley",
       "place": 4,
       "points": 15.0,
+      "seedTime": "2:10.50",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "2:11.32"
@@ -890,6 +1125,7 @@
       "name": "Weiss, Morgan",
       "place": 5,
       "points": 14.0,
+      "seedTime": "2:17.33",
       "tags": "",
       "team": "Fgcu Swim Club",
       "time": "2:12.86"
@@ -901,6 +1137,7 @@
       "name": "Imperialbobis, Pierce",
       "place": 7,
       "points": 12.0,
+      "seedTime": "2:15.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "2:18.89"
@@ -912,6 +1149,7 @@
       "name": "Maruniak, Alina",
       "place": 8,
       "points": 11.0,
+      "seedTime": "2:20.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "2:24.48"
@@ -923,6 +1161,7 @@
       "name": "Kelly, Conner",
       "place": 7,
       "points": 12.0,
+      "seedTime": "1:59.90",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "2:04.41"
@@ -934,6 +1173,7 @@
       "name": "Reimer, Jaret",
       "place": 9,
       "points": 9.0,
+      "seedTime": "1:58.79",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "2:05.24"
@@ -945,6 +1185,7 @@
       "name": "Skelton, Ryan",
       "place": 10,
       "points": 7.0,
+      "seedTime": "2:04.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "2:10.58"
@@ -967,6 +1208,7 @@
       "name": "Zacarias, Mathias",
       "place": 1,
       "points": 20.0,
+      "seedTime": "1:48.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:46.99"
@@ -978,6 +1220,7 @@
       "name": "De La Osa, Nicholas",
       "place": 2,
       "points": 17.0,
+      "seedTime": "1:48.60",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:50.90"
@@ -989,6 +1232,7 @@
       "name": "Hayes, Daniel",
       "place": 3,
       "points": 16.0,
+      "seedTime": "1:44.68",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "1:51.68"
@@ -1000,6 +1244,7 @@
       "name": "Fregosi, Carson",
       "place": 4,
       "points": 15.0,
+      "seedTime": "1:45.32",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:52.11"
@@ -1011,6 +1256,7 @@
       "name": "Grant, Jake",
       "place": 5,
       "points": 14.0,
+      "seedTime": "1:54.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:54.87"
@@ -1022,6 +1268,7 @@
       "name": "Taddonio, Matt",
       "place": 6,
       "points": 13.0,
+      "seedTime": "1:55.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:59.04"
@@ -1033,6 +1280,7 @@
       "name": "Cumberland, Luke",
       "place": 8,
       "points": 11.0,
+      "seedTime": "1:58.79",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "2:04.84"
@@ -1066,6 +1314,7 @@
       "name": "Adams, Breanna",
       "place": 9,
       "points": 9.0,
+      "seedTime": "40.00",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "37.21"
@@ -1088,6 +1337,7 @@
       "name": "Squires, Sami",
       "place": 13,
       "points": 4.0,
+      "seedTime": "40.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "39.03"
@@ -1110,6 +1360,7 @@
       "name": "Short, Julianna",
       "place": 15,
       "points": 2.0,
+      "seedTime": "40.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "43.44"
@@ -1121,6 +1372,7 @@
       "name": "Morales, Frances",
       "place": 1,
       "points": 20.0,
+      "seedTime": "35.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "34.32"
@@ -1132,6 +1384,7 @@
       "name": "Fassett, Olivia",
       "place": 2,
       "points": 17.0,
+      "seedTime": "33.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "34.44"
@@ -1143,6 +1396,7 @@
       "name": "Medrano, Camila",
       "place": 3,
       "points": 16.0,
+      "seedTime": "37.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "34.60"
@@ -1154,6 +1408,7 @@
       "name": "Ligenza, Jessica",
       "place": 6,
       "points": 13.0,
+      "seedTime": "35.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "36.33"
@@ -1165,6 +1420,7 @@
       "name": "Yodzis, Camille",
       "place": 7,
       "points": 12.0,
+      "seedTime": "36.19",
       "tags": "",
       "team": "Fgcu Swim Club",
       "time": "36.49"
@@ -1176,6 +1432,7 @@
       "name": "Gholson, Zoe",
       "place": 8,
       "points": 11.0,
+      "seedTime": "37.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "36.70"
@@ -1187,6 +1444,7 @@
       "name": "Muklewicz, Daria",
       "place": 11,
       "points": 6.0,
+      "seedTime": "37.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "38.65"
@@ -1198,6 +1456,7 @@
       "name": "Lopes, Marra",
       "place": 12,
       "points": 5.0,
+      "seedTime": "39.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "38.98"
@@ -1231,6 +1490,7 @@
       "name": "Nohl, Adam",
       "place": 16,
       "points": 1.0,
+      "seedTime": "33.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "33.02"
@@ -1241,6 +1501,7 @@
       "gender": "M",
       "name": "Vallamattam, Ashok",
       "place": 17,
+      "seedTime": "33.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "33.13"
@@ -1251,6 +1512,7 @@
       "gender": "M",
       "name": "Thiesing, Zach",
       "place": 20,
+      "seedTime": "34.02",
       "tags": "",
       "team": "Fgcu Swim Club",
       "time": "34.37"
@@ -1261,6 +1523,7 @@
       "gender": "M",
       "name": "Scharm, Kenny",
       "place": 22,
+      "seedTime": "33.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "36.57"
@@ -1271,6 +1534,7 @@
       "gender": "M",
       "name": "Harrison, Turner",
       "place": 23,
+      "seedTime": "39.56",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "37.81"
@@ -1282,6 +1546,7 @@
       "name": "Mckeon, Zach",
       "place": 4,
       "points": 15.0,
+      "seedTime": "31.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "30.15"
@@ -1293,6 +1558,7 @@
       "name": "Sturm, David",
       "place": 9,
       "points": 9.0,
+      "seedTime": "33.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "31.42"
@@ -1304,6 +1570,7 @@
       "name": "Ragoowansi, Evan",
       "place": 11,
       "points": 6.0,
+      "seedTime": "30.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "32.16"
@@ -1315,6 +1582,7 @@
       "name": "Williams, Matthew",
       "place": 13,
       "points": 4.0,
+      "seedTime": "33.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "32.47"
@@ -1326,6 +1594,7 @@
       "name": "Bunnell, Blake",
       "place": 15,
       "points": 2.0,
+      "seedTime": "33.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "32.96"
@@ -1336,6 +1605,7 @@
       "gender": "M",
       "name": "Lehrer, Jarrad",
       "place": 18,
+      "seedTime": "33.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "33.22"
@@ -1346,6 +1616,7 @@
       "gender": "M",
       "name": "Allen, Alex",
       "place": 19,
+      "seedTime": "33.04",
       "tags": "",
       "team": "Fgcu Swim Club",
       "time": "33.61"
@@ -1356,6 +1627,7 @@
       "gender": "M",
       "name": "Miller, Logan",
       "place": 21,
+      "seedTime": "34.05",
       "tags": "",
       "team": "Fgcu Swim Club",
       "time": "34.49"
@@ -1367,6 +1639,7 @@
       "name": "Todd, Joel",
       "place": 1,
       "points": 20.0,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "27.58"
@@ -1378,6 +1651,7 @@
       "name": "Kertesz, Kristof",
       "place": 2,
       "points": 17.0,
+      "seedTime": "27.99",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "28.02"
@@ -1389,6 +1663,7 @@
       "name": "Walch, Michael",
       "place": 3,
       "points": 16.0,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "30.02"
@@ -1400,6 +1675,7 @@
       "name": "Anzola, Enrique",
       "place": 5,
       "points": 14.0,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "30.25"
@@ -1411,6 +1687,7 @@
       "name": "Hensley, Chris",
       "place": 8,
       "points": 11.0,
+      "seedTime": "28.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "31.29"
@@ -1422,6 +1699,7 @@
       "name": "Schouman, Hayden",
       "place": 10,
       "points": 7.0,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "31.54"
@@ -1433,6 +1711,7 @@
       "name": "Ramakrishnan, Ashwin",
       "place": 12,
       "points": 5.0,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "32.18"
@@ -1444,6 +1723,7 @@
       "name": "St. Pierre, Richard",
       "place": 14,
       "points": 3.0,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "32.90"
@@ -1507,6 +1787,7 @@
       "gender": "F",
       "name": "Parkulo, Wendy",
       "place": 24,
+      "seedTime": "1:20.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "1:07.17"
@@ -1517,6 +1798,7 @@
       "gender": "F",
       "name": "Smith-Frazer, Julie",
       "place": 25,
+      "seedTime": "1:10.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "1:07.27"
@@ -1547,6 +1829,7 @@
       "gender": "F",
       "name": "Valentin, Skylar",
       "place": 30,
+      "seedTime": "1:10.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:10.19"
@@ -1557,6 +1840,7 @@
       "gender": "F",
       "name": "Fieger, Lindsay",
       "place": null,
+      "seedTime": "1:10.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "DQ"
@@ -1568,6 +1852,7 @@
       "name": "Gholson, Zoe",
       "place": 16,
       "points": 1.0,
+      "seedTime": "1:05.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "1:04.85"
@@ -1578,6 +1863,7 @@
       "gender": "F",
       "name": "Imperialbobis, Pierce",
       "place": 18,
+      "seedTime": "1:05.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:05.30"
@@ -1588,6 +1874,7 @@
       "gender": "F",
       "name": "Austin, Jill",
       "place": 20,
+      "seedTime": "1:05.00",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "1:05.77"
@@ -1598,6 +1885,7 @@
       "gender": "F",
       "name": "Foster, Darby",
       "place": 23,
+      "seedTime": "1:04.39",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:06.97"
@@ -1608,6 +1896,7 @@
       "gender": "F",
       "name": "Squires, Sami",
       "place": 28,
+      "seedTime": "1:05.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "1:08.04"
@@ -1618,6 +1907,7 @@
       "gender": "F",
       "name": "Tomasko, Amanda",
       "place": 29,
+      "seedTime": "1:10.00",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "1:09.31"
@@ -1628,6 +1918,7 @@
       "gender": "F",
       "name": "Short, Julianna",
       "place": 31,
+      "seedTime": "1:09.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:14.76"
@@ -1639,6 +1930,7 @@
       "name": "Salmon, Mandy",
       "place": 7,
       "points": 12.0,
+      "seedTime": "1:02.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:00.72"
@@ -1650,6 +1942,7 @@
       "name": "Burley, Sawyer",
       "place": 8,
       "points": 11.0,
+      "seedTime": "1:00.63",
       "tags": "",
       "team": "Fgcu Swim Club",
       "time": "1:01.60"
@@ -1661,6 +1954,7 @@
       "name": "Lopes, Marra",
       "place": 11,
       "points": 6.0,
+      "seedTime": "1:03.44",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "1:03.42"
@@ -1672,6 +1966,7 @@
       "name": "Shumate, Kaitlyn",
       "place": 13,
       "points": 4.0,
+      "seedTime": "1:03.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:03.65"
@@ -1683,6 +1978,7 @@
       "name": "Hylton, Sarah",
       "place": 14,
       "points": 3.0,
+      "seedTime": "1:04.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:03.72"
@@ -1693,6 +1989,7 @@
       "gender": "F",
       "name": "Chapamn, Emma",
       "place": 19,
+      "seedTime": "1:00.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "1:05.60"
@@ -1703,6 +2000,7 @@
       "gender": "F",
       "name": "Muklewicz, Daria",
       "place": 21,
+      "seedTime": "1:03.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:06.48"
@@ -1713,6 +2011,7 @@
       "gender": "F",
       "name": "Maruniak, Alina",
       "place": 22,
+      "seedTime": "1:04.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:06.53"
@@ -1724,6 +2023,7 @@
       "name": "Brewer, Kathryn",
       "place": 1,
       "points": 20.0,
+      "seedTime": "52.52",
       "tags": "",
       "team": "University of South Florida",
       "time": "55.34"
@@ -1735,6 +2035,7 @@
       "name": "Richardson, Jessica",
       "place": 2,
       "points": 17.0,
+      "seedTime": "56.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "55.37"
@@ -1746,6 +2047,7 @@
       "name": "Ridgeway, Ellie",
       "place": 3,
       "points": 16.0,
+      "seedTime": "57.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "56.70"
@@ -1757,6 +2059,7 @@
       "name": "Nastasi, Allison",
       "place": 4,
       "points": 15.0,
+      "seedTime": "57.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "57.81"
@@ -1768,6 +2071,7 @@
       "name": "Wuensch, Abby",
       "place": 5,
       "points": 14.0,
+      "seedTime": "1:00.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "59.00"
@@ -1779,6 +2083,7 @@
       "name": "McQueen, Jenna",
       "place": 6,
       "points": 13.0,
+      "seedTime": "1:00.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "59.51"
@@ -1790,6 +2095,7 @@
       "name": "Bucy, Maggie",
       "place": 9,
       "points": 9.0,
+      "seedTime": "59.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "1:02.99"
@@ -1800,6 +2106,7 @@
       "gender": "F",
       "name": "Rieger, Alex",
       "place": null,
+      "seedTime": "59.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "54.42"
@@ -1881,6 +2188,7 @@
       "gender": "M",
       "name": "Schuster, Jacob",
       "place": 17,
+      "seedTime": "57.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "54.81"
@@ -1891,6 +2199,7 @@
       "gender": "M",
       "name": "D'Zio, Zachary",
       "place": 20,
+      "seedTime": "56.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "55.61"
@@ -1901,6 +2210,7 @@
       "gender": "M",
       "name": "Yund, Samuel",
       "place": 23,
+      "seedTime": "59.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "55.80"
@@ -1911,6 +2221,7 @@
       "gender": "M",
       "name": "Anzola, Enrique",
       "place": 29,
+      "seedTime": "1:00.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "57.20"
@@ -1931,6 +2242,7 @@
       "gender": "M",
       "name": "Taddonio, Matt",
       "place": 13,
+      "seedTime": "55.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "53.83"
@@ -1942,6 +2254,7 @@
       "name": "Mckeon, Zach",
       "place": 16,
       "points": 1.0,
+      "seedTime": "54.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "54.55"
@@ -1952,6 +2265,7 @@
       "gender": "M",
       "name": "Morey, Eli",
       "place": 18,
+      "seedTime": "56.19",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "55.15"
@@ -1962,6 +2276,7 @@
       "gender": "M",
       "name": "Weinstein, Zach",
       "place": 21,
+      "seedTime": "56.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "55.72"
@@ -1972,6 +2287,7 @@
       "gender": "M",
       "name": "Bunnell, Blake",
       "place": 22,
+      "seedTime": "55.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "55.74"
@@ -1982,6 +2298,7 @@
       "gender": "M",
       "name": "Short, Riley",
       "place": 26,
+      "seedTime": "55.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "56.96"
@@ -1992,6 +2309,7 @@
       "gender": "M",
       "name": "Skelton, Ryan",
       "place": 27,
+      "seedTime": "55.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "56.99"
@@ -2003,6 +2321,7 @@
       "name": "Plough, Francis",
       "place": 4,
       "points": 15.0,
+      "seedTime": "52.30",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "50.90"
@@ -2014,6 +2333,7 @@
       "name": "Sturm, David",
       "place": 6,
       "points": 13.0,
+      "seedTime": "53.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "51.56"
@@ -2025,6 +2345,7 @@
       "name": "Morris, Luke",
       "place": 10,
       "points": 7.0,
+      "seedTime": "51.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "53.07"
@@ -2036,6 +2357,7 @@
       "name": "Landau, Max",
       "place": 12,
       "points": 5.0,
+      "seedTime": "51.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "53.39"
@@ -2046,6 +2368,7 @@
       "gender": "M",
       "name": "Lawniczak, Justin",
       "place": 13,
+      "seedTime": "53.12",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "53.83"
@@ -2057,6 +2380,7 @@
       "name": "Murphy, Lachlan",
       "place": 15,
       "points": 2.0,
+      "seedTime": "53.22",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "54.49"
@@ -2067,6 +2391,7 @@
       "gender": "M",
       "name": "Roberts, Nick",
       "place": 25,
+      "seedTime": "54.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "56.31"
@@ -2078,6 +2403,7 @@
       "name": "Burke, Zach",
       "place": 1,
       "points": 20.0,
+      "seedTime": "49.14",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "48.40"
@@ -2089,6 +2415,7 @@
       "name": "Hollister, Cash",
       "place": 2,
       "points": 17.0,
+      "seedTime": "50.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "49.21"
@@ -2100,6 +2427,7 @@
       "name": "Hayes, Daniel",
       "place": 3,
       "points": 16.0,
+      "seedTime": "47.81",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "50.60"
@@ -2111,6 +2439,7 @@
       "name": "Vicnansky, Ian",
       "place": 5,
       "points": 14.0,
+      "seedTime": "50.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "51.05"
@@ -2122,6 +2451,7 @@
       "name": "Fregosi, Carson",
       "place": 7,
       "points": 12.0,
+      "seedTime": "50.23",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "52.15"
@@ -2133,6 +2463,7 @@
       "name": "Pressly, John",
       "place": 8,
       "points": 11.0,
+      "seedTime": "50.06",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "52.54"
@@ -2144,6 +2475,7 @@
       "name": "Sharma, Agrim",
       "place": 9,
       "points": 9.0,
+      "seedTime": "50.06",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "52.73"
@@ -2155,6 +2487,7 @@
       "name": "Fassett, Olivia",
       "place": 1,
       "points": 20.0,
+      "seedTime": "2:16.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:23.29"
@@ -2166,6 +2499,7 @@
       "name": "Pietraszun, Stasia",
       "place": 2,
       "points": 17.0,
+      "seedTime": "2:30.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "2:27.60"
@@ -2177,6 +2511,7 @@
       "name": "Pappas, Katina",
       "place": 3,
       "points": 16.0,
+      "seedTime": "2:40.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "2:38.60"
@@ -2188,6 +2523,7 @@
       "name": "Potter, Erin",
       "place": 4,
       "points": 15.0,
+      "seedTime": "2:35.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "2:40.49"
@@ -2199,6 +2535,7 @@
       "name": "Greene, Nicole",
       "place": 5,
       "points": 14.0,
+      "seedTime": "2:30.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:41.14"
@@ -2210,6 +2547,7 @@
       "name": "Ligenza, Jessica",
       "place": 6,
       "points": 13.0,
+      "seedTime": "2:35.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "2:43.71"
@@ -2221,6 +2559,7 @@
       "name": "Melendez, Clarisa",
       "place": 7,
       "points": 12.0,
+      "seedTime": "2:25.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "3:07.51"
@@ -2243,6 +2582,7 @@
       "name": "Rasmussen, Jack",
       "place": 8,
       "points": 11.0,
+      "seedTime": "2:20.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:20.30"
@@ -2254,6 +2594,7 @@
       "name": "Zacarias, Mathias",
       "place": 1,
       "points": 20.0,
+      "seedTime": "2:05.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:00.87"
@@ -2265,6 +2606,7 @@
       "name": "De La Osa, Nicholas",
       "place": 2,
       "points": 17.0,
+      "seedTime": "2:00.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "2:02.97"
@@ -2276,6 +2618,7 @@
       "name": "Thrift, Josh",
       "place": 3,
       "points": 16.0,
+      "seedTime": "2:05.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:04.73"
@@ -2287,6 +2630,7 @@
       "name": "Grant, Jake",
       "place": 4,
       "points": 15.0,
+      "seedTime": "2:08.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:12.86"
@@ -2298,6 +2642,7 @@
       "name": "Bunnell, Blake",
       "place": 6,
       "points": 13.0,
+      "seedTime": "2:08.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "2:17.41"
@@ -2309,6 +2654,7 @@
       "name": "Lawniczak, Justin",
       "place": 7,
       "points": 12.0,
+      "seedTime": "2:08.24",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "2:18.74"
@@ -2320,6 +2666,7 @@
       "name": "Cumberland, Luke",
       "place": 9,
       "points": 9.0,
+      "seedTime": "2:10.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "2:21.35"
@@ -2351,6 +2698,7 @@
       "name": "Adams, Breanna",
       "place": 7,
       "points": 12.0,
+      "seedTime": "37.00",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "33.97"
@@ -2384,6 +2732,7 @@
       "name": "Dziedzic, Alyssa",
       "place": 14,
       "points": 3.0,
+      "seedTime": "36.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "35.53"
@@ -2394,6 +2743,7 @@
       "gender": "F",
       "name": "Melendez, Clarisa",
       "place": 20,
+      "seedTime": "38.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "41.29"
@@ -2405,6 +2755,7 @@
       "name": "McQueen, Jenna",
       "place": 5,
       "points": 14.0,
+      "seedTime": "36.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "33.16"
@@ -2416,6 +2767,7 @@
       "name": "Meyer, Courtney",
       "place": 9,
       "points": 9.0,
+      "seedTime": "35.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "34.09"
@@ -2427,6 +2779,7 @@
       "name": "Imperialbobis, Pierce",
       "place": 10,
       "points": 7.0,
+      "seedTime": "34.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "34.67"
@@ -2438,6 +2791,7 @@
       "name": "Dazza, Yahsyra",
       "place": 12,
       "points": 5.0,
+      "seedTime": "35.04",
       "tags": "",
       "team": "Fgcu Swim Club",
       "time": "35.34"
@@ -2449,6 +2803,7 @@
       "name": "Pappas, Katina",
       "place": 13,
       "points": 4.0,
+      "seedTime": "35.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "35.42"
@@ -2460,6 +2815,7 @@
       "name": "Blaydes, Rachel",
       "place": 15,
       "points": 2.0,
+      "seedTime": "34.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "35.85"
@@ -2470,6 +2826,7 @@
       "gender": "F",
       "name": "Maruniak, Alina",
       "place": 18,
+      "seedTime": "35.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "36.15"
@@ -2480,6 +2837,7 @@
       "gender": "F",
       "name": "Moschella, Emily",
       "place": null,
+      "seedTime": "34.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "DQ"
@@ -2491,6 +2849,7 @@
       "name": "Richardson, Jessica",
       "place": 1,
       "points": 20.0,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "28.35"
@@ -2502,6 +2861,7 @@
       "name": "Lyde, Vinez",
       "place": 2,
       "points": 17.0,
+      "seedTime": "25.50",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "31.14"
@@ -2513,6 +2873,7 @@
       "name": "Nekrasas, Grace",
       "place": 3,
       "points": 16.0,
+      "seedTime": "29.87",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "31.86"
@@ -2524,6 +2885,7 @@
       "name": "Morales, Frances",
       "place": 4,
       "points": 15.0,
+      "seedTime": "33.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "32.76"
@@ -2535,6 +2897,7 @@
       "name": "Chapamn, Emma",
       "place": 6,
       "points": 13.0,
+      "seedTime": "32.07",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "33.92"
@@ -2546,6 +2909,7 @@
       "name": "Shumate, Kaitlyn",
       "place": 16,
       "points": 1.0,
+      "seedTime": "33.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "36.06"
@@ -2556,6 +2920,7 @@
       "gender": "F",
       "name": "Connor, Quinn",
       "place": null,
+      "seedTime": "33.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "DQ"
@@ -2619,6 +2984,7 @@
       "gender": "M",
       "name": "Miller, Kyle",
       "place": null,
+      "seedTime": "34.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "DQ"
@@ -2630,6 +2996,7 @@
       "name": "Egan, Adam",
       "place": 4,
       "points": 15.0,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "29.08"
@@ -2641,6 +3008,7 @@
       "name": "Schuster, Jacob",
       "place": 8,
       "points": 11.0,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "29.93"
@@ -2652,6 +3020,7 @@
       "name": "St. Pierre, Richard",
       "place": 9,
       "points": 9.0,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "30.12"
@@ -2663,6 +3032,7 @@
       "name": "Weinstein, Zach",
       "place": 10,
       "points": 7.0,
+      "seedTime": "31.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "30.36"
@@ -2674,6 +3044,7 @@
       "name": "Vallamattam, Ashok",
       "place": 13,
       "points": 4.0,
+      "seedTime": "31.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "31.13"
@@ -2685,6 +3056,7 @@
       "name": "Thiesing, Zach",
       "place": 15,
       "points": 2.0,
+      "seedTime": "32.14",
       "tags": "",
       "team": "Fgcu Swim Club",
       "time": "31.89"
@@ -2696,6 +3068,7 @@
       "name": "Nohl, Adam",
       "place": 16,
       "points": 1.0,
+      "seedTime": "31.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "32.21"
@@ -2706,6 +3079,7 @@
       "gender": "M",
       "name": "D'Zio, Zachary",
       "place": 17,
+      "seedTime": "30.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "32.62"
@@ -2717,6 +3091,7 @@
       "name": "Morris, Luke",
       "place": 1,
       "points": 20.0,
+      "seedTime": "26.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "27.08"
@@ -2728,6 +3103,7 @@
       "name": "Thrift, Josh",
       "place": 2,
       "points": 17.0,
+      "seedTime": "26.50",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "27.93"
@@ -2739,6 +3115,7 @@
       "name": "Schouman, Hayden",
       "place": 3,
       "points": 16.0,
+      "seedTime": "27.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "28.19"
@@ -2750,6 +3127,7 @@
       "name": "Jaundoo, Jordan",
       "place": 6,
       "points": 13.0,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "29.47"
@@ -2761,6 +3139,7 @@
       "name": "Reimer, Jaret",
       "place": 7,
       "points": 12.0,
+      "seedTime": "28.50",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "29.77"
@@ -2772,6 +3151,7 @@
       "name": "Short, Riley",
       "place": 11,
       "points": 6.0,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "30.54"
@@ -2805,6 +3185,7 @@
       "name": "Williams, Margaret",
       "place": 9,
       "points": 9.0,
+      "seedTime": "1:12.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:12.52"
@@ -2816,6 +3197,7 @@
       "name": "Greene, Nicole",
       "place": 10,
       "points": 7.0,
+      "seedTime": "1:10.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:12.97"
@@ -2827,6 +3209,7 @@
       "name": "Austin, Jill",
       "place": 11,
       "points": 6.0,
+      "seedTime": "1:15.00",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "1:16.62"
@@ -2849,6 +3232,7 @@
       "name": "Brewer, Kathryn",
       "place": 1,
       "points": 20.0,
+      "seedTime": "55.63",
       "tags": "",
       "team": "University of South Florida",
       "time": "58.94"
@@ -2860,6 +3244,7 @@
       "name": "Ridgeway, Ellie",
       "place": 2,
       "points": 17.0,
+      "seedTime": "1:01.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:01.31"
@@ -2871,6 +3256,7 @@
       "name": "Hays, Rebecca",
       "place": 3,
       "points": 16.0,
+      "seedTime": "1:04.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "1:04.97"
@@ -2882,6 +3268,7 @@
       "name": "Moore, Allie",
       "place": 4,
       "points": 15.0,
+      "seedTime": "1:07.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:05.28"
@@ -2893,6 +3280,7 @@
       "name": "Hollander, Jennifer",
       "place": 5,
       "points": 14.0,
+      "seedTime": "1:10.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:09.94"
@@ -2904,6 +3292,7 @@
       "name": "Potter, Erin",
       "place": 7,
       "points": 12.0,
+      "seedTime": "1:10.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:11.36"
@@ -2914,6 +3303,7 @@
       "gender": "F",
       "name": "Rieger, Alex",
       "place": null,
+      "seedTime": "1:00.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:00.45"
@@ -2925,6 +3315,7 @@
       "name": "Hollister, Cash",
       "place": 6,
       "points": 13.0,
+      "seedTime": "1:00.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "59.32"
@@ -2958,6 +3349,7 @@
       "name": "Lawniczak, Justin",
       "place": 11,
       "points": 6.0,
+      "seedTime": "1:03.12",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "1:04.64"
@@ -2980,6 +3372,7 @@
       "name": "Hensley, Cole",
       "place": 1,
       "points": 20.0,
+      "seedTime": "49.50",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "51.67"
@@ -2991,6 +3384,7 @@
       "name": "Kertesz, Kristof",
       "place": 2,
       "points": 17.0,
+      "seedTime": "53.99",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "54.07"
@@ -3002,6 +3396,7 @@
       "name": "Vicnansky, Ian",
       "place": 3,
       "points": 16.0,
+      "seedTime": "55.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "55.67"
@@ -3013,6 +3408,7 @@
       "name": "Pressly, John",
       "place": 4,
       "points": 15.0,
+      "seedTime": "54.50",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "57.80"
@@ -3024,6 +3420,7 @@
       "name": "Taddonio, Matt",
       "place": 5,
       "points": 14.0,
+      "seedTime": "57.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "59.25"
@@ -3035,6 +3432,7 @@
       "name": "Cumberland, Luke",
       "place": 8,
       "points": 11.0,
+      "seedTime": "59.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:00.24"
@@ -3046,6 +3444,7 @@
       "name": "Kelly, Conner",
       "place": 9,
       "points": 9.0,
+      "seedTime": "58.90",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "1:03.22"
@@ -3057,6 +3456,7 @@
       "name": "Nastasi, Allison",
       "place": 1,
       "points": 20.0,
+      "seedTime": "5:35.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "5:32.02"
@@ -3068,6 +3468,7 @@
       "name": "Herrod, Ashley",
       "place": 2,
       "points": 17.0,
+      "seedTime": "5:44.50",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "5:47.16"
@@ -3079,6 +3480,7 @@
       "name": "Richardson, Jessica",
       "place": 3,
       "points": 16.0,
+      "seedTime": "5:45.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "5:51.13"
@@ -3090,6 +3492,7 @@
       "name": "Moore, Allie",
       "place": 4,
       "points": 15.0,
+      "seedTime": "6:07.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "5:52.62"
@@ -3101,6 +3504,7 @@
       "name": "Valentin, Skylar",
       "place": 5,
       "points": 14.0,
+      "seedTime": "7:00.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "7:08.08"
@@ -3112,6 +3516,7 @@
       "name": "Hensley, Cole",
       "place": 1,
       "points": 20.0,
+      "seedTime": "4:50.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "5:11.43"
@@ -3123,6 +3528,7 @@
       "name": "Quillen, Michael",
       "place": 2,
       "points": 17.0,
+      "seedTime": "4:59.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "5:11.99"
@@ -3134,6 +3540,7 @@
       "name": "Taddonio, Matt",
       "place": 3,
       "points": 16.0,
+      "seedTime": "5:10.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "5:21.37"
@@ -3145,6 +3552,7 @@
       "name": "Reimer, Jaret",
       "place": 4,
       "points": 15.0,
+      "seedTime": "5:15.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "5:51.39"
@@ -3156,6 +3564,7 @@
       "name": "Kelly, Conner",
       "place": 5,
       "points": 14.0,
+      "seedTime": "5:20.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "6:07.11"
@@ -3211,6 +3620,7 @@
       "name": "Meyer, Courtney",
       "place": 13,
       "points": 4.0,
+      "seedTime": "1:25.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:16.52"
@@ -3233,6 +3643,7 @@
       "name": "Moore, Allie",
       "place": 2,
       "points": 17.0,
+      "seedTime": "1:17.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:08.80"
@@ -3244,6 +3655,7 @@
       "name": "Potter, Erin",
       "place": 14,
       "points": 3.0,
+      "seedTime": "1:15.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:16.61"
@@ -3255,6 +3667,7 @@
       "name": "Greene, Nicole",
       "place": 16,
       "points": 1.0,
+      "seedTime": "1:14.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:18.22"
@@ -3265,6 +3678,7 @@
       "gender": "F",
       "name": "Tomasko, Amanda",
       "place": 17,
+      "seedTime": "1:22.00",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "1:20.83"
@@ -3275,6 +3689,7 @@
       "gender": "F",
       "name": "Valentin, Skylar",
       "place": 18,
+      "seedTime": "1:25.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:21.00"
@@ -3285,6 +3700,7 @@
       "gender": "F",
       "name": "Fieger, Lindsay",
       "place": 19,
+      "seedTime": "1:21.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "1:26.51"
@@ -3295,6 +3711,7 @@
       "gender": "F",
       "name": "Melendez, Clarisa",
       "place": 20,
+      "seedTime": "1:20.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:29.06"
@@ -3306,6 +3723,7 @@
       "name": "Wuensch, Abby",
       "place": 1,
       "points": 20.0,
+      "seedTime": "1:07.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:08.31"
@@ -3317,6 +3735,7 @@
       "name": "Morales, Frances",
       "place": 3,
       "points": 16.0,
+      "seedTime": "1:14.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:12.53"
@@ -3328,6 +3747,7 @@
       "name": "Burley, Sawyer",
       "place": 4,
       "points": 15.0,
+      "seedTime": "1:12.60",
       "tags": "",
       "team": "Fgcu Swim Club",
       "time": "1:12.75"
@@ -3339,6 +3759,7 @@
       "name": "Sibilia, Maddie",
       "place": 7,
       "points": 12.0,
+      "seedTime": "1:12.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:13.45"
@@ -3350,6 +3771,7 @@
       "name": "Hollander, Jennifer",
       "place": 10,
       "points": 7.0,
+      "seedTime": "1:10.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:15.80"
@@ -3361,6 +3783,7 @@
       "name": "Chapamn, Emma",
       "place": 11,
       "points": 6.0,
+      "seedTime": "1:10.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "1:15.88"
@@ -3372,6 +3795,7 @@
       "name": "Adams, Breanna",
       "place": 12,
       "points": 5.0,
+      "seedTime": "1:14.00",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "1:16.09"
@@ -3405,6 +3829,7 @@
       "name": "Kloss, Matt",
       "place": 12,
       "points": 5.0,
+      "seedTime": "1:10.17",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "1:03.91"
@@ -3416,6 +3841,7 @@
       "name": "Thiesing, Zach",
       "place": 16,
       "points": 1.0,
+      "seedTime": "1:05.11",
       "tags": "",
       "team": "Fgcu Swim Club",
       "time": "1:05.86"
@@ -3426,6 +3852,7 @@
       "gender": "M",
       "name": "D'Zio, Zachary",
       "place": 17,
+      "seedTime": "1:07.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:07.21"
@@ -3437,6 +3864,7 @@
       "name": "Grant, Jake",
       "place": 9,
       "points": 9.0,
+      "seedTime": "1:02.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:02.21"
@@ -3448,6 +3876,7 @@
       "name": "Bunnell, Blake",
       "place": 11,
       "points": 6.0,
+      "seedTime": "1:02.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:03.50"
@@ -3459,6 +3888,7 @@
       "name": "Grabarczyk, Grant",
       "place": 14,
       "points": 3.0,
+      "seedTime": "1:04.41",
       "tags": "",
       "team": "Fgcu Swim Club",
       "time": "1:04.53"
@@ -3470,6 +3900,7 @@
       "name": "Vallamattam, Ashok",
       "place": 15,
       "points": 2.0,
+      "seedTime": "1:04.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:05.67"
@@ -3480,6 +3911,7 @@
       "gender": "M",
       "name": "Jaundoo, Jordan",
       "place": 18,
+      "seedTime": "1:01.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:07.95"
@@ -3490,6 +3922,7 @@
       "gender": "M",
       "name": "Pernas, Carlos",
       "place": 19,
+      "seedTime": "1:05.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:14.46"
@@ -3501,6 +3934,7 @@
       "name": "Zacarias, Mathias",
       "place": 1,
       "points": 20.0,
+      "seedTime": "57.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "55.80"
@@ -3512,6 +3946,7 @@
       "name": "De La Osa, Nicholas",
       "place": 2,
       "points": 17.0,
+      "seedTime": "55.33",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "58.06"
@@ -3523,6 +3958,7 @@
       "name": "Morris, Luke",
       "place": 3,
       "points": 16.0,
+      "seedTime": "58.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "59.38"
@@ -3534,6 +3970,7 @@
       "name": "Walch, Michael",
       "place": 4,
       "points": 15.0,
+      "seedTime": "58.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "59.66"
@@ -3545,6 +3982,7 @@
       "name": "Kertesz, Kristof",
       "place": 5,
       "points": 14.0,
+      "seedTime": "55.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "59.75"
@@ -3556,6 +3994,7 @@
       "name": "Thrift, Josh",
       "place": 6,
       "points": 13.0,
+      "seedTime": "58.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:00.52"
@@ -3567,6 +4006,7 @@
       "name": "Adelkopf, Brandon",
       "place": 7,
       "points": 12.0,
+      "seedTime": "1:00.83",
       "tags": "",
       "team": "Fgcu Swim Club",
       "time": "1:01.16"
@@ -3578,6 +4018,7 @@
       "name": "Murphy, Lachlan",
       "place": 13,
       "points": 4.0,
+      "seedTime": "1:00.51",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "1:04.32"
@@ -3608,6 +4049,7 @@
       "gender": "F",
       "name": "Imperialbobis, Pierce",
       "place": 20,
+      "seedTime": "33.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "30.30"
@@ -3618,6 +4060,7 @@
       "gender": "F",
       "name": "Blaydes, Rachel",
       "place": 26,
+      "seedTime": "31.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "31.48"
@@ -3628,6 +4071,7 @@
       "gender": "F",
       "name": "Fieger, Lindsay",
       "place": 27,
+      "seedTime": "33.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "32.90"
@@ -3638,6 +4082,7 @@
       "gender": "F",
       "name": "Fevola, Lia",
       "place": 28,
+      "seedTime": "35.63",
       "tags": "",
       "team": "Fgcu Swim Club",
       "time": "37.14"
@@ -3649,6 +4094,7 @@
       "name": "Herrod, Ashley",
       "place": 10,
       "points": 7.0,
+      "seedTime": "28.50",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "28.24"
@@ -3660,6 +4106,7 @@
       "name": "Salmon, Mandy",
       "place": 11,
       "points": 6.0,
+      "seedTime": "29.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "28.30"
@@ -3671,6 +4118,7 @@
       "name": "Weiss, Morgan",
       "place": 12,
       "points": 5.0,
+      "seedTime": "28.65",
       "tags": "",
       "team": "Fgcu Swim Club",
       "time": "28.38"
@@ -3682,6 +4130,7 @@
       "name": "Gholson, Zoe",
       "place": 14,
       "points": 3.0,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "29.38"
@@ -3693,6 +4142,7 @@
       "name": "Squires, Sami",
       "place": 15,
       "points": 2.0,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "29.58"
@@ -3703,6 +4153,7 @@
       "gender": "F",
       "name": "Austin, Jill",
       "place": 22,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "30.71"
@@ -3713,6 +4164,7 @@
       "gender": "F",
       "name": "Maruniak, Alina",
       "place": 23,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "30.73"
@@ -3723,6 +4175,7 @@
       "gender": "F",
       "name": "Parkulo, Wendy",
       "place": 24,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "30.77"
@@ -3734,6 +4187,7 @@
       "name": "Nastasi, Allison",
       "place": 3,
       "points": 16.0,
+      "seedTime": "27.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "26.96"
@@ -3745,6 +4199,7 @@
       "name": "McQueen, Jenna",
       "place": 4,
       "points": 15.0,
+      "seedTime": "28.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "27.39"
@@ -3756,6 +4211,7 @@
       "name": "Abad, Allison",
       "place": 8,
       "points": 11.0,
+      "seedTime": "27.98",
       "tags": "",
       "team": "Fgcu Swim Club",
       "time": "28.04"
@@ -3767,6 +4223,7 @@
       "name": "Yodzis, Camille",
       "place": 13,
       "points": 4.0,
+      "seedTime": "27.91",
       "tags": "",
       "team": "Fgcu Swim Club",
       "time": "28.80"
@@ -3778,6 +4235,7 @@
       "name": "Hylton, Sarah",
       "place": 16,
       "points": 1.0,
+      "seedTime": "28.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "29.61"
@@ -3788,6 +4246,7 @@
       "gender": "F",
       "name": "Muklewicz, Daria",
       "place": 19,
+      "seedTime": "28.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "29.96"
@@ -3798,6 +4257,7 @@
       "gender": "F",
       "name": "Chapamn, Emma",
       "place": 21,
+      "seedTime": "27.50",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "30.41"
@@ -3808,6 +4268,7 @@
       "gender": "F",
       "name": "Shumate, Kaitlyn",
       "place": 25,
+      "seedTime": "28.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "30.89"
@@ -3819,6 +4280,7 @@
       "name": "Brewer, Kathryn",
       "place": 1,
       "points": 20.0,
+      "seedTime": "24.19",
       "tags": "",
       "team": "University of South Florida",
       "time": "25.73"
@@ -3830,6 +4292,7 @@
       "name": "Knapp, Lindsay",
       "place": 2,
       "points": 17.0,
+      "seedTime": "26.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "26.47"
@@ -3841,6 +4304,7 @@
       "name": "Nekrasas, Grace",
       "place": 5,
       "points": 14.0,
+      "seedTime": "25.61",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "27.59"
@@ -3852,6 +4316,7 @@
       "name": "Bucy, Maggie",
       "place": 6,
       "points": 13.0,
+      "seedTime": "25.21",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "27.63"
@@ -3863,6 +4328,7 @@
       "name": "Hays, Rebecca",
       "place": 7,
       "points": 12.0,
+      "seedTime": "26.13",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "27.88"
@@ -3874,6 +4340,7 @@
       "name": "Pietraszun, Stasia",
       "place": 9,
       "points": 9.0,
+      "seedTime": "27.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "28.09"
@@ -3884,6 +4351,7 @@
       "gender": "F",
       "name": "Rieger, Alex",
       "place": null,
+      "seedTime": "25.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "25.08"
@@ -3894,6 +4362,7 @@
       "gender": "F",
       "name": "Connor, Quinn",
       "place": null,
+      "seedTime": "27.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "DQ"
@@ -3965,6 +4434,7 @@
       "gender": "M",
       "name": "Ramakrishnan, Ashwin",
       "place": 39,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "28.69"
@@ -3975,6 +4445,7 @@
       "gender": "M",
       "name": "Scharm, Kenny",
       "place": 41,
+      "seedTime": "31.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "31.59"
@@ -3985,6 +4456,7 @@
       "gender": "M",
       "name": "Harrison, Turner",
       "place": 42,
+      "seedTime": "29.74",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "32.40"
@@ -3995,6 +4467,7 @@
       "gender": "M",
       "name": "Anzola, Enrique",
       "place": 17,
+      "seedTime": "25.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "24.33"
@@ -4005,6 +4478,7 @@
       "gender": "M",
       "name": "Medina, Juan",
       "place": 30,
+      "seedTime": "26.92",
       "tags": "",
       "team": "Fgcu Swim Club",
       "time": "25.71"
@@ -4015,6 +4489,7 @@
       "gender": "M",
       "name": "D'Zio, Zachary",
       "place": 31,
+      "seedTime": "25.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "25.75"
@@ -4025,6 +4500,7 @@
       "gender": "M",
       "name": "Rezabek, Matthew",
       "place": 32,
+      "seedTime": "25.50",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "25.77"
@@ -4035,6 +4511,7 @@
       "gender": "M",
       "name": "Short, Riley",
       "place": 35,
+      "seedTime": "28.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "26.18"
@@ -4045,6 +4522,7 @@
       "gender": "M",
       "name": "Miller, Logan",
       "place": 38,
+      "seedTime": "26.28",
       "tags": "",
       "team": "Fgcu Swim Club",
       "time": "27.83"
@@ -4055,6 +4533,7 @@
       "gender": "M",
       "name": "Repke, Matt",
       "place": 43,
+      "seedTime": "28.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "33.04"
@@ -4066,6 +4545,7 @@
       "name": "Plough, Francis",
       "place": 5,
       "points": 14.0,
+      "seedTime": "24.70",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "22.91"
@@ -4076,6 +4556,7 @@
       "gender": "M",
       "name": "Morey, Eli",
       "place": 21,
+      "seedTime": "24.82",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "24.88"
@@ -4086,6 +4567,7 @@
       "gender": "M",
       "name": "Mckeon, Zach",
       "place": 26,
+      "seedTime": "25.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "25.39"
@@ -4096,6 +4578,7 @@
       "gender": "M",
       "name": "Schuster, Jacob",
       "place": 28,
+      "seedTime": "25.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "25.51"
@@ -4106,6 +4589,7 @@
       "gender": "M",
       "name": "Weinstein, Zach",
       "place": 29,
+      "seedTime": "25.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "25.54"
@@ -4116,6 +4600,7 @@
       "gender": "M",
       "name": "Reimer, Jaret",
       "place": 33,
+      "seedTime": "24.84",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "25.86"
@@ -4126,6 +4611,7 @@
       "gender": "M",
       "name": "Pernas, Carlos",
       "place": 40,
+      "seedTime": "25.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "29.70"
@@ -4137,6 +4623,7 @@
       "name": "Schouman, Hayden",
       "place": 12,
       "points": 5.0,
+      "seedTime": "23.90",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "23.73"
@@ -4147,6 +4634,7 @@
       "gender": "M",
       "name": "Weis, Jason",
       "place": 22,
+      "seedTime": "24.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "25.00"
@@ -4157,6 +4645,7 @@
       "gender": "M",
       "name": "Jaundoo, Jordan",
       "place": 24,
+      "seedTime": "24.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "25.35"
@@ -4167,6 +4656,7 @@
       "gender": "M",
       "name": "Roberts, Nick",
       "place": 25,
+      "seedTime": "24.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "25.38"
@@ -4177,6 +4667,7 @@
       "gender": "M",
       "name": "Kloss, Matt",
       "place": 34,
+      "seedTime": "24.14",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "25.96"
@@ -4187,6 +4678,7 @@
       "gender": "M",
       "name": "Ragoowansi, Evan",
       "place": 37,
+      "seedTime": "24.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "26.40"
@@ -4198,6 +4690,7 @@
       "name": "De La Osa, Nicholas",
       "place": 6,
       "points": 13.0,
+      "seedTime": "23.09",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "23.07"
@@ -4209,6 +4702,7 @@
       "name": "Cole, Justin",
       "place": 8,
       "points": 11.0,
+      "seedTime": "23.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "23.22"
@@ -4220,6 +4714,7 @@
       "name": "Sturm, David",
       "place": 10,
       "points": 7.0,
+      "seedTime": "23.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "23.35"
@@ -4231,6 +4726,7 @@
       "name": "Fregosi, Carson",
       "place": 13,
       "points": 4.0,
+      "seedTime": "23.20",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "23.79"
@@ -4242,6 +4738,7 @@
       "name": "Landau, Max",
       "place": 15,
       "points": 2.0,
+      "seedTime": "23.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "24.12"
@@ -4253,6 +4750,7 @@
       "name": "Sharma, Agrim",
       "place": 16,
       "points": 1.0,
+      "seedTime": "23.40",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "24.17"
@@ -4263,6 +4761,7 @@
       "gender": "M",
       "name": "Murphy, Lachlan",
       "place": 20,
+      "seedTime": "23.29",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "24.76"
@@ -4274,6 +4773,7 @@
       "name": "Burke, Zach",
       "place": 1,
       "points": 20.0,
+      "seedTime": "21.67",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "21.34"
@@ -4285,6 +4785,7 @@
       "name": "Hollister, Cash",
       "place": 2,
       "points": 17.0,
+      "seedTime": "21.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "22.11"
@@ -4296,6 +4797,7 @@
       "name": "Hensley, Cole",
       "place": 3,
       "points": 16.0,
+      "seedTime": "21.50",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "22.38"
@@ -4307,6 +4809,7 @@
       "name": "Zacarias, Mathias",
       "place": 4,
       "points": 15.0,
+      "seedTime": "22.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "22.78"
@@ -4318,6 +4821,7 @@
       "name": "Hayes, Daniel",
       "place": 7,
       "points": 12.0,
+      "seedTime": "22.66",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "23.21"
@@ -4329,6 +4833,7 @@
       "name": "Vicnansky, Ian",
       "place": 9,
       "points": 9.0,
+      "seedTime": "21.90",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "23.24"
@@ -4340,6 +4845,7 @@
       "name": "St. Pierre, Richard",
       "place": 14,
       "points": 3.0,
+      "seedTime": "19.24",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "23.83"
@@ -4373,6 +4879,7 @@
       "name": "Adams, Breanna",
       "place": 9,
       "points": 9.0,
+      "seedTime": "1:30.00",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "1:23.22"
@@ -4406,6 +4913,7 @@
       "name": "Squires, Sami",
       "place": 13,
       "points": 4.0,
+      "seedTime": "1:25.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "1:28.84"
@@ -4417,6 +4925,7 @@
       "name": "Parkulo, Wendy",
       "place": 14,
       "points": 3.0,
+      "seedTime": "1:35.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "1:30.76"
@@ -4428,6 +4937,7 @@
       "name": "Short, Julianna",
       "place": 15,
       "points": 2.0,
+      "seedTime": "1:29.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:33.73"
@@ -4439,6 +4949,7 @@
       "name": "Morales, Frances",
       "place": 1,
       "points": 20.0,
+      "seedTime": "1:16.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:15.60"
@@ -4450,6 +4961,7 @@
       "name": "Medrano, Camila",
       "place": 3,
       "points": 16.0,
+      "seedTime": "1:20.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:17.63"
@@ -4461,6 +4973,7 @@
       "name": "Wuensch, Abby",
       "place": 4,
       "points": 15.0,
+      "seedTime": "1:15.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:19.02"
@@ -4472,6 +4985,7 @@
       "name": "Yodzis, Camille",
       "place": 6,
       "points": 13.0,
+      "seedTime": "1:18.99",
       "tags": "",
       "team": "Fgcu Swim Club",
       "time": "1:20.54"
@@ -4483,6 +4997,7 @@
       "name": "Ligenza, Jessica",
       "place": 7,
       "points": 12.0,
+      "seedTime": "1:17.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:21.38"
@@ -4494,6 +5009,7 @@
       "name": "O'Brien, Megan",
       "place": 8,
       "points": 11.0,
+      "seedTime": "1:23.66",
       "tags": "",
       "team": "Fgcu Swim Club",
       "time": "1:21.87"
@@ -4505,6 +5021,7 @@
       "name": "Muklewicz, Daria",
       "place": 12,
       "points": 5.0,
+      "seedTime": "1:19.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:26.02"
@@ -4516,6 +5033,7 @@
       "name": "Anzola, Enrique",
       "place": 3,
       "points": 16.0,
+      "seedTime": "1:15.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:09.89"
@@ -4527,6 +5045,7 @@
       "name": "Grabarczyk, Grant",
       "place": 4,
       "points": 15.0,
+      "seedTime": "1:11.39",
       "tags": "",
       "team": "Fgcu Swim Club",
       "time": "1:11.42"
@@ -4549,6 +5068,7 @@
       "name": "Allen, Alex",
       "place": 8,
       "points": 10.0,
+      "seedTime": "1:15.11",
       "tags": "",
       "team": "Fgcu Swim Club",
       "time": "1:14.25"
@@ -4571,6 +5091,7 @@
       "name": "Harrison, Turner",
       "place": 13,
       "points": 4.0,
+      "seedTime": "1:23.00",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "1:31.79"
@@ -4582,6 +5103,7 @@
       "name": "Todd, Joel",
       "place": 1,
       "points": 20.0,
+      "seedTime": "1:04.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "1:00.40"
@@ -4593,6 +5115,7 @@
       "name": "Walch, Michael",
       "place": 2,
       "points": 17.0,
+      "seedTime": "1:04.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "1:05.18"
@@ -4604,6 +5127,7 @@
       "name": "Ramakrishnan, Ashwin",
       "place": 5,
       "points": 14.0,
+      "seedTime": "1:10.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:11.97"
@@ -4615,6 +5139,7 @@
       "name": "Cumberland, Luke",
       "place": 6,
       "points": 13.0,
+      "seedTime": "1:10.09",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:12.18"
@@ -4626,6 +5151,7 @@
       "name": "Ragoowansi, Evan",
       "place": 8,
       "points": 10.0,
+      "seedTime": "1:09.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:14.25"
@@ -4637,6 +5163,7 @@
       "name": "Kelly, Conner",
       "place": 10,
       "points": 7.0,
+      "seedTime": "1:10.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "1:15.34"
@@ -4648,6 +5175,7 @@
       "name": "Jaundoo, Jordan",
       "place": 11,
       "points": 6.0,
+      "seedTime": "1:10.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:15.63"
@@ -4681,6 +5209,7 @@
       "name": "Wuensch, Abby",
       "place": 6,
       "points": 13.0,
+      "seedTime": "35.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "31.27"
@@ -4691,6 +5220,7 @@
       "gender": "F",
       "name": "Pappas, Katina",
       "place": 19,
+      "seedTime": "35.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "32.73"
@@ -4701,6 +5231,7 @@
       "gender": "F",
       "name": "Foster, Darby",
       "place": 20,
+      "seedTime": "34.28",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "32.89"
@@ -4721,6 +5252,7 @@
       "gender": "F",
       "name": "Fevola, Lia",
       "place": 22,
+      "seedTime": "37.64",
       "tags": "",
       "team": "Fgcu Swim Club",
       "time": "41.06"
@@ -4732,6 +5264,7 @@
       "name": "Potter, Erin",
       "place": 10,
       "points": 7.0,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "31.49"
@@ -4743,6 +5276,7 @@
       "name": "Burley, Sawyer",
       "place": 11,
       "points": 6.0,
+      "seedTime": "31.25",
       "tags": "",
       "team": "Fgcu Swim Club",
       "time": "31.77"
@@ -4754,6 +5288,7 @@
       "name": "Tomasko, Amanda",
       "place": 13,
       "points": 4.0,
+      "seedTime": "33.00",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "32.05"
@@ -4765,6 +5300,7 @@
       "name": "Lopes, Marra",
       "place": 15,
       "points": 2.0,
+      "seedTime": "32.93",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "32.35"
@@ -4775,6 +5311,7 @@
       "gender": "F",
       "name": "Hollander, Jennifer",
       "place": 16,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "32.45"
@@ -4785,6 +5322,7 @@
       "gender": "F",
       "name": "Williams, Margaret",
       "place": 16,
+      "seedTime": "32.15",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "32.45"
@@ -4795,6 +5333,7 @@
       "gender": "F",
       "name": "Greene, Nicole",
       "place": 18,
+      "seedTime": "30.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "32.57"
@@ -4805,6 +5344,7 @@
       "gender": "F",
       "name": "Connor, Quinn",
       "place": null,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "DQ"
@@ -4816,6 +5356,7 @@
       "name": "Brewer, Kathryn",
       "place": 1,
       "points": 20.0,
+      "seedTime": "25.10",
       "tags": "",
       "team": "University of South Florida",
       "time": "26.79"
@@ -4827,6 +5368,7 @@
       "name": "Knapp, Lindsay",
       "place": 2,
       "points": 17.0,
+      "seedTime": "28.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "28.78"
@@ -4838,6 +5380,7 @@
       "name": "Hays, Rebecca",
       "place": 3,
       "points": 16.0,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "29.20"
@@ -4849,6 +5392,7 @@
       "name": "Fassett, Olivia",
       "place": 4,
       "points": 15.0,
+      "seedTime": "29.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "30.09"
@@ -4860,6 +5404,7 @@
       "name": "Lyde, Vinez",
       "place": 5,
       "points": 14.0,
+      "seedTime": "29.50",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "30.71"
@@ -4871,6 +5416,7 @@
       "name": "Herrod, Ashley",
       "place": 8,
       "points": 11.0,
+      "seedTime": "29.50",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "31.34"
@@ -4882,6 +5428,7 @@
       "name": "Hylton, Sarah",
       "place": 9,
       "points": 9.0,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "31.41"
@@ -4893,6 +5440,7 @@
       "name": "Bucy, Maggie",
       "place": 14,
       "points": 3.0,
+      "seedTime": "29.30",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "32.28"
@@ -4925,6 +5473,7 @@
       "name": "Egan, Adam",
       "place": 12,
       "points": 5.0,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "27.42"
@@ -4936,6 +5485,7 @@
       "name": "Morey, Eli",
       "place": 14,
       "points": 3.0,
+      "seedTime": "27.77",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "27.58"
@@ -4946,6 +5496,7 @@
       "gender": "M",
       "name": "Lehrer, Jarrad",
       "place": 15,
+      "seedTime": "30.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "27.67"
@@ -4966,6 +5517,7 @@
       "gender": "M",
       "name": "Weinstein, Zach",
       "place": 19,
+      "seedTime": "32.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "28.69"
@@ -4976,6 +5528,7 @@
       "gender": "M",
       "name": "Thiesing, Zach",
       "place": 20,
+      "seedTime": "28.75",
       "tags": "",
       "team": "Fgcu Swim Club",
       "time": "29.03"
@@ -4987,6 +5540,7 @@
       "name": "Thrift, Josh",
       "place": 4,
       "points": 15.0,
+      "seedTime": "25.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "25.03"
@@ -4998,6 +5552,7 @@
       "name": "Todd, Joel",
       "place": 8,
       "points": 10.0,
+      "seedTime": "26.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "26.57"
@@ -5009,6 +5564,7 @@
       "name": "Schuster, Jacob",
       "place": 10,
       "points": 7.0,
+      "seedTime": "27.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "26.93"
@@ -5020,6 +5576,7 @@
       "name": "Hensley, Chris",
       "place": 11,
       "points": 6.0,
+      "seedTime": "25.80",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "26.97"
@@ -5030,6 +5587,7 @@
       "gender": "M",
       "name": "Kloss, Matt",
       "place": 21,
+      "seedTime": "27.17",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "29.69"
@@ -5040,6 +5598,7 @@
       "gender": "M",
       "name": "Pernas, Carlos",
       "place": 22,
+      "seedTime": "27.50",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "31.97"
@@ -5051,6 +5610,7 @@
       "name": "Hensley, Cole",
       "place": 1,
       "points": 20.0,
+      "seedTime": "22.20",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "23.37"
@@ -5062,6 +5622,7 @@
       "name": "Vicnansky, Ian",
       "place": 2,
       "points": 17.0,
+      "seedTime": "24.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "24.52"
@@ -5073,6 +5634,7 @@
       "name": "Pressly, John",
       "place": 3,
       "points": 16.0,
+      "seedTime": "23.50",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "24.86"
@@ -5084,6 +5646,7 @@
       "name": "Kertesz, Kristof",
       "place": 5,
       "points": 14.0,
+      "seedTime": "24.50",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "25.13"
@@ -5095,6 +5658,7 @@
       "name": "Hayes, Daniel",
       "place": 6,
       "points": 13.0,
+      "seedTime": "24.17",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "25.87"
@@ -5106,6 +5670,7 @@
       "name": "Hollister, Cash",
       "place": 7,
       "points": 12.0,
+      "seedTime": "24.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "26.56"
@@ -5117,6 +5682,7 @@
       "name": "Dika, James",
       "place": 13,
       "points": 4.0,
+      "seedTime": "25.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "27.56"
@@ -5127,6 +5693,7 @@
       "gender": "M",
       "name": "St. Pierre, Richard",
       "place": 15,
+      "seedTime": "25.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "27.67"
@@ -5149,6 +5716,7 @@
       "name": "Valentin, Skylar",
       "place": 11,
       "points": 6.0,
+      "seedTime": "1:20.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:20.03"
@@ -5171,6 +5739,7 @@
       "name": "McQueen, Jenna",
       "place": 4,
       "points": 15.0,
+      "seedTime": "1:10.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:09.82"
@@ -5182,6 +5751,7 @@
       "name": "Moore, Allie",
       "place": 6,
       "points": 13.0,
+      "seedTime": "1:17.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:11.30"
@@ -5193,6 +5763,7 @@
       "name": "Pappas, Katina",
       "place": 7,
       "points": 12.0,
+      "seedTime": "1:15.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:11.47"
@@ -5204,6 +5775,7 @@
       "name": "Dziedzic, Alyssa",
       "place": 9,
       "points": 9.0,
+      "seedTime": "1:15.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:15.26"
@@ -5215,6 +5787,7 @@
       "name": "Shumate, Kaitlyn",
       "place": 13,
       "points": 4.0,
+      "seedTime": "1:10.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:20.78"
@@ -5226,6 +5799,7 @@
       "name": "Melendez, Clarisa",
       "place": 14,
       "points": 3.0,
+      "seedTime": "1:14.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:26.88"
@@ -5236,6 +5810,7 @@
       "gender": "F",
       "name": "Connor, Quinn",
       "place": null,
+      "seedTime": "1:11.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "DQ"
@@ -5247,6 +5822,7 @@
       "name": "Pietraszun, Stasia",
       "place": 1,
       "points": 20.0,
+      "seedTime": "1:05.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "1:04.40"
@@ -5258,6 +5834,7 @@
       "name": "Ridgeway, Ellie",
       "place": 2,
       "points": 17.0,
+      "seedTime": "1:01.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:06.66"
@@ -5269,6 +5846,7 @@
       "name": "Nekrasas, Grace",
       "place": 3,
       "points": 16.0,
+      "seedTime": "1:03.01",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "1:09.65"
@@ -5280,6 +5858,7 @@
       "name": "Sibilia, Maddie",
       "place": 5,
       "points": 14.0,
+      "seedTime": "1:06.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:10.65"
@@ -5291,6 +5870,7 @@
       "name": "Meyer, Courtney",
       "place": 10,
       "points": 7.0,
+      "seedTime": "1:10.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:15.94"
@@ -5335,6 +5915,7 @@
       "name": "Pernas, Carlos",
       "place": 10,
       "points": 7.0,
+      "seedTime": "1:10.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:16.30"
@@ -5357,6 +5938,7 @@
       "name": "Burke, Zach",
       "place": 1,
       "points": 20.0,
+      "seedTime": "58.00",
       "tags": "",
       "team": "Florida State Univeristy Swim-FL",
       "time": "56.78"
@@ -5368,6 +5950,7 @@
       "name": "Morris, Luke",
       "place": 2,
       "points": 17.0,
+      "seedTime": "56.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "57.22"
@@ -5379,6 +5962,7 @@
       "name": "Plough, Francis",
       "place": 3,
       "points": 16.0,
+      "seedTime": "59.20",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "59.19"
@@ -5390,6 +5974,7 @@
       "name": "Schouman, Hayden",
       "place": 4,
       "points": 15.0,
+      "seedTime": "57.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:01.50"
@@ -5401,6 +5986,7 @@
       "name": "Rasmussen, Jack",
       "place": 6,
       "points": 13.0,
+      "seedTime": "1:04.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "1:03.82"
@@ -5412,6 +5998,7 @@
       "name": "Short, Riley",
       "place": 7,
       "points": 12.0,
+      "seedTime": "1:00.00",
       "tags": "",
       "team": "Florida Club Swim & Dive-FL",
       "time": "1:06.14"

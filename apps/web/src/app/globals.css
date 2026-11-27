@@ -74,6 +74,35 @@
   --page-gutter-y: clamp(20px, 4.53vw + 3px, 32px);
 }
 
+/* A list with a JumpRail beside it (components/ui/JumpRail.tsx): wrap the list and the rail's
+   slot in jump-rail-layout, and give the slot jump-rail-slot. The rail sits just right of the
+   list, out in the page's right margin, keeping at least --jump-rail-edge clear of the window's
+   edge; where that margin is too narrow to hold it (phones), the list gives up only the
+   difference instead of the rail's whole width. */
+@utility jump-rail-layout {
+  --jump-rail-width: 16px;
+  --jump-rail-gap: 4px;
+  --jump-rail-edge: 6px;
+  --jump-rail-inset: max(
+    0px,
+    var(--jump-rail-gap) + var(--jump-rail-width) + var(--jump-rail-edge) - var(--page-gutter-x)
+  );
+  position: relative;
+  padding-right: var(--jump-rail-inset);
+  @media (width >= 1040px) {
+    --jump-rail-width: 20px;
+    --jump-rail-gap: 12px;
+  }
+}
+
+@utility jump-rail-slot {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(100% - var(--jump-rail-inset) + var(--jump-rail-gap));
+  width: var(--jump-rail-width);
+}
+
 body {
   font-family: var(--font-sans);
   background-color: var(--color-background-layout);
@@ -86,6 +115,18 @@ button:not(:disabled) {
 
 button:disabled {
   cursor: not-allowed;
+}
+
+/* Gold keyboard-focus ring for buttons, links and every other focusable element
+   instead of the browser-default blue. In the base layer so component
+   `focus-visible:` utilities (rings, outline-none) still win. */
+@layer base {
+  :focus-visible {
+    /* `auto` is the browser's own focus-ring style (same weight and spot as the
+       default blue one); only the color changes. */
+    outline: auto 1px var(--brand-color-primary);
+    outline-offset: 0;
+  }
 }
 
 /* Use the SwimBuzz gold focus state instead of the browser-default blue ring.

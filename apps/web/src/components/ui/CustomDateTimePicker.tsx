@@ -429,7 +429,7 @@ function PickerTrigger({
           onPickerClick()
           inputRef.current?.focus()
         }}
-        className={`grid ${compact ? "h-5 w-5 [&_svg]:h-3.5 [&_svg]:w-3.5" : "h-6 w-6"} shrink-0 place-items-center rounded text-foreground-tertiary transition hover:bg-fill-secondary hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/45 disabled:cursor-not-allowed disabled:opacity-50`}
+        className={`grid ${compact ? "h-5 w-5 [&_svg]:h-3.5 [&_svg]:w-3.5" : "h-6 w-6"} shrink-0 place-items-center rounded text-foreground-tertiary transition hover:bg-fill-secondary hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50`}
       >
         <PickerToggleIcon icon={icon} />
       </button>
@@ -469,8 +469,8 @@ function FloatingPopover({
   )
 }
 
-const iconButtonClass = "grid h-7 w-7 place-items-center rounded-md text-foreground-secondary transition hover:bg-fill-secondary hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/45"
-const optionClass = "grid h-8 place-items-center rounded-md text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-primary/45"
+const iconButtonClass = "grid h-7 w-7 place-items-center rounded-md text-foreground-secondary transition hover:bg-fill-secondary hover:text-foreground"
+const optionClass = "grid h-8 place-items-center rounded-md text-sm font-medium transition"
 
 export function DatePicker({
   value,
@@ -959,10 +959,10 @@ export function TimeZonePicker({
       disabled={disabled}
       value={value}
       onChange={(event) => onChange(event.target.value)}
-      className={`w-full rounded-lg border bg-background px-3 py-2 text-sm text-foreground outline-none transition focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50 ${
+      className={`w-full rounded-lg border bg-background px-3 py-2 text-sm text-foreground outline-none transition disabled:cursor-not-allowed disabled:opacity-50 ${
         hasError
-          ? "border-error focus:border-error focus:ring-error/10"
-          : "border-border focus:border-primary focus:ring-primary/10"
+          ? "border-error"
+          : "border-border"
       } ${className}`.trim()}
     >
       {zones.map((zone) => (

@@ -9,6 +9,12 @@ import { canEditPractice, canViewPractice } from "@/lib/practice/practice-access
 import type { PracticeFormState } from "../../PracticeEditor"
 import PracticeEditClient from "./PracticeEditClient"
 import { toDateInput, toTimeInput } from "@/lib/date-input"
+import { practicePageMetadata } from "@/lib/page-title"
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id: param } = await params
+  return practicePageMetadata(param, "Edit")
+}
 
 export default async function PracticeEditPage({
   params,

@@ -34,7 +34,7 @@ export default function AthleteGalleryCard({
     <Link
       id={anchor}
       href={athletePath(athlete.slug ?? athlete.id)}
-      className={`group @container block min-w-0 scroll-mt-32 rounded-xl border shadow-sm transition-[background-color,box-shadow] hover:bg-background-hover hover:shadow-md ${
+      className={`group @container block min-w-0 rounded-xl border shadow-sm transition-[background-color,box-shadow] hover:bg-background-hover hover:shadow-md ${
         isYou ? "border-primary bg-primary/5" : "border-border bg-background"
       }`}
     >

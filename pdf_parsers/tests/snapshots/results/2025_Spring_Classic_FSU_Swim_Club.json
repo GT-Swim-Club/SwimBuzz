@@ -102,6 +102,304 @@
   },
   "meet_date": "2025-02-01",
   "meet_name": "2025 Spring Classic",
+  "place_times": [
+    {
+      "champion": "2:01.11",
+      "eighth": "2:22.45",
+      "event": "200 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:49.22",
+      "eighth": "2:06.50",
+      "event": "200 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:21.20",
+      "eighth": "2:35.77",
+      "event": "200 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:00.90",
+      "eighth": "2:10.23",
+      "event": "200 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "59.93",
+      "eighth": "1:08.22",
+      "event": "100 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "51.81",
+      "eighth": "57.18",
+      "event": "100 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "24.65",
+      "eighth": "26.42",
+      "event": "50 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "27.90"
+    },
+    {
+      "champion": "21.69",
+      "eighth": "22.72",
+      "event": "50 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "24.49"
+    },
+    {
+      "champion": "2:39.18",
+      "eighth": null,
+      "event": "200 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:14.35",
+      "eighth": null,
+      "event": "200 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:03.20",
+      "eighth": "1:08.62",
+      "event": "100 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "52.97",
+      "eighth": "1:05.10",
+      "event": "100 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "33.19",
+      "eighth": "35.23",
+      "event": "50 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "41.68"
+    },
+    {
+      "champion": "28.95",
+      "eighth": "30.86",
+      "event": "50 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "5:10.85",
+      "eighth": null,
+      "event": "400 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "4:13.42",
+      "eighth": null,
+      "event": "400 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "6:05.08",
+      "eighth": null,
+      "event": "500 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "5:03.69",
+      "eighth": null,
+      "event": "500 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:23.37",
+      "eighth": null,
+      "event": "200 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:00.90",
+      "eighth": null,
+      "event": "200 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:11.71",
+      "eighth": "1:19.66",
+      "event": "100 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:03.50",
+      "eighth": "1:18.46",
+      "event": "100 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "27.54",
+      "eighth": "31.01",
+      "event": "50 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "42.41"
+    },
+    {
+      "champion": "24.22",
+      "eighth": "28.01",
+      "event": "50 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:21.16",
+      "eighth": null,
+      "event": "200 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:00.49",
+      "eighth": null,
+      "event": "200 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "56.13",
+      "eighth": "59.08",
+      "event": "100 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:18.95"
+    },
+    {
+      "champion": "46.60",
+      "eighth": "51.14",
+      "event": "100 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "55.21"
+    },
+    {
+      "champion": "26.82",
+      "eighth": "28.58",
+      "event": "50 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "31.26"
+    },
+    {
+      "champion": "23.41",
+      "eighth": "25.34",
+      "event": "50 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "27.60"
+    },
+    {
+      "champion": "1:05.16",
+      "eighth": "1:08.86",
+      "event": "100 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:23.47"
+    },
+    {
+      "champion": "54.82",
+      "eighth": "1:03.48",
+      "event": "100 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "22.47",
+      "eighth": null,
+      "event": "50 Free",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:53.91",
+      "eighth": "2:06.05",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:37.38",
+      "eighth": "1:51.49",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:42.95",
+      "eighth": "1:54.63",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:27.31",
+      "eighth": "1:39.78",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    }
+  ],
   "relay_results": [
     {
       "course": "SCY",
@@ -2047,15 +2345,15 @@
       "points": 15.0,
       "splits": [
         {
-          "distance": 66,
+          "distance": 50,
           "splitTime": "29.74"
         },
         {
-          "distance": 132,
+          "distance": 150,
           "splitTime": "1:09.06"
         },
         {
-          "distance": 198,
+          "distance": 200,
           "splitTime": "35.21"
         }
       ],
@@ -2187,15 +2485,15 @@
       "place": null,
       "splits": [
         {
-          "distance": 66,
+          "distance": 50,
           "splitTime": "41.14"
         },
         {
-          "distance": 132,
+          "distance": 100,
           "splitTime": "48.89"
         },
         {
-          "distance": 198,
+          "distance": 200,
           "splitTime": "1:41.40"
         }
       ],
@@ -2542,7 +2840,7 @@
       "course": "SCY",
       "event": "200 Free",
       "gender": "M",
-      "name": "Johnson, Benjamin",
+      "name": "Johnson, Benjamin Scott",
       "place": 12,
       "points": 5.0,
       "splits": [
@@ -4937,7 +5235,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "M",
-      "name": "Johnson, Benjamin",
+      "name": "Johnson, Benjamin Scott",
       "place": 45,
       "tags": "",
       "team": "FSUC",
@@ -7153,15 +7451,15 @@
       "points": 17.0,
       "splits": [
         {
-          "distance": 66,
+          "distance": 100,
           "splitTime": "1:09.29"
         },
         {
-          "distance": 132,
+          "distance": 150,
           "splitTime": "37.78"
         },
         {
-          "distance": 198,
+          "distance": 200,
           "splitTime": "37.99"
         }
       ],
@@ -7859,7 +8157,7 @@
       "course": "SCY",
       "event": "100 Breast",
       "gender": "M",
-      "name": "Johnson, Benjamin",
+      "name": "Johnson, Benjamin Scott",
       "place": 10,
       "points": 7.0,
       "splits": [
@@ -10572,7 +10870,7 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "M",
-      "name": "Johnson, Benjamin",
+      "name": "Johnson, Benjamin Scott",
       "place": 33,
       "tags": "",
       "team": "FSUC",

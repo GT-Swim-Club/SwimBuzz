@@ -112,6 +112,328 @@
   },
   "meet_date": "2018-10-06",
   "meet_name": "Tigertown Invitational 2018",
+  "place_times": [
+    {
+      "champion": "2:43.33",
+      "eighth": null,
+      "event": "200 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:15.41",
+      "eighth": "2:35.34",
+      "event": "200 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "25.14",
+      "eighth": "27.27",
+      "event": "50 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "29.01"
+    },
+    {
+      "champion": "22.24",
+      "eighth": "23.40",
+      "event": "50 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "24.24"
+    },
+    {
+      "champion": "59.70",
+      "eighth": "1:09.69",
+      "event": "100 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:19.44"
+    },
+    {
+      "champion": "58.36",
+      "eighth": "1:05.84",
+      "event": "100 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:02.58",
+      "eighth": "1:11.18",
+      "event": "100 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:15.94"
+    },
+    {
+      "champion": "58.56",
+      "eighth": "1:00.93",
+      "event": "100 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "1:06.92"
+    },
+    {
+      "champion": "2:01.42",
+      "eighth": "2:16.82",
+      "event": "200 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:48.59",
+      "eighth": "1:55.91",
+      "event": "200 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "33.05",
+      "eighth": "37.35",
+      "event": "50 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "41.45"
+    },
+    {
+      "champion": "28.77",
+      "eighth": "30.48",
+      "event": "50 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "33.87"
+    },
+    {
+      "champion": "59.97",
+      "eighth": "1:15.38",
+      "event": "100 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "53.93",
+      "eighth": "59.87",
+      "event": "100 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "4:46.69",
+      "eighth": null,
+      "event": "400 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "4:26.67",
+      "eighth": null,
+      "event": "400 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:17.05",
+      "eighth": "3:19.48",
+      "event": "200 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:02.40",
+      "eighth": "2:13.14",
+      "event": "200 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "27.12",
+      "eighth": "29.91",
+      "event": "50 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "33.39"
+    },
+    {
+      "champion": "23.66",
+      "eighth": "25.47",
+      "event": "50 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "28.96"
+    },
+    {
+      "champion": "5:31.61",
+      "eighth": "6:44.06",
+      "event": "500 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "4:58.51",
+      "eighth": "5:35.62",
+      "event": "500 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "27.92",
+      "eighth": "33.41",
+      "event": "50 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "37.69"
+    },
+    {
+      "champion": "27.21",
+      "eighth": "28.79",
+      "event": "50 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "35.56"
+    },
+    {
+      "champion": "1:13.72",
+      "eighth": "1:20.41",
+      "event": "100 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:00.36",
+      "eighth": "1:07.17",
+      "event": "100 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:46.81",
+      "eighth": null,
+      "event": "200 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:06.48",
+      "eighth": null,
+      "event": "200 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:09.20",
+      "eighth": null,
+      "event": "200 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:07.09",
+      "eighth": null,
+      "event": "200 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "56.50",
+      "eighth": "1:01.71",
+      "event": "100 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:12.56"
+    },
+    {
+      "champion": "49.06",
+      "eighth": "51.36",
+      "event": "100 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "55.84"
+    },
+    {
+      "champion": "1:55.28",
+      "eighth": null,
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:39.84",
+      "eighth": null,
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "3:51.52",
+      "eighth": null,
+      "event": "400 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "3:20.02",
+      "eighth": null,
+      "event": "400 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:45.02",
+      "eighth": null,
+      "event": "200 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:29.76",
+      "eighth": "1:59.61",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "4:24.60",
+      "eighth": null,
+      "event": "400 Medley Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "3:44.08",
+      "eighth": null,
+      "event": "400 Medley Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    }
+  ],
   "relay_results": [
     {
       "course": "SCY",
@@ -2690,7 +3012,7 @@
         },
         {
           "leg": 4,
-          "name": "Bailey, Emma",
+          "name": "Bailey, Emma Rose",
           "splitTime": "26.47"
         }
       ],
@@ -5351,7 +5673,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "Mitchel, Mary",
+      "name": "Mitchel, Mary Gayle",
       "place": 43,
       "tags": "",
       "team": "AUB-SE",
@@ -10324,7 +10646,7 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "F",
-      "name": "Mitchel, Mary",
+      "name": "Mitchel, Mary Gayle",
       "place": 15,
       "tags": "",
       "team": "AUB-SE",
@@ -14798,36 +15120,6 @@
       "name": "Campbell, Connor",
       "place": 10,
       "points": 9.0,
-      "splits": [
-        {
-          "distance": 71,
-          "splitTime": "27.60"
-        },
-        {
-          "distance": 142,
-          "splitTime": "29.70"
-        },
-        {
-          "distance": 213,
-          "splitTime": "30.17"
-        },
-        {
-          "distance": 284,
-          "splitTime": "31.43"
-        },
-        {
-          "distance": 355,
-          "splitTime": "1:02.53"
-        },
-        {
-          "distance": 426,
-          "splitTime": "2:07.50"
-        },
-        {
-          "distance": 497,
-          "splitTime": "28.36"
-        }
-      ],
       "tags": "",
       "team": "AUB-SE",
       "time": "5:37.29"
@@ -14840,35 +15132,35 @@
       "place": 11,
       "splits": [
         {
-          "distance": 62,
+          "distance": 50,
           "splitTime": "29.79"
         },
         {
-          "distance": 124,
+          "distance": 100,
           "splitTime": "33.18"
         },
         {
-          "distance": 186,
+          "distance": 150,
           "splitTime": "34.18"
         },
         {
-          "distance": 248,
+          "distance": 200,
           "splitTime": "34.84"
         },
         {
-          "distance": 310,
+          "distance": 250,
           "splitTime": "35.54"
         },
         {
-          "distance": 372,
+          "distance": 300,
           "splitTime": "35.96"
         },
         {
-          "distance": 434,
+          "distance": 350,
           "splitTime": "37.50"
         },
         {
-          "distance": 496,
+          "distance": 500,
           "splitTime": "1:48.57"
         }
       ],
@@ -15037,7 +15329,7 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "F",
-      "name": "Bailey, Emma",
+      "name": "Bailey, Emma Rose",
       "place": 2,
       "points": 17.0,
       "tags": "",
@@ -15231,7 +15523,7 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "F",
-      "name": "Mitchel, Mary",
+      "name": "Mitchel, Mary Gayle",
       "place": 20,
       "points": 1.0,
       "tags": "",
@@ -17362,7 +17654,7 @@
       "course": "SCY",
       "event": "100 Free",
       "gender": "F",
-      "name": "Bailey, Emma",
+      "name": "Bailey, Emma Rose",
       "place": 3,
       "points": 16.0,
       "tags": "",

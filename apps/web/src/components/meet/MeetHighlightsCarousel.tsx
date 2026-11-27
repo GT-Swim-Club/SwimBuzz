@@ -284,7 +284,7 @@ export default function MeetHighlightsCarousel({
                       setStopped(true)
                       open.run()
                     }}
-                    className="group flex min-w-0 flex-col rounded-lg focus-visible:outline-2 focus-visible:outline-primary [&>div]:flex-1"
+                    className="group flex min-w-0 flex-col rounded-lg [&>div]:flex-1"
                   >
                     <HighlightTile counter={c} interactive />
                   </button>

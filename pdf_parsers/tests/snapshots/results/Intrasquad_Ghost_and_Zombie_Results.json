@@ -87,6 +87,128 @@
   },
   "meet_date": "2022-11-01",
   "meet_name": "GTSC Ghost and Zombie Intrasquad",
+  "place_times": [
+    {
+      "champion": "2:06.07",
+      "eighth": null,
+      "event": "200 IM",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "24.34",
+      "eighth": "27.80",
+      "event": "50 Fly",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:57.40",
+      "eighth": null,
+      "event": "200 Free",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "58.25",
+      "eighth": null,
+      "event": "100 Back",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "29.02",
+      "eighth": "38.07",
+      "event": "50 Breast",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:35.50",
+      "eighth": null,
+      "event": "200 Fly",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "50.21",
+      "eighth": "57.41",
+      "event": "100 Free",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "4:40.09",
+      "eighth": null,
+      "event": "400 IM",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "6:02.57",
+      "eighth": null,
+      "event": "500 Free",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:02.90",
+      "eighth": null,
+      "event": "100 Breast",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "23.58",
+      "eighth": "26.88",
+      "event": "50 Free",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "54.82",
+      "eighth": "1:09.91",
+      "event": "100 Fly",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "28.57",
+      "eighth": null,
+      "event": "50 Back",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:18.09",
+      "eighth": null,
+      "event": "200 Breast",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "57.78",
+      "eighth": "1:12.82",
+      "event": "100 IM",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    }
+  ],
   "relay_results": [],
   "results": [
     {

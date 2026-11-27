@@ -154,7 +154,7 @@ const ICON_BUTTON =
   "relative inline-flex h-5 w-5 shrink-0 items-center justify-center rounded text-foreground-tertiary transition-colors hover:bg-fill hover:text-foreground disabled:opacity-50"
 
 const INPUT =
-  "h-7 rounded-md border border-border bg-background px-1.5 font-mono text-sm tabular-nums text-foreground outline-none focus:border-primary disabled:opacity-60"
+  "h-7 rounded-md border border-border bg-background px-1.5 font-mono text-sm tabular-nums text-foreground outline-none disabled:opacity-60"
 
 const NUMBER_INPUT = `${INPUT} w-11 text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`
 
@@ -307,7 +307,7 @@ export function RoundSelect({ editor }: { editor: HeatLaneEditor }) {
       autoFocus
       value={editor.form.round}
       onChange={(e) => editor.setForm((f) => ({ ...f, round: e.target.value as Form["round"] }))}
-      className="h-7 rounded-md border border-border bg-background px-1.5 text-sm text-foreground outline-none focus:border-primary disabled:opacity-60"
+      className="h-7 rounded-md border border-border bg-background px-1.5 text-sm text-foreground outline-none disabled:opacity-60"
     >
       <option value="">Not set</option>
       {SUMMARY_ROUNDS.map((r) => (

@@ -28,9 +28,16 @@ import { athletePath, isCuid } from "@/lib/slug"
 import StatsHighlights from "@/components/ui/StatsHighlights"
 import { computeAthleteHighlights } from "@/lib/athlete/athlete-stats"
 import { loadRelaySplits } from "@/lib/meet/relay-splits"
+import { athletePageMetadata } from "@/lib/page-title"
+import { isPlaceholderEmail } from "@/lib/auth/gatech-email"
 
 /** Season highlights card above the personal bests — hidden for now, coming back later. */
 const SHOW_SEASON_HIGHLIGHTS: boolean = false
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id: param } = await params
+  return athletePageMetadata(param)
+}
 
 export default async function AthletePage({ params }: { params: Promise<{ id: string }> }) {
     const { id: param } = await params
@@ -124,7 +131,9 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
   const yearLabel =
     year &&
     `${formatAcademicYear(year)}${yearSeason !== currentSeason() ? ` (${formatSeasonLabel(yearSeason!)})` : ""}`
-  const meta = [yearLabel, (isCoach || isOwnProfile) && athlete.user?.email].filter(Boolean)
+  // An athlete added without an email has a placeholder, which isn't shown.
+  const email = athlete.user?.email && !isPlaceholderEmail(athlete.user.email) ? athlete.user.email : ""
+  const meta = [yearLabel, (isCoach || isOwnProfile) && email].filter(Boolean)
 
   return (
     <main className="flex flex-col gap-6">
@@ -192,7 +201,7 @@ export default async function AthletePage({ params }: { params: Promise<{ id: st
               athleteId={athlete.id}
               firstName={athlete.firstName}
               lastName={athlete.lastName}
-              email={athlete.user?.email ?? ""}
+              email={email}
               swimCloudIds={athlete.swimCloudIds}
               preferredName={athlete.preferredName}
               gender={athlete.gender}

@@ -92,6 +92,224 @@
   },
   "meet_date": "2019-09-13",
   "meet_name": "GT vs Auburn Dual Meet",
+  "place_times": [
+    {
+      "champion": "29.91",
+      "eighth": "34.13",
+      "event": "50 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "25.51",
+      "eighth": "27.95",
+      "event": "50 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "56.50",
+      "eighth": "1:03.35",
+      "event": "100 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "49.08",
+      "eighth": "52.22",
+      "event": "100 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "33.52",
+      "eighth": "38.50",
+      "event": "50 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "28.90",
+      "eighth": "31.15",
+      "event": "50 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:00.70",
+      "eighth": null,
+      "event": "100 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "52.19",
+      "eighth": "59.41",
+      "event": "100 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:05.78",
+      "eighth": "1:20.15",
+      "event": "100 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "55.49",
+      "eighth": "1:04.39",
+      "event": "100 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "26.46",
+      "eighth": "28.41",
+      "event": "50 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "21.62",
+      "eighth": "23.46",
+      "event": "50 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "29.16"
+    },
+    {
+      "champion": "1:14.12",
+      "eighth": null,
+      "event": "100 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:01.09",
+      "eighth": "1:11.64",
+      "event": "100 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "27.57",
+      "eighth": "31.72",
+      "event": "50 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "23.77",
+      "eighth": "25.44",
+      "event": "50 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:04.05",
+      "eighth": "1:12.08",
+      "event": "100 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "55.40",
+      "eighth": "1:01.96",
+      "event": "100 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:19.47",
+      "eighth": null,
+      "event": "200 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:50.97",
+      "eighth": null,
+      "event": "200 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:07.45",
+      "eighth": null,
+      "event": "200 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:23.65",
+      "eighth": null,
+      "event": "200 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:16.61",
+      "eighth": null,
+      "event": "200 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:59.02",
+      "eighth": null,
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:37.00",
+      "eighth": null,
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:48.63",
+      "eighth": null,
+      "event": "200 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:30.38",
+      "eighth": "1:43.59",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    }
+  ],
   "relay_results": [
     {
       "course": "SCY",
@@ -164,7 +382,7 @@
         },
         {
           "leg": 2,
-          "name": "Raines, Laura"
+          "name": "Raines, Laura Clayton"
         },
         {
           "leg": 3,
@@ -417,7 +635,7 @@
       "relaySwimmers": [
         {
           "leg": 1,
-          "name": "Raines, Laura"
+          "name": "Raines, Laura Clayton"
         },
         {
           "leg": 2,
@@ -1220,7 +1438,7 @@
       "course": "SCY",
       "event": "100 Free",
       "gender": "F",
-      "name": "Raines, Laura",
+      "name": "Raines, Laura Clayton",
       "place": 7,
       "points": 12.0,
       "seedTime": "1:01.00",
@@ -2479,7 +2697,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "Raines, Laura",
+      "name": "Raines, Laura Clayton",
       "place": 4,
       "points": 15.0,
       "seedTime": "27.50",

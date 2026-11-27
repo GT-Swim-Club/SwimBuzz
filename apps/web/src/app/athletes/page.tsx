@@ -87,6 +87,8 @@ async function RosterContent({ searchParams, layout }: { searchParams: Promise<R
     )
 }
 
+export const metadata = { title: "Roster" }
+
 export default async function AthletesPage(props: {
     searchParams: Promise<RosterSearchParams>
   }) {

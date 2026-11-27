@@ -87,6 +87,248 @@
   },
   "meet_date": "2024-10-26",
   "meet_name": "2024 CLUB War Eagle Invitational",
+  "place_times": [
+    {
+      "champion": "1:57.22",
+      "eighth": "2:09.57",
+      "event": "200 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:42.63",
+      "eighth": "1:52.02",
+      "event": "200 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "2:07.74"
+    },
+    {
+      "champion": "32.16",
+      "eighth": "34.63",
+      "event": "50 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "37.11"
+    },
+    {
+      "champion": "26.95",
+      "eighth": "29.17",
+      "event": "50 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "31.63"
+    },
+    {
+      "champion": "1:02.95",
+      "eighth": "1:08.41",
+      "event": "100 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:18.97"
+    },
+    {
+      "champion": "53.07",
+      "eighth": "57.33",
+      "event": "100 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "24.49",
+      "eighth": "26.19",
+      "event": "50 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "21.04",
+      "eighth": "22.24",
+      "event": "50 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "22.93"
+    },
+    {
+      "champion": "5:34.71",
+      "eighth": null,
+      "event": "500 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "4:56.99",
+      "eighth": "5:54.97",
+      "event": "500 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:13.77",
+      "eighth": "2:29.53",
+      "event": "200 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:54.75",
+      "eighth": "2:11.35",
+      "event": "200 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:11.55",
+      "eighth": "1:16.73",
+      "event": "100 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:22.22"
+    },
+    {
+      "champion": "1:00.87",
+      "eighth": "1:06.57",
+      "event": "100 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "1:22.62"
+    },
+    {
+      "champion": "1:01.18",
+      "eighth": "1:08.40",
+      "event": "100 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "51.87",
+      "eighth": "55.15",
+      "event": "100 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "1:01.67"
+    },
+    {
+      "champion": "28.08",
+      "eighth": "30.78",
+      "event": "50 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "33.12"
+    },
+    {
+      "champion": "24.28",
+      "eighth": "26.60",
+      "event": "50 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "29.85"
+    },
+    {
+      "champion": "1:03.58",
+      "eighth": "1:07.06",
+      "event": "100 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:11.31"
+    },
+    {
+      "champion": "53.71",
+      "eighth": "59.51",
+      "event": "100 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "1:04.84"
+    },
+    {
+      "champion": "53.81",
+      "eighth": "59.02",
+      "event": "100 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:04.79"
+    },
+    {
+      "champion": "47.43",
+      "eighth": "49.17",
+      "event": "100 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "52.80"
+    },
+    {
+      "champion": "27.56",
+      "eighth": "28.90",
+      "event": "50 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "32.78"
+    },
+    {
+      "champion": "23.70",
+      "eighth": "24.46",
+      "event": "50 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "26.29"
+    },
+    {
+      "champion": "1:55.06",
+      "eighth": "2:05.05",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:37.87",
+      "eighth": "1:42.60",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:41.41",
+      "eighth": "1:52.95",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:27.30",
+      "eighth": "1:33.37",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "3:58.08",
+      "eighth": null,
+      "event": "400 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "3:11.32",
+      "eighth": "3:50.03",
+      "event": "400 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    }
+  ],
   "relay_results": [
     {
       "course": "SCY",
@@ -3178,7 +3420,7 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "F",
-      "name": "Brown, Ella",
+      "name": "Brown, Ella Jane",
       "place": 45,
       "tags": "",
       "team": "Swim Club at Una",
@@ -3840,7 +4082,7 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "M",
-      "name": "Rosales Hernando, Juan",
+      "name": "Rosales Hernando, Juan Jose",
       "place": 55,
       "tags": "",
       "team": "Georgia Tech Swim Club",
@@ -4948,7 +5190,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "McMahon, Ava",
+      "name": "McMahon, Ava Mei",
       "place": 45,
       "seedTime": "30.00",
       "tags": "",
@@ -5382,7 +5624,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "Brown, Ella",
+      "name": "Brown, Ella Jane",
       "place": 85,
       "tags": "",
       "team": "Swim Club at Una",
@@ -6630,7 +6872,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "M",
-      "name": "Rosales Hernando, Juan",
+      "name": "Rosales Hernando, Juan Jose",
       "place": 100,
       "seedTime": "26.80",
       "tags": "",
@@ -6917,7 +7159,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "M",
-      "name": "Myint, Andy",
+      "name": "Myint, Andy Soe",
       "place": 127,
       "tags": "",
       "team": "Swim Club at Georgia State Uni",
@@ -8975,7 +9217,7 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "F",
-      "name": "McMahon, Ava",
+      "name": "McMahon, Ava Mei",
       "place": 27,
       "seedTime": "37.00",
       "tags": "",
@@ -9994,7 +10236,7 @@
       "course": "SCY",
       "event": "100 IM",
       "gender": "F",
-      "name": "McMahon, Ava",
+      "name": "McMahon, Ava Mei",
       "place": 32,
       "seedTime": "1:20.00",
       "tags": "",

@@ -183,11 +183,10 @@ export default function AddAthleteDialog({
 
       <div>
         <label htmlFor="add-athlete-email" className={LABEL}>
-          Email <span className="text-error">*</span>
+          Email
         </label>
         <input
           id="add-athlete-email"
-          required
           type="email"
           value={form.email}
           onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}

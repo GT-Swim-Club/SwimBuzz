@@ -4,6 +4,8 @@ import PracticeEditor from "../PracticeEditor"
 import { getSession } from "@/lib/auth/session"
 import { listManagedPracticeTagNames } from "@/lib/practice/practice-tag-catalog"
 
+export const metadata = { title: "New Practice" }
+
 export default async function NewPracticePage() {
   const session = await getSession()
   if (!session) redirect("/signin?callbackUrl=/practices/new")

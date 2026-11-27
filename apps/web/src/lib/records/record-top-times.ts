@@ -411,7 +411,7 @@ async function teamAllTopTimes(gender: unknown, mode: unknown): Promise<CachedAl
  * PDF. A day at most, so "this season" turns over with the season.
  */
 /** Bump when TeamAllTopTimesResponse's shape or an event label changes: cached entries outlive deploys. */
-const TOP_TIMES_CACHE_VERSION = "8"
+const TOP_TIMES_CACHE_VERSION = "9"
 
 const cachedAllTopTimes = unstable_cache(
   (gender: "F" | "M", mode: TopTimesMode) => teamAllTopTimes(gender, mode),

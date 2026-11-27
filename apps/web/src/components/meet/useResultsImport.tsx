@@ -35,6 +35,8 @@ type ImportResult = {
   nameConfirmations?: NameConfirmation[]
   rosterForPairing?: RosterPairingOption[]
   pairingSeason?: string
+  /** The season had no roster: rosterForPairing is every season's athletes. */
+  pairingAllSeasons?: boolean
   cachedParse?: unknown
   /** Finished SwimPhone scrape; pairing re-applies its results instead of scraping again. */
   scraperJobId?: string
@@ -156,8 +158,10 @@ export function useResultsImport({ meetId, season }: { meetId?: string; season: 
         confirmations,
         roster: data.rosterForPairing ?? [],
         season: data.pairingSeason ?? season,
-        description:
-          "These names matched your team code but not the roster. Pair them to a roster athlete to import their results.",
+        allSeasons: data.pairingAllSeasons,
+        description: data.pairingAllSeasons
+          ? "This season has no roster yet, and these names matched your team code but no athlete from any season. Pair them to an athlete (they'll join this season) to import their results."
+          : "These names matched your team code but not the roster. Pair them to a roster athlete to import their results.",
         occurrenceNoun: ["result", "results"],
         submitVerb: "Import",
         taskLabel: "Importing paired results…",

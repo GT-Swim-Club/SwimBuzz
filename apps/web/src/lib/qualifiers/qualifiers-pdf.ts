@@ -2,13 +2,30 @@ import { jsPDF } from "jspdf"
 import { MEET_HEADER } from "@swimbuzz/shared"
 import { HELVETICA_CAP_HEIGHT } from "@/lib/meet/meet-pdf-details"
 import { pdfText } from "@/lib/meet/roster-summary-pdf"
+import { drawEventOrderTimesPdf } from "@/lib/meet/event-order-pdf"
+import type { EventOrderWithHeats } from "@/lib/meet/event-heats"
+import type { PlaceTimes } from "@/lib/meet/place-times"
 
 const EYEBROW = "Georgia Tech Swim Club"
 
-export type QualifiersPdfRow = { lead: string; time: string; margin: string; meet: string; date: string }
+export type QualifiersPdfRow = {
+  lead: string
+  /** The event's number at Nationals, as a gold badge before the lead (an athlete's events). */
+  eventNumber?: number | null
+  time: string
+  margin: string
+  meet: string
+  date: string
+}
 
 /** An event (its swimmers, fastest first) or an athlete (their events). */
-export type QualifiersPdfSection = { title: string; meta: string; rows: QualifiersPdfRow[] }
+export type QualifiersPdfSection = {
+  title: string
+  /** The event's number at Nationals, as a gold badge before the title (an event's section). */
+  eventNumber?: number | null
+  meta: string
+  rows: QualifiersPdfRow[]
+}
 
 export type QualifiersPdfInput = {
   /** "2027 Nationals Qualifiers" */
@@ -18,12 +35,20 @@ export type QualifiersPdfInput = {
   sections: QualifiersPdfSection[]
   /** Shown instead of the sections when there are none. */
   emptyMessage: string
+  /** The Nationals meet's order of events, drawn under the header before the qualifiers. */
+  eventOrder?: EventOrderWithHeats | null
+  /** Last season's Nationals champion, 8th and 24th place times beside each event, by side. */
+  placeTimes?: ((gender: "F" | "M", event: string) => PlaceTimes | null) | null
+  /** Where those times are from, over the order of events. */
+  placeTimesCaption?: string | null
 }
 
 type RGB = [number, number, number]
 
 // Light-theme brand tokens (variables.css); the PDF is always printed on white.
 const ACCENT: RGB = [140, 107, 56]
+const ACCENT_BORDER: RGB = [203, 188, 165]
+const ACCENT_BG: RGB = [244, 240, 235]
 const INK: RGB = [31, 31, 31]
 const INK_SECONDARY: RGB = [89, 89, 89]
 const INK_TERTIARY: RGB = [140, 140, 140]
@@ -62,13 +87,20 @@ const M = {
   leadMin: px(130),
   leadMax: px(220),
   radius: px(6),
+  /** Event number badges, like the roster summary PDF's: a heading's, then a row's. */
+  sectionBadgeSize: px(20),
+  sectionBadgeTextSize: px(10),
+  rowBadgeSize: px(16),
+  rowBadgeTextSize: px(8.5),
+  badgeGap: px(6),
   footerSize: px(10),
 }
 
 /**
  * Nationals qualifiers as a Letter PDF, matching the page's view: a section per event (its
  * qualifiers fastest first) or per athlete (their cuts), each swim's time, margin under the cut,
- * meet and date in columns, unlabeled. Sections run down the pages, and a section that breaks across
+ * meet and date in columns, unlabeled, after the Nationals order of events when the season has one.
+ * Sections run down the pages, and a section that breaks across
  * pages carries its heading over with "(cont.)".
  */
 export function buildQualifiersPdf(input: QualifiersPdfInput): jsPDF {
@@ -104,12 +136,31 @@ export function buildQualifiersPdf(input: QualifiersPdfInput): jsPDF {
 
   const baselineIn = (top: number, height: number, size: number) => top + height / 2 + size * 0.35
 
+  /** A gold event number badge, centered in the band from `top` of `height`; returns its width. */
+  function badge(number: number, x: number, top: number, height: number, size: number, textSize: number): number {
+    setType("bold", textSize, ACCENT)
+    // Two-digit numbers stay circles; three digits stretch into a pill.
+    const width = Math.max(size, doc.getTextWidth(String(number)) + px(6))
+    const badgeTop = top + (height - size) / 2
+    doc.setDrawColor(...ACCENT_BORDER)
+    doc.setFillColor(...ACCENT_BG)
+    doc.setLineWidth(0.75)
+    doc.roundedRect(x, badgeTop, width, size, size / 2, size / 2, "FD")
+    doc.text(String(number), x + width / 2, baselineIn(badgeTop, size, textSize), { align: "center" })
+    return width
+  }
+
+  /** Room a row's badge takes before its lead text. */
+  const rowBadgeRoom = (row: QualifiersPdfRow) => (row.eventNumber ? M.rowBadgeSize + M.badgeGap : 0)
+
   // ---- columns: the lead as wide as its longest entry (within limits), the meet takes the rest ----
 
   setType("normal", M.textSize)
   const widestLead = Math.max(
     0,
-    ...input.sections.flatMap((section) => section.rows.map((row) => doc.getTextWidth(pdfText(row.lead))))
+    ...input.sections.flatMap((section) =>
+      section.rows.map((row) => doc.getTextWidth(pdfText(row.lead)) + rowBadgeRoom(row))
+    )
   )
   const leadWidth = Math.min(M.leadMax, Math.max(M.leadMin, widestLead + M.cellPadX * 2))
   const timeX = left + leadWidth
@@ -131,6 +182,21 @@ export function buildQualifiersPdf(input: QualifiersPdfInput): jsPDF {
   doc.text(fit(input.details, right - left), left, baseline)
   let y = baseline + M.headerGap
 
+  // The Nationals order of events, a session per row with last year's times, before the qualifiers.
+  if (input.eventOrder) {
+    const bottom = drawEventOrderTimesPdf(doc, input.eventOrder, {
+      top: y,
+      pageLeft: left,
+      pageRight: right,
+      contentBottom,
+      pageTop: M.margin,
+      fit,
+      placeTimes: input.placeTimes,
+      caption: input.placeTimesCaption,
+    })
+    if (bottom !== y) y = bottom + M.headerGap
+  }
+
   if (input.sections.length === 0) {
     setType("normal", M.textSize, INK_SECONDARY)
     doc.text(fit(input.emptyMessage, right - left), left, y + M.textSize)
@@ -151,19 +217,29 @@ export function buildQualifiersPdf(input: QualifiersPdfInput): jsPDF {
     const meta = pdfText(section.meta)
     const metaWidth = doc.getTextWidth(meta)
     doc.text(meta, right - M.cellPadX, baselineIn(y, M.sectionHeight, M.sectionMetaSize), { align: "right" })
+    let titleX = left + M.cellPadX
+    if (section.eventNumber) {
+      titleX +=
+        badge(section.eventNumber, titleX, y, M.sectionHeight, M.sectionBadgeSize, M.sectionBadgeTextSize) +
+        M.badgeGap
+    }
     setType("bold", M.sectionTitleSize)
     const title = fit(
       continued ? `${section.title} (cont.)` : section.title,
-      right - left - metaWidth - M.sectionMetaGap - M.cellPadX * 2
+      right - titleX - metaWidth - M.sectionMetaGap - M.cellPadX
     )
-    doc.text(title, left + M.cellPadX, baselineIn(y, M.sectionHeight, M.sectionTitleSize))
+    doc.text(title, titleX, baselineIn(y, M.sectionHeight, M.sectionTitleSize))
     y += M.sectionHeight
   }
 
   function drawRow(row: QualifiersPdfRow, last: boolean) {
     const at = baselineIn(y, M.rowHeight, M.textSize)
+    let leadX = left + M.cellPadX
+    if (row.eventNumber) {
+      leadX += badge(row.eventNumber, leadX, y, M.rowHeight, M.rowBadgeSize, M.rowBadgeTextSize) + M.badgeGap
+    }
     setType("normal", M.textSize)
-    doc.text(fit(row.lead, leadWidth - M.cellPadX * 2), left + M.cellPadX, at)
+    doc.text(fit(row.lead, left + leadWidth - M.cellPadX - leadX), leadX, at)
     setType("bold", M.textSize)
     doc.text(fit(row.time, M.timeWidth - M.cellPadX * 2), timeX + M.cellPadX, at)
     setType("normal", M.textSize, SUCCESS)

@@ -41,7 +41,7 @@ import {
   unofficialPdfBadgeReserve,
 } from "@/lib/meet/meet-pdf-details"
 import { drawPdfIcon } from "@/lib/meet/pdf-icon"
-import { cleanEventName } from "@/lib/meet/meet-event-order"
+import { drawEventOrderPdf } from "@/lib/meet/event-order-pdf"
 import type { EventOrderWithHeats } from "@/lib/meet/event-heats"
 
 export type RosterSummaryPdfInput = {
@@ -65,7 +65,6 @@ const INK: RGB = [31, 31, 31]
 const INK_SECONDARY: RGB = [89, 89, 89]
 const INK_TERTIARY: RGB = [140, 140, 140]
 const BORDER: RGB = [234, 234, 234]
-const BORDER_SUBTLE: RGB = [228, 228, 231]
 const WHITE: RGB = [255, 255, 255]
 /** Team pills' colors ("GOLD" after a name): the light theme's `--brand-color-team-<tone>-*`. */
 const TEAM_PILL_COLORS: Record<TeamPillTone, { fill: RGB; text: RGB; border: RGB }> = {
@@ -164,21 +163,6 @@ const M = {
   heatLaneGap: px(8),
   columnGap: px(22),
   footerSize: px(10),
-  // Order of events: sessions two across, in the half-page columns the sections use.
-  orderMaxColumns: 2,
-  orderGap: px(10),
-  orderRadius: px(8),
-  // Column heads and rows take the PDF's "SEED" tag and row label sizes.
-  orderSessionHeight: px(28),
-  orderSessionSize: px(11),
-  orderHeadHeight: px(20),
-  orderRowHeight: px(21),
-  orderNumberWidth: px(40),
-  orderPadX: px(10),
-  /** From the WOMEN / MEN head to the HEATS head beside it. */
-  orderHeatsGap: px(12),
-  /** A lone session's table, centered: this much wider than a half-page column. */
-  orderSoloScale: 1.15,
   // Highlights: rows of tiles across the page, like the meet page's carousel.
   tileGap: px(8),
   tileRadius: px(8),
@@ -1253,124 +1237,19 @@ function layoutRosterSummaryPdf(input: RosterSummaryPdfInput, scale: number): js
 
   // ---- order of events: each session a bordered table, Women | Event | Men ----
 
-  function drawOrderOfEvents(order: EventOrderWithHeats, top: number): number {
-    const sessions = order.sessions.filter((session) => session.rows.length > 0)
-    if (sessions.length === 0) return top
-    const columns = M.orderMaxColumns
-    const gap = M.columnGap
-    const width = sessions.length === 1 ? columnWidth * M.orderSoloScale : columnWidth
-    const labelled = (label: string) => label.trim().toLowerCase() !== "order of events"
-    type Session = EventOrderWithHeats["sessions"][number]
-    const boxHeight = (session: Session) =>
-      (labelled(session.label) ? M.orderSessionHeight : 0) + M.orderHeadHeight + session.rows.length * M.orderRowHeight
-    /** One session's box at (x, yy). */
-    function drawBox(session: Session, x: number, yy: number) {
-      const height = boxHeight(session)
-      let rowTop = yy
-      if (labelled(session.label)) {
-        // A gold-tinted title strip with the box's rounded top corners, like the event badges.
-        doc.setFillColor(...ACCENT_BG)
-        doc.roundedRect(x, yy, width, M.orderSessionHeight + M.orderRadius, M.orderRadius, M.orderRadius, "F")
-        doc.setFillColor(...WHITE)
-        doc.rect(x, yy + M.orderSessionHeight, width, M.orderRadius, "F")
-        // Gold capitals, centered over the table.
-        const charSpace = px(0.8)
-        setType("bold", M.orderSessionSize, ACCENT)
-        const title = fit(session.label.toUpperCase(), width - M.orderPadX * 2, charSpace)
-        const titleWidth = doc.getTextWidth(title) + title.length * charSpace
-        doc.text(title, x + (width - titleWidth) / 2, centeredBaseline(yy, M.orderSessionHeight, M.orderSessionSize), {
-          charSpace,
-        })
-        rowTop += M.orderSessionHeight
-        doc.setDrawColor(...ACCENT_BORDER)
-        doc.setLineWidth(0.75)
-        doc.line(x, rowTop, x + width, rowTop)
-      }
-      // Column heads like the "SEED" tag.
-      const headBaseline = centeredBaseline(rowTop, M.orderHeadHeight, M.seedTagSize)
-      const headSpace = px(1)
-      setType("bold", M.seedTagSize, INK_TERTIARY)
-      const headWidth = (head: string) => doc.getTextWidth(head) + head.length * headSpace
-      doc.text("WOMEN", x + M.orderPadX, headBaseline, { charSpace: headSpace })
-      const eventHead = "EVENT"
-      doc.text(eventHead, x + (width - headWidth(eventHead)) / 2, headBaseline, { charSpace: headSpace })
-      const menHead = "MEN"
-      doc.text(menHead, x + width - M.orderPadX - headWidth(menHead), headBaseline, { charSpace: headSpace })
-      // Heat counts, when a heat sheet gives any: a HEATS column inside each event-number column,
-      // the same distance in from both sides.
-      const heatsHead = "HEATS"
-      const hasHeats = session.rows.some((row) => row.womenHeats != null || row.menHeats != null)
-      const heatsInset = M.orderPadX + Math.max(headWidth("WOMEN"), headWidth(menHead)) + M.orderHeatsGap
-      const heatsWidth = headWidth(heatsHead)
-      const womenHeatsCenter = x + heatsInset + heatsWidth / 2
-      const menHeatsCenter = x + width - heatsInset - heatsWidth / 2
-      if (hasHeats) {
-        doc.text(heatsHead, womenHeatsCenter - heatsWidth / 2, headBaseline, { charSpace: headSpace })
-        doc.text(heatsHead, menHeatsCenter - heatsWidth / 2, headBaseline, { charSpace: headSpace })
-      }
-      const eventInset = hasHeats ? heatsInset + heatsWidth + M.orderHeatsGap / 2 : M.orderPadX + M.orderNumberWidth
-      rowTop += M.orderHeadHeight
-      doc.setDrawColor(...BORDER)
-      doc.setLineWidth(0.75)
-      doc.line(x, rowTop, x + width, rowTop)
-      session.rows.forEach((row, r) => {
-        if (r > 0) {
-          doc.setDrawColor(...BORDER_SUBTLE)
-          doc.setLineWidth(0.5)
-          doc.line(x, rowTop, x + width, rowTop)
-        }
-        const rowBaseline = centeredBaseline(rowTop, M.orderRowHeight, M.labelSize)
-        // Event numbers in the badges' gold, events like row labels.
-        setType("bold", M.labelSize, ACCENT)
-        if (row.women != null) doc.text(String(row.women), x + M.orderPadX, rowBaseline)
-        if (row.men != null) doc.text(String(row.men), x + width - M.orderPadX, rowBaseline, { align: "right" })
-        setType("normal", M.labelSize, INK_SECONDARY)
-        if (row.womenHeats != null) doc.text(String(row.womenHeats), womenHeatsCenter, rowBaseline, { align: "center" })
-        if (row.menHeats != null) doc.text(String(row.menHeats), menHeatsCenter, rowBaseline, { align: "center" })
-        setType("normal", M.labelSize, INK)
-        const event = fit(cleanEventName(row.event), width - eventInset * 2)
-        doc.text(event, x + width / 2, rowBaseline, { align: "center" })
-        rowTop += M.orderRowHeight
-      })
-      doc.setDrawColor(...ACCENT_BORDER)
-      doc.setLineWidth(0.75)
-      doc.roundedRect(x, yy, width, height, M.orderRadius, M.orderRadius, "S")
-    }
-
-    // Down the left column, then the right: split where the columns come out most even, in order.
-    const stackHeight = (list: Session[]) =>
-      list.reduce((sum, session, i) => sum + (i > 0 ? M.orderGap : 0) + boxHeight(session), 0)
-    let split = sessions.length
-    let best = Infinity
-    for (let k = 1; k <= sessions.length && columns > 1; k++) {
-      const tallest = Math.max(stackHeight(sessions.slice(0, k)), stackHeight(sessions.slice(k)))
-      if (tallest < best) {
-        best = tallest
-        split = k
-      }
-    }
-    const stacks = [sessions.slice(0, split), sessions.slice(split)]
-    const height = Math.max(...stacks.map(stackHeight))
-    let yy = top
-    // Too tall for what's left under the header: start it on a fresh page.
-    if (yy + height > contentBottom && yy > M.margin) {
-      doc.addPage()
-      yy = M.margin
-    }
-    // A lone session is centered on the page; several fill the columns from the left.
-    const firstX = sessions.length === 1 ? pageLeft + (pageRight - pageLeft - width) / 2 : pageLeft
-    stacks.forEach((stack, column) => {
-      const x = firstX + column * (width + gap)
-      let boxTop = yy
-      for (const session of stack) {
-        drawBox(session, x, boxTop)
-        boxTop += boxHeight(session) + M.orderGap
-      }
+  if (input.eventOrder) {
+    const bottom = drawEventOrderPdf(doc, input.eventOrder, {
+      top: y,
+      pageLeft,
+      pageRight,
+      columnWidth,
+      columnGap: M.columnGap,
+      contentBottom,
+      pageTop: M.margin,
+      fit,
     })
-    return yy + height + M.headerGap
+    if (bottom !== y) y = bottom + M.headerGap
   }
-
-  if (input.eventOrder) y = drawOrderOfEvents(input.eventOrder, y)
 
   // ---- highlights: the carousel's counters as rows of tiles across the page ----
 

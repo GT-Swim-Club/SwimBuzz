@@ -628,7 +628,9 @@ export default function PracticesSidebar({
         }
       >
         {/* Keep the grid slot, but pin its contents independently of page bounce. */}
-        <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden md:fixed md:left-[var(--sidebar-left)] md:top-[var(--sidebar-top)] md:h-[calc(100dvh-var(--workspace-offset,9rem))] md:w-[var(--sidebar-width)]">
+        {/* Not overflow-hidden: the rails scroll themselves, and clipping here would cut off
+            focus rings and hover washes on controls at the sidebar's edges. */}
+        <div className="flex h-full min-h-0 flex-col gap-3 md:fixed md:left-[var(--sidebar-left)] md:top-[var(--sidebar-top)] md:h-[calc(100dvh-var(--workspace-offset,9rem))] md:w-[var(--sidebar-width)]">
           {renderSidebarContent(effectiveWidth)}
         </div>
       </aside>
@@ -694,7 +696,7 @@ export default function PracticesSidebar({
                 <CloseIcon />
               </button>
             </div>
-            <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden">
+            <div className="flex h-full min-h-0 flex-col gap-3">
               {renderSidebarContent(MOBILE_DRAWER_WIDTH)}
             </div>
           </div>

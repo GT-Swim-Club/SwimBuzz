@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "20mb",
     },
+    // Reuse a page already loaded in this tab for 30s when it's opened again, instead of a
+    // function call and DB queries per visit. Server actions (revalidatePath) and router.refresh()
+    // still clear it, so the viewer's own edits show at once.
+    staleTimes: {
+      dynamic: 30,
+    },
   },
   // Must match: Next prefers outputFileTracingRoot when they differ.
   // Relative CSS @imports break with a monorepo turbopack root — import

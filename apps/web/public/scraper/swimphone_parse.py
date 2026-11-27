@@ -235,6 +235,43 @@ def _is_event_table(table) -> bool:
     return "event" in heads and "sex" in heads
 
 
+# Where each field sits in an event table row when the header doesn't say: # | Sex |
+# Event (distance, stroke — one header spanning two cells).
+_DEFAULT_EVENT_COLUMNS = {"num": 0, "sex": 1, "distance": 2, "stroke": 3}
+
+
+def _event_table_columns(table) -> dict[str, int]:
+    """Cell index of each field in an event table's rows, read from its header row.
+
+    Most meets lay rows out as ``# | Sex | Event | Entries | …``, but some add an
+    ``Age Group`` column after Sex (GT vs Auburn 2018, smid 9940), pushing the event
+    one cell to the right. "Event" spans the distance and stroke cells (colspan 2)."""
+    header = next((row for row in table.find_all("tr") if row.find("th")), None)
+    if header is None:
+        return dict(_DEFAULT_EVENT_COLUMNS)
+    columns: dict[str, int] = {}
+    index = 0
+    for th in header.find_all(["th", "td"]):
+        text = th.get_text(" ", strip=True).lower()
+        try:
+            span = max(1, int(th.get("colspan") or 1))
+        except ValueError:
+            span = 1
+        if text == "#" and "num" not in columns:
+            columns["num"] = index
+        elif text == "sex" and "sex" not in columns:
+            columns["sex"] = index
+        elif text == "event" and "distance" not in columns:
+            columns["distance"] = index
+            columns["stroke"] = index + 1
+        elif text == "entries" and "entries" not in columns:
+            columns["entries"] = index
+        index += span
+    if not {"num", "sex", "distance"} <= columns.keys():
+        return dict(_DEFAULT_EVENT_COLUMNS)
+    return columns
+
+
 def _parse_session_dates(soup) -> list[str]:
     """Ordered distinct meet days from the session table on the event order page.
 
@@ -259,6 +296,7 @@ def _parse_session_dates(soup) -> list[str]:
 def parse_event_order(html: str, smid: int, meet_default: str) -> list[SwimPhoneEvent]:
     soup = BeautifulSoup(html, "html.parser")
     events: list[SwimPhoneEvent] = []
+    empty_events: set[int] = set()
 
     event_tables = [t for t in soup.find_all("table") if _is_event_table(t)]
     if not event_tables:
@@ -275,18 +313,27 @@ def parse_event_order(html: str, smid: int, meet_default: str) -> list[SwimPhone
 
     for table in event_tables:
         table_date = table_dates.get(id(table))
+        columns = _event_table_columns(table)
         for row in table.find_all("tr"):
             cells = row.find_all("td")
-            if len(cells) < 5:
+            if len(cells) < 5 or len(cells) <= max(columns.values()):
                 continue
 
-            event_num_text = cells[0].get_text(strip=True)
-            if not event_num_text.isdigit():
+            # A lettered event number ("2B", an age-group split of event 2) is that event.
+            event_num_match = re.fullmatch(
+                r"(\d+)[A-Z]?", cells[columns["num"]].get_text(strip=True), re.I
+            )
+            if not event_num_match:
                 continue
 
-            gender = cells[1].get_text(strip=True)
-            distance_raw = cells[2].get_text(" ", strip=True)
-            stroke_raw = cells[3].get_text(" ", strip=True)
+            entries_col = columns.get("entries")
+            no_entries = (
+                entries_col is not None and cells[entries_col].get_text(strip=True) == "0"
+            )
+
+            gender = cells[columns["sex"]].get_text(strip=True)
+            distance_raw = cells[columns["distance"]].get_text(" ", strip=True)
+            stroke_raw = cells[columns["stroke"]].get_text(" ", strip=True)
             is_relay = "relay" in stroke_raw.lower()
             stroke = _normalize_stroke(stroke_raw)
             if not stroke and not is_relay:
@@ -308,7 +355,7 @@ def parse_event_order(html: str, smid: int, meet_default: str) -> list[SwimPhone
 
             events.append(
                 SwimPhoneEvent(
-                    event_num=int(event_num_text),
+                    event_num=int(event_num_match.group(1)),
                     gender=gender,
                     distance=distance,
                     stroke=stroke,
@@ -319,6 +366,19 @@ def parse_event_order(html: str, smid: int, meet_default: str) -> list[SwimPhone
                     date=table_date,
                 )
             )
+            if no_entries and not results_url:
+                empty_events.add(id(events[-1]))
+
+    # An empty row (no entries, no results) that shares its number with another row is a
+    # placeholder — "13 Men Open 50 Back" beside "13 Women 100 Fly" (smid 9940) — and would
+    # put the wrong number in the meet's order of events. Empty rows with their own number
+    # are kept: they're real events nobody from this meet swam.
+    rows_per_num: dict[int, int] = {}
+    for event in events:
+        rows_per_num[event.event_num] = rows_per_num.get(event.event_num, 0) + 1
+    events = [
+        e for e in events if not (id(e) in empty_events and rows_per_num[e.event_num] > 1)
+    ]
 
     if not events:
         raise SwimPhoneParseError(

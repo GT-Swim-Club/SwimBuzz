@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { importMeetResults, resolveMeetDate } from "@/lib/meet/meet-import"
+import { importMeetResults, resolveMeetDate, resultSwimmerNames } from "@/lib/meet/meet-import"
 import { normalizeNameMappings, normalizeRejectedNames } from "@/lib/athlete/athlete-match"
 import {
   assertMeetNameMatches,
@@ -20,7 +20,7 @@ import { notifyMeetRosterOfInfoDrops } from "@/lib/meet/meet-roster-notify"
 import { notifyNewNationalCuts } from "@/lib/notifications/national-cut-notify"
 import { getSession } from "@/lib/auth/session"
 import { isStaffRole } from "@swimbuzz/shared"
-import { addPairedAthletesToSeason } from "@/lib/athlete/paired-athlete-seasons"
+import { addPairedAthletesToSeason, joinEmptySeasonFromOtherSeasons } from "@/lib/athlete/paired-athlete-seasons"
 
 export const runtime = "nodejs"
 export const maxDuration = 300
@@ -195,6 +195,12 @@ export async function applySwimphoneImportJob(
   const relayResults = coerceParsedRelayResults(scraped.relay_results)
   // Athletes paired from another season join this one before the import reads its roster.
   await addPairedAthletesToSeason(pairing ? pairing.nameMappings : ctx.nameMappings, ctx.season)
+  // A season with no roster yet (a past one): swimmers are matched by name from every season.
+  const { rosterless } = await joinEmptySeasonFromOtherSeasons({
+    season: ctx.season,
+    names: resultSwimmerNames(scraped.results ?? [], relayResults),
+    rejectedNames: pairing ? pairing.rejectedNames : ctx.rejectedNames,
+  })
   // SwimPhone results carry no teams, so the meet's per-team split (resultTeams) stays as it was.
   const { athleteTeams, ...summary } = await importMeetResults({
     season: ctx.season,
@@ -210,6 +216,7 @@ export async function applySwimphoneImportJob(
     pairOnly: Boolean(pairing),
     allResults: pairing ? (scraped.results ?? []) : null,
     allRelayResults: pairing ? relayResults : null,
+    pairAcrossSeasons: rosterless,
   })
   void athleteTeams
 

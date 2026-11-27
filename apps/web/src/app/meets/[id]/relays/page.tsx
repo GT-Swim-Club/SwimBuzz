@@ -33,6 +33,12 @@ import MeetRelaysWorkspace from "./MeetRelaysWorkspace"
 import RelayPageHeader, { relayBackLinkClass, relayEyebrowClass } from "./RelayPageHeader"
 import RelaySummary, { publishedSummaryCards } from "./RelaySummary"
 import ShareRelaysButton from "./ShareRelaysButton"
+import { meetPageMetadata } from "@/lib/page-title"
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id: param } = await params
+  return meetPageMetadata(param, "Relays")
+}
 
 export default async function MeetRelaysPage({
   params,
@@ -45,41 +51,40 @@ export default async function MeetRelaysPage({
   if (!session) {
     redirect(`/signin?callbackUrl=/meets/${encodeURIComponent(param)}/relays`)
   }
-  const [isStaff, viewerAthleteId] = await Promise.all([
+  const [isStaff, viewerAthleteId, meet] = await Promise.all([
     isStaffUi(session.user.role),
     resolveViewerAthleteId(session.user.id),
+    prisma.meet.findFirst({
+      where: { OR: [{ id: param }, { slug: param }] },
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        iconUrl: true,
+        season: true,
+        course: true,
+        createdAt: true,
+        startsAt: true,
+        endsAt: true,
+        timeZone: true,
+        unofficial: true,
+        location: true,
+        school: true,
+        eventOrder: true,
+        resultStatusesSummary: true,
+        relayResultsSummary: true,
+        psychSheetSummary: true,
+        heatSheetSummary: true,
+        finalsHeatSheetSummary: true,
+        entriesSheetSummary: true,
+        signupRelayPreferences: true,
+        finalRoster: true,
+        relayDrafts: true,
+        relayPrelimsFinals: true,
+        swims: { select: { id: true } },
+      },
+    }),
   ])
-
-  const meet = await prisma.meet.findFirst({
-    where: { OR: [{ id: param }, { slug: param }] },
-    select: {
-      id: true,
-      slug: true,
-      name: true,
-      iconUrl: true,
-      season: true,
-      course: true,
-      createdAt: true,
-      startsAt: true,
-      endsAt: true,
-      timeZone: true,
-      unofficial: true,
-      location: true,
-      school: true,
-      eventOrder: true,
-      resultStatusesSummary: true,
-      relayResultsSummary: true,
-      psychSheetSummary: true,
-      heatSheetSummary: true,
-      finalsHeatSheetSummary: true,
-      entriesSheetSummary: true,
-      signupRelayPreferences: true,
-      finalRoster: true,
-      relayDrafts: true,
-      relayPrelimsFinals: true,
-      swims: { select: { id: true } },
-    },
-  })
   if (!meet) notFound()
 
   const meetPath = `/meets/${meet.slug ?? meet.id}`
@@ -92,13 +97,14 @@ export default async function MeetRelaysPage({
   const lastActiveDate = new Date(meet.endsAt ?? meet.startsAt ?? meet.createdAt)
   lastActiveDate.setHours(0, 0, 0, 0)
   const meetHasEnded = lastActiveDate <= yesterday
-  await deleteEndedMeetRelayDrafts(meet, meetHasEnded)
-
-  const seasonAthletes = await prisma.athlete.findMany({
-    where: { seasons: { has: meet.season } },
-    orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
-    select: { id: true, slug: true, firstName: true, lastName: true, preferredName: true, gender: true },
-  })
+  const [, seasonAthletes] = await Promise.all([
+    deleteEndedMeetRelayDrafts(meet, meetHasEnded),
+    prisma.athlete.findMany({
+      where: { seasons: { has: meet.season } },
+      orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+      select: { id: true, slug: true, firstName: true, lastName: true, preferredName: true, gender: true },
+    }),
+  ])
   const relayLineups = buildRelayLineups(meet, seasonAthletes)
   // Staff build relays until the meet ends; anyone can view lineups once a relay exists.
   const canBuild = isStaff && !meetHasEnded

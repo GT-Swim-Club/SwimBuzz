@@ -167,7 +167,7 @@ export default function RichTextField({
     // Prevent default browser behavior of opening links in editor by clicking
       editorProps: {
       attributes: {
-        class: `prose prose-sm max-w-none whitespace-pre-wrap rounded-lg border border-border bg-background p-2 text-sm text-foreground transition-shadow focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-[var(--brand-color-primary)] [&_a]:underline ${className}`,
+        class: `prose prose-sm max-w-none whitespace-pre-wrap rounded-lg border border-border bg-background p-2 text-sm text-foreground transition-shadow [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-[var(--brand-color-primary)] [&_a]:underline ${className}`,
         style: `font-family: inherit; min-height: ${rows * 1.5}rem;`,
       },
       handleClick: (view, pos, event) => {

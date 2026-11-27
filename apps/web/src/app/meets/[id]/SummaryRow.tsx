@@ -16,6 +16,7 @@ import {
 } from "react"
 import { flushSync } from "react-dom"
 import { formatDisplayTime, formatOrdinal } from "@/lib/utils"
+import { EventBadge } from "@/components/meet/EventBadge"
 import SwimDetailModal, { deltaPillClass, formatDelta, type RemoveTimeAction, type SwimDetail } from "./SwimDetailModal"
 import type { HeatLaneEdit } from "./HeatLaneInlineEdit"
 
@@ -122,25 +123,7 @@ function hashMatchesId(id: string) {
   return hashes[hashes.length - 1] === id
 }
 
-/**
- * Without `compact`: 21px with a 10px semibold number, as on the relays page and its PNG. The roster
- * summary passes `compact` to size it to its row density instead.
- */
-export function EventBadge({ number, compact }: { number: number; compact?: boolean }) {
-  return (
-    <span
-      className={`inline-flex shrink-0 items-center justify-center rounded-full border border-accent/45 bg-accent/10 tabular-nums text-accent ${
-        compact === undefined
-          ? "h-[21px] min-w-[21px] px-[3px] text-[10px] font-semibold"
-          : compact
-            ? "h-5 w-5 text-[10px] font-semibold"
-            : "h-[26px] w-[26px] text-[11px] font-semibold"
-      }`}
-    >
-      {number}
-    </span>
-  )
-}
+export { EventBadge }
 
 /**
  * The row's right-hand block: delta, time and place — or seed and seed rank — in fixed columns,

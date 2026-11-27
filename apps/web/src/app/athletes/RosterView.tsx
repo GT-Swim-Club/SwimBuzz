@@ -186,8 +186,8 @@ export default function RosterView({
                 : "No athletes found."}
         </div>
       ) : (
-        // The A–Z rail sits beside the list, or out in the page's right margin once that's wide
-        // enough to hold it (see JumpRail) — keep in step with RosterSkeleton.
+        // The A–Z rail sits just right of the list, out in the page's right margin as far as it
+        // fits (see JumpRail) — keep in step with RosterSkeleton.
         <div className={JUMP_RAIL_LAYOUT_CLASS}>
           <div className="min-w-0 flex-1">
             {layout === "list" ? (
@@ -234,7 +234,7 @@ function RosterTable({ rows, showGender, showStatus }: { rows: Row[]; showGender
             key={athlete.id}
             id={anchor}
             href={athletePath(athlete.slug ?? athlete.id)}
-            className={`group grid scroll-mt-32 items-center gap-4 border-t border-border px-4 py-2.5 text-base leading-[22px] text-foreground-secondary transition-colors hover:bg-background-hover sm:px-6 ${cols} ${
+            className={`group grid items-center gap-4 border-t border-border px-4 py-2.5 text-base leading-[22px] text-foreground-secondary transition-colors hover:bg-background-hover sm:px-6 ${cols} ${
               isYou ? "bg-primary/5" : ""
             }`}
           >

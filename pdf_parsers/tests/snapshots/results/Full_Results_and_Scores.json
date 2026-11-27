@@ -122,6 +122,360 @@
   },
   "meet_date": "2018-04-06",
   "meet_name": "2018 Collegiate Club Swim & Dive Nationals",
+  "place_times": [
+    {
+      "champion": "4:36.10",
+      "eighth": "4:55.42",
+      "event": "400 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "5:32.60"
+    },
+    {
+      "champion": "4:03.12",
+      "eighth": "4:23.36",
+      "event": "400 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "4:47.91"
+    },
+    {
+      "champion": "2:06.57",
+      "eighth": "2:14.87",
+      "event": "200 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "2:20.70"
+    },
+    {
+      "champion": "1:47.77",
+      "eighth": "1:54.37",
+      "event": "200 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "2:01.00"
+    },
+    {
+      "champion": "2:08.05",
+      "eighth": "2:19.32",
+      "event": "200 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:49.23",
+      "eighth": "1:56.74",
+      "event": "200 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "2:05.86"
+    },
+    {
+      "champion": "2:23.22",
+      "eighth": "2:30.88",
+      "event": "200 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "2:38.97"
+    },
+    {
+      "champion": "2:08.77",
+      "eighth": "2:10.51",
+      "event": "200 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "2:17.04"
+    },
+    {
+      "champion": "5:11.77",
+      "eighth": "5:29.34",
+      "event": "500 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "5:50.09"
+    },
+    {
+      "champion": "4:35.79",
+      "eighth": "4:49.58",
+      "event": "500 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "5:01.70"
+    },
+    {
+      "champion": "25.28",
+      "eighth": null,
+      "event": "50 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "27.53"
+    },
+    {
+      "champion": "22.02",
+      "eighth": "22.78",
+      "event": "50 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "23.45"
+    },
+    {
+      "champion": "2:11.13",
+      "eighth": "2:15.67",
+      "event": "200 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "2:20.16"
+    },
+    {
+      "champion": "1:52.54",
+      "eighth": "1:56.92",
+      "event": "200 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "2:01.65"
+    },
+    {
+      "champion": "24.04",
+      "eighth": "24.62",
+      "event": "50 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "25.50"
+    },
+    {
+      "champion": "20.68",
+      "eighth": "20.99",
+      "event": "50 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "21.63"
+    },
+    {
+      "champion": "1:05.06",
+      "eighth": "1:08.41",
+      "event": "100 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:11.20"
+    },
+    {
+      "champion": "56.50",
+      "eighth": "58.72",
+      "event": "100 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "1:00.29"
+    },
+    {
+      "champion": "1:52.87",
+      "eighth": "1:59.78",
+      "event": "200 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "2:04.08"
+    },
+    {
+      "champion": "1:41.78",
+      "eighth": null,
+      "event": "200 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "1:47.39"
+    },
+    {
+      "champion": "57.76",
+      "eighth": "59.94",
+      "event": "100 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:03.05"
+    },
+    {
+      "champion": "48.67",
+      "eighth": null,
+      "event": "100 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "53.98"
+    },
+    {
+      "champion": "10:51.90",
+      "eighth": "11:52.83",
+      "event": "1000 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "9:35.07",
+      "eighth": "10:11.16",
+      "event": "1000 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "10:43.62"
+    },
+    {
+      "champion": "27.05",
+      "eighth": "28.38",
+      "event": "50 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "29.69"
+    },
+    {
+      "champion": "23.42",
+      "eighth": "24.33",
+      "event": "50 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "25.31"
+    },
+    {
+      "champion": "56.77",
+      "eighth": null,
+      "event": "100 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:02.14"
+    },
+    {
+      "champion": "48.56",
+      "eighth": "50.85",
+      "event": "100 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "51.98"
+    },
+    {
+      "champion": "29.86",
+      "eighth": "31.14",
+      "event": "50 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "32.68"
+    },
+    {
+      "champion": "26.22",
+      "eighth": "27.00",
+      "event": "50 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "27.47"
+    },
+    {
+      "champion": "51.81",
+      "eighth": null,
+      "event": "100 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "55.74"
+    },
+    {
+      "champion": "45.43",
+      "eighth": "46.95",
+      "event": "100 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "47.75"
+    },
+    {
+      "champion": "58.97",
+      "eighth": "1:02.35",
+      "event": "100 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:04.05"
+    },
+    {
+      "champion": "51.36",
+      "eighth": "53.09",
+      "event": "100 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "54.54"
+    },
+    {
+      "champion": "7:58.18",
+      "eighth": "8:28.75",
+      "event": "800 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": "9:08.36"
+    },
+    {
+      "champion": "6:55.05",
+      "eighth": "7:11.80",
+      "event": "800 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": "7:34.13"
+    },
+    {
+      "champion": "3:58.66",
+      "eighth": "4:12.39",
+      "event": "400 Medley Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": "4:24.36"
+    },
+    {
+      "champion": "3:22.96",
+      "eighth": "3:32.09",
+      "event": "400 Medley Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": "3:38.42"
+    },
+    {
+      "champion": "1:50.39",
+      "eighth": "1:52.47",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": "1:57.95"
+    },
+    {
+      "champion": "1:31.76",
+      "eighth": "1:35.97",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": "1:38.47"
+    },
+    {
+      "champion": "3:35.47",
+      "eighth": "3:45.78",
+      "event": "400 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": "3:53.86"
+    },
+    {
+      "champion": "3:05.69",
+      "eighth": "3:12.31",
+      "event": "400 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": "3:17.32"
+    },
+    {
+      "champion": "1:38.47",
+      "eighth": "1:42.12",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": "1:45.80"
+    },
+    {
+      "champion": "1:23.65",
+      "eighth": "1:26.64",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": "1:28.79"
+    }
+  ],
   "relay_results": [
     {
       "course": "SCY",
@@ -33773,7 +34127,7 @@
       "course": "SCY",
       "event": "200 Back",
       "gender": "F",
-      "name": "Baudinet, Mary",
+      "name": "Baudinet, Mary Helen",
       "place": 31,
       "tags": "",
       "team": "VCS",
@@ -39133,7 +39487,7 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "F",
-      "name": "Cannon, Kellie",
+      "name": "Cannon, Kellie Ann",
       "place": 158,
       "tags": "P",
       "team": "UCONN",
@@ -39433,7 +39787,7 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "F",
-      "name": "Comas, Mary",
+      "name": "Comas, Mary Kate",
       "place": 187,
       "tags": "P",
       "team": "TUSC",
@@ -45043,7 +45397,7 @@
       "course": "SCY",
       "event": "200 IM",
       "gender": "F",
-      "name": "Erlandsen, Mary",
+      "name": "Erlandsen, Mary Katharine",
       "place": 63,
       "tags": "P",
       "team": "LUM",
@@ -49083,7 +49437,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "Cannon, Kellie",
+      "name": "Cannon, Kellie Ann",
       "place": 238,
       "tags": "P",
       "team": "UCONN",
@@ -49543,7 +49897,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "Comas, Mary",
+      "name": "Comas, Mary Kate",
       "place": 284,
       "tags": "P",
       "team": "TUSC",
@@ -50453,7 +50807,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "DeWitt, Mary",
+      "name": "DeWitt, Mary Elizabeth",
       "place": null,
       "tags": "P",
       "team": "XUSC",
@@ -52423,7 +52777,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "M",
-      "name": "Liew, Zeng",
+      "name": "Liew, Zeng Fung",
       "place": 150,
       "tags": "P",
       "team": "SCUCD",
@@ -52973,7 +53327,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "M",
-      "name": "Reynolds, Mark",
+      "name": "Reynolds, Mark Reynolds",
       "place": 205,
       "tags": "P",
       "team": "UBUF",
@@ -56743,7 +57097,7 @@
       "course": "SCY",
       "event": "100 Breast",
       "gender": "F",
-      "name": "Erlandsen, Mary",
+      "name": "Erlandsen, Mary Katharine",
       "place": 63,
       "tags": "P",
       "team": "LUM",
@@ -59083,7 +59437,7 @@
       "course": "SCY",
       "event": "100 Breast",
       "gender": "M",
-      "name": "Liew, Zeng",
+      "name": "Liew, Zeng Fung",
       "place": 76,
       "tags": "P",
       "team": "SCUCD",
@@ -60143,7 +60497,7 @@
       "course": "SCY",
       "event": "100 Breast",
       "gender": "M",
-      "name": "Reynolds, Mark",
+      "name": "Reynolds, Mark Reynolds",
       "place": 182,
       "tags": "P",
       "team": "UBUF",
@@ -65683,7 +66037,7 @@
       "course": "SCY",
       "event": "100 Back",
       "gender": "F",
-      "name": "Baudinet, Mary",
+      "name": "Baudinet, Mary Helen",
       "place": 80,
       "tags": "P",
       "team": "VCS",
@@ -66173,7 +66527,7 @@
       "course": "SCY",
       "event": "100 Back",
       "gender": "F",
-      "name": "Cannon, Kellie",
+      "name": "Cannon, Kellie Ann",
       "place": 129,
       "tags": "P",
       "team": "UCONN",
@@ -66333,7 +66687,7 @@
       "course": "SCY",
       "event": "100 Back",
       "gender": "F",
-      "name": "Comas, Mary",
+      "name": "Comas, Mary Kate",
       "place": 145,
       "tags": "P",
       "team": "TUSC",
@@ -70933,7 +71287,7 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "F",
-      "name": "Baudinet, Mary",
+      "name": "Baudinet, Mary Helen",
       "place": 100,
       "tags": "P",
       "team": "VCS",
@@ -71573,7 +71927,7 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "F",
-      "name": "Comas, Mary",
+      "name": "Comas, Mary Kate",
       "place": 164,
       "tags": "P",
       "team": "TUSC",
@@ -72503,7 +72857,7 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "F",
-      "name": "DeWane, Mary",
+      "name": "DeWane, Mary Katherine",
       "place": 257,
       "tags": "P",
       "team": "HCS",
@@ -79563,7 +79917,7 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "F",
-      "name": "Erlandsen, Mary",
+      "name": "Erlandsen, Mary Katharine",
       "place": 63,
       "tags": "P",
       "team": "LUM",
@@ -81513,7 +81867,7 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "M",
-      "name": "Liew, Zeng",
+      "name": "Liew, Zeng Fung",
       "place": 16,
       "tags": "F",
       "team": "SCUCD",
@@ -81743,7 +82097,7 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "M",
-      "name": "Liew, Zeng",
+      "name": "Liew, Zeng Fung",
       "place": 19,
       "tags": "P",
       "team": "SCUCD",
@@ -87003,7 +87357,7 @@
       "course": "SCY",
       "event": "100 Free",
       "gender": "F",
-      "name": "Cannon, Kellie",
+      "name": "Cannon, Kellie Ann",
       "place": 207,
       "tags": "P",
       "team": "UCONN",
@@ -91273,7 +91627,7 @@
       "course": "SCY",
       "event": "100 Free",
       "gender": "M",
-      "name": "Reynolds, Mark",
+      "name": "Reynolds, Mark Reynolds",
       "place": 252,
       "tags": "P",
       "team": "UBUF",
@@ -94303,7 +94657,7 @@
       "course": "SCY",
       "event": "100 IM",
       "gender": "F",
-      "name": "Erlandsen, Mary",
+      "name": "Erlandsen, Mary Katharine",
       "place": 137,
       "tags": "P",
       "team": "LUM",
@@ -94463,7 +94817,7 @@
       "course": "SCY",
       "event": "100 IM",
       "gender": "F",
-      "name": "Baudinet, Mary",
+      "name": "Baudinet, Mary Helen",
       "place": 153,
       "tags": "P",
       "team": "VCS",
@@ -95893,7 +96247,7 @@
       "course": "SCY",
       "event": "100 IM",
       "gender": "F",
-      "name": "Demmin, Mary",
+      "name": "Demmin, Mary Elizabeth",
       "place": 296,
       "tags": "P",
       "team": "RADU",
@@ -99658,6 +100012,66 @@
       "tags": "P",
       "team": "VTECH",
       "time": "NS"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Zelko, Austin",
+      "place": 1,
+      "tags": "S",
+      "team": "PSU",
+      "time": "23.11"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Fly",
+      "gender": "M",
+      "name": "Reiter, Ben",
+      "place": 2,
+      "tags": "S",
+      "team": "UNCCH",
+      "time": "23.56"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Sterns, Andrew",
+      "place": 1,
+      "tags": "S",
+      "team": "AUB",
+      "time": "59.14"
+    },
+    {
+      "course": "SCY",
+      "event": "100 Breast",
+      "gender": "M",
+      "name": "Frank, Jonathan",
+      "place": 2,
+      "tags": "S",
+      "team": "UCONN",
+      "time": "59.65"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Wasek, Jessica",
+      "place": 1,
+      "tags": "S",
+      "team": "SRUS",
+      "time": "29.55"
+    },
+    {
+      "course": "SCY",
+      "event": "50 Back",
+      "gender": "F",
+      "name": "Glisan, Sarah",
+      "place": 2,
+      "tags": "S",
+      "team": "PSU",
+      "time": "29.78"
     }
   ],
   "team_scores": {

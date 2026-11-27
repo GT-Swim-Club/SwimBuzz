@@ -102,6 +102,256 @@
   },
   "meet_date": "2018-02-24",
   "meet_name": "Music City Invitational",
+  "place_times": [
+    {
+      "champion": "55.71",
+      "eighth": "58.78",
+      "event": "100 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:02.40"
+    },
+    {
+      "champion": "48.31",
+      "eighth": "49.65",
+      "event": "100 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "52.76"
+    },
+    {
+      "champion": "30.92",
+      "eighth": "32.98",
+      "event": "50 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "36.35"
+    },
+    {
+      "champion": "25.66",
+      "eighth": "27.13",
+      "event": "50 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "32.43"
+    },
+    {
+      "champion": "1:10.12",
+      "eighth": "1:17.84",
+      "event": "100 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:00.11",
+      "eighth": "1:04.11",
+      "event": "100 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "1:08.97"
+    },
+    {
+      "champion": "27.81",
+      "eighth": "29.23",
+      "event": "50 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "31.82"
+    },
+    {
+      "champion": "23.40",
+      "eighth": "25.23",
+      "event": "50 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "26.59"
+    },
+    {
+      "champion": "2:02.47",
+      "eighth": "2:16.73",
+      "event": "200 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:46.29",
+      "eighth": "1:51.67",
+      "event": "200 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "2:01.67"
+    },
+    {
+      "champion": "1:04.00",
+      "eighth": "1:10.55",
+      "event": "100 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:19.43"
+    },
+    {
+      "champion": "56.05",
+      "eighth": "58.73",
+      "event": "100 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "1:03.13"
+    },
+    {
+      "champion": "13.98",
+      "eighth": "27.05",
+      "event": "50 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "28.45"
+    },
+    {
+      "champion": "22.18",
+      "eighth": "22.80",
+      "event": "50 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "23.83"
+    },
+    {
+      "champion": "1:00.49",
+      "eighth": "1:09.99",
+      "event": "100 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "54.85",
+      "eighth": "58.24",
+      "event": "100 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "1:08.18"
+    },
+    {
+      "champion": "31.65",
+      "eighth": "36.37",
+      "event": "50 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "39.31"
+    },
+    {
+      "champion": "28.10",
+      "eighth": "29.35",
+      "event": "50 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "31.78"
+    },
+    {
+      "champion": "1:03.64",
+      "eighth": "1:08.73",
+      "event": "100 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "52.69",
+      "eighth": "56.67",
+      "event": "100 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:18.60",
+      "eighth": "2:26.45",
+      "event": "200 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:59.52",
+      "eighth": "2:10.65",
+      "event": "200 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "5:14.80",
+      "eighth": null,
+      "event": "500 Free",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:55.54",
+      "eighth": null,
+      "event": "200 Back",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:20.58",
+      "eighth": "3:07.97",
+      "event": "200 Breast",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:02.78",
+      "eighth": null,
+      "event": "200 Fly",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "4:30.69",
+      "eighth": null,
+      "event": "400 IM",
+      "gender": "X",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:55.97",
+      "eighth": "2:06.70",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": "2:34.46"
+    },
+    {
+      "champion": "1:38.66",
+      "eighth": "1:44.29",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": "1:55.82"
+    },
+    {
+      "champion": "1:44.91",
+      "eighth": "1:55.87",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:28.26",
+      "eighth": "1:33.68",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    }
+  ],
   "relay_results": [
     {
       "course": "SCY",
@@ -3164,6 +3414,7 @@
       "gender": "F",
       "name": "Durham, Rebecca",
       "place": 2,
+      "seedTime": "57.69",
       "splits": [
         {
           "distance": 50,
@@ -3184,6 +3435,7 @@
       "gender": "F",
       "name": "Knapp, Lindsay",
       "place": 3,
+      "seedTime": "56.69",
       "splits": [
         {
           "distance": 50,
@@ -3204,6 +3456,7 @@
       "gender": "F",
       "name": "Kennedy, Kaitlyn",
       "place": 4,
+      "seedTime": "58.34",
       "splits": [
         {
           "distance": 50,
@@ -3224,6 +3477,7 @@
       "gender": "F",
       "name": "Smith, Sabrina",
       "place": 5,
+      "seedTime": "58.00",
       "splits": [
         {
           "distance": 50,
@@ -3244,6 +3498,7 @@
       "gender": "F",
       "name": "Umbarger, Taylor",
       "place": 6,
+      "seedTime": "58.15",
       "splits": [
         {
           "distance": 50,
@@ -3264,6 +3519,7 @@
       "gender": "F",
       "name": "Laffey, Makenna",
       "place": 7,
+      "seedTime": "58.69",
       "splits": [
         {
           "distance": 50,
@@ -3284,6 +3540,7 @@
       "gender": "F",
       "name": "Franchi, Madeleine",
       "place": 8,
+      "seedTime": "59.00",
       "splits": [
         {
           "distance": 50,
@@ -3304,6 +3561,7 @@
       "gender": "F",
       "name": "Chafin, Holly",
       "place": 9,
+      "seedTime": "1:02.59",
       "splits": [
         {
           "distance": 50,
@@ -3324,6 +3582,7 @@
       "gender": "F",
       "name": "Macdonald, Mackenzie",
       "place": 10,
+      "seedTime": "56.80",
       "splits": [
         {
           "distance": 50,
@@ -3364,6 +3623,7 @@
       "gender": "F",
       "name": "McDermott, Maggie",
       "place": 12,
+      "seedTime": "59.90",
       "splits": [
         {
           "distance": 50,
@@ -3384,6 +3644,7 @@
       "gender": "F",
       "name": "Sparrow, Kat",
       "place": 13,
+      "seedTime": "59.50",
       "splits": [
         {
           "distance": 50,
@@ -3404,6 +3665,7 @@
       "gender": "F",
       "name": "Stelter, Gretchen",
       "place": 14,
+      "seedTime": "57.00",
       "splits": [
         {
           "distance": 50,
@@ -3424,6 +3686,7 @@
       "gender": "F",
       "name": "Medrano, Camila",
       "place": 15,
+      "seedTime": "1:06.69",
       "splits": [
         {
           "distance": 50,
@@ -3464,6 +3727,7 @@
       "gender": "F",
       "name": "Asip, Lexi",
       "place": 17,
+      "seedTime": "1:00.00",
       "splits": [
         {
           "distance": 50,
@@ -3484,6 +3748,7 @@
       "gender": "F",
       "name": "Hummel, Christina",
       "place": 18,
+      "seedTime": "59.00",
       "splits": [
         {
           "distance": 50,
@@ -3504,6 +3769,7 @@
       "gender": "F",
       "name": "Donovan, Katie",
       "place": 19,
+      "seedTime": "1:01.49",
       "splits": [
         {
           "distance": 50,
@@ -3524,6 +3790,7 @@
       "gender": "F",
       "name": "Spencer, Julia",
       "place": 20,
+      "seedTime": "1:02.14",
       "splits": [
         {
           "distance": 50,
@@ -3544,6 +3811,7 @@
       "gender": "F",
       "name": "Dragon, Haylee",
       "place": 21,
+      "seedTime": "1:03.84",
       "splits": [
         {
           "distance": 50,
@@ -3564,6 +3832,7 @@
       "gender": "F",
       "name": "McMullen, Haley",
       "place": 22,
+      "seedTime": "1:02.41",
       "splits": [
         {
           "distance": 50,
@@ -3584,6 +3853,7 @@
       "gender": "F",
       "name": "Gugliotta, Gina",
       "place": 23,
+      "seedTime": "1:01.47",
       "splits": [
         {
           "distance": 50,
@@ -3604,6 +3874,7 @@
       "gender": "F",
       "name": "Moschella, Emily",
       "place": 24,
+      "seedTime": "1:02.69",
       "splits": [
         {
           "distance": 50,
@@ -3624,6 +3895,7 @@
       "gender": "F",
       "name": "Kemmerly, Christine",
       "place": 25,
+      "seedTime": "1:02.31",
       "splits": [
         {
           "distance": 50,
@@ -3664,6 +3936,7 @@
       "gender": "F",
       "name": "Skaines, Nikki",
       "place": 27,
+      "seedTime": "1:00.13",
       "splits": [
         {
           "distance": 50,
@@ -3724,6 +3997,7 @@
       "gender": "F",
       "name": "Hoover, Annalise",
       "place": 30,
+      "seedTime": "1:05.00",
       "splits": [
         {
           "distance": 50,
@@ -3764,6 +4038,7 @@
       "gender": "F",
       "name": "Ramia, Zoe",
       "place": 32,
+      "seedTime": "1:03.00",
       "splits": [
         {
           "distance": 50,
@@ -3784,6 +4059,7 @@
       "gender": "F",
       "name": "Ortega, Claudia",
       "place": 33,
+      "seedTime": "10:02.69",
       "splits": [
         {
           "distance": 50,
@@ -3804,6 +4080,7 @@
       "gender": "F",
       "name": "Zukaitis, Jillien",
       "place": 34,
+      "seedTime": "1:06.20",
       "splits": [
         {
           "distance": 50,
@@ -3864,6 +4141,7 @@
       "gender": "F",
       "name": "Flomerfelt, Belle",
       "place": 37,
+      "seedTime": "1:02.00",
       "splits": [
         {
           "distance": 50,
@@ -3924,6 +4202,7 @@
       "gender": "F",
       "name": "Wright, Irene",
       "place": 40,
+      "seedTime": "1:06.00",
       "splits": [
         {
           "distance": 50,
@@ -3944,6 +4223,7 @@
       "gender": "F",
       "name": "Smith, Caroline",
       "place": 41,
+      "seedTime": "1:06.25",
       "splits": [
         {
           "distance": 50,
@@ -3964,6 +4244,7 @@
       "gender": "F",
       "name": "Foster, Darby",
       "place": 42,
+      "seedTime": "1:04.39",
       "splits": [
         {
           "distance": 50,
@@ -4004,6 +4285,7 @@
       "gender": "F",
       "name": "Ross, Chloe",
       "place": 44,
+      "seedTime": "1:12.00",
       "splits": [
         {
           "distance": 50,
@@ -4084,6 +4366,7 @@
       "gender": "F",
       "name": "Lee, Patricia",
       "place": 48,
+      "seedTime": "1:06.46",
       "splits": [
         {
           "distance": 50,
@@ -4104,6 +4387,7 @@
       "gender": "F",
       "name": "von Hollen, Katie",
       "place": 49,
+      "seedTime": "1:06.00",
       "splits": [
         {
           "distance": 50,
@@ -4124,6 +4408,7 @@
       "gender": "F",
       "name": "Tomasko, Amanda",
       "place": 50,
+      "seedTime": "1:10.50",
       "splits": [
         {
           "distance": 50,
@@ -4164,6 +4449,7 @@
       "gender": "F",
       "name": "Williams, Casey",
       "place": 52,
+      "seedTime": "1:17.22",
       "splits": [
         {
           "distance": 50,
@@ -4224,6 +4510,7 @@
       "gender": "F",
       "name": "Cantor, Isabella",
       "place": 55,
+      "seedTime": "1:08.00",
       "splits": [
         {
           "distance": 50,
@@ -4244,6 +4531,7 @@
       "gender": "F",
       "name": "Brozynski, Rachael",
       "place": 56,
+      "seedTime": "1:14.44",
       "splits": [
         {
           "distance": 50,
@@ -4264,6 +4552,7 @@
       "gender": "F",
       "name": "Miller, Meghan",
       "place": 57,
+      "seedTime": "1:27.88",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "1:29.15"
@@ -4274,6 +4563,7 @@
       "gender": "F",
       "name": "Hopkins, Nadia",
       "place": 58,
+      "seedTime": "1:50.67",
       "splits": [
         {
           "distance": 50,
@@ -4294,6 +4584,7 @@
       "gender": "M",
       "name": "Manning, Liam",
       "place": 1,
+      "seedTime": "48.23",
       "splits": [
         {
           "distance": 50,
@@ -4314,6 +4605,7 @@
       "gender": "M",
       "name": "Riordan, Bryan",
       "place": 2,
+      "seedTime": "50.00",
       "splits": [
         {
           "distance": 50,
@@ -4354,6 +4646,7 @@
       "gender": "M",
       "name": "Lumley, Isaac",
       "place": 4,
+      "seedTime": "50.00",
       "splits": [
         {
           "distance": 50,
@@ -4374,6 +4667,7 @@
       "gender": "M",
       "name": "Perry, Damon",
       "place": 5,
+      "seedTime": "50.10",
       "splits": [
         {
           "distance": 50,
@@ -4394,6 +4688,7 @@
       "gender": "M",
       "name": "Srdanovic, Ivan",
       "place": 6,
+      "seedTime": "50.10",
       "splits": [
         {
           "distance": 50,
@@ -4414,6 +4709,7 @@
       "gender": "M",
       "name": "Chou, Max",
       "place": 7,
+      "seedTime": "50.00",
       "splits": [
         {
           "distance": 50,
@@ -4454,6 +4750,7 @@
       "gender": "M",
       "name": "Grunert, Ryan",
       "place": 9,
+      "seedTime": "51.32",
       "splits": [
         {
           "distance": 50,
@@ -4474,6 +4771,7 @@
       "gender": "M",
       "name": "Niu, Rick",
       "place": 10,
+      "seedTime": "49.99",
       "splits": [
         {
           "distance": 50,
@@ -4494,6 +4792,7 @@
       "gender": "M",
       "name": "Vester, Samuel",
       "place": 11,
+      "seedTime": "45.71",
       "splits": [
         {
           "distance": 50,
@@ -4514,6 +4813,7 @@
       "gender": "M",
       "name": "Jacobs, Matt",
       "place": 12,
+      "seedTime": "1:09.00",
       "splits": [
         {
           "distance": 50,
@@ -4554,6 +4854,7 @@
       "gender": "M",
       "name": "Huddleston, John",
       "place": 14,
+      "seedTime": "52.00",
       "splits": [
         {
           "distance": 50,
@@ -4574,6 +4875,7 @@
       "gender": "M",
       "name": "Ting, Gabriel",
       "place": 15,
+      "seedTime": "49.59",
       "splits": [
         {
           "distance": 50,
@@ -4594,6 +4896,7 @@
       "gender": "M",
       "name": "Brumagin, Josh",
       "place": 16,
+      "seedTime": "55.00",
       "splits": [
         {
           "distance": 50,
@@ -4614,6 +4917,7 @@
       "gender": "M",
       "name": "Mazurek, Tyler",
       "place": 17,
+      "seedTime": "54.08",
       "splits": [
         {
           "distance": 50,
@@ -4634,6 +4938,7 @@
       "gender": "M",
       "name": "Quillen, Josh",
       "place": 18,
+      "seedTime": "56.09",
       "splits": [
         {
           "distance": 50,
@@ -4654,6 +4959,7 @@
       "gender": "M",
       "name": "Jordan, Will",
       "place": 19,
+      "seedTime": "55.00",
       "splits": [
         {
           "distance": 50,
@@ -4674,6 +4980,7 @@
       "gender": "M",
       "name": "Cochenour, Michael",
       "place": 20,
+      "seedTime": "51.18",
       "splits": [
         {
           "distance": 50,
@@ -4694,6 +5001,7 @@
       "gender": "M",
       "name": "LaRocque, Max",
       "place": 21,
+      "seedTime": "57.99",
       "splits": [
         {
           "distance": 50,
@@ -4754,6 +5062,7 @@
       "gender": "M",
       "name": "Greiner, Donald",
       "place": 24,
+      "seedTime": "54.40",
       "splits": [
         {
           "distance": 50,
@@ -4774,6 +5083,7 @@
       "gender": "M",
       "name": "Murphy, Lachlan",
       "place": 25,
+      "seedTime": "53.22",
       "splits": [
         {
           "distance": 50,
@@ -4794,6 +5104,7 @@
       "gender": "M",
       "name": "Hilton, Mark",
       "place": 26,
+      "seedTime": "52.00",
       "splits": [
         {
           "distance": 50,
@@ -4814,6 +5125,7 @@
       "gender": "M",
       "name": "Hopkins, Kyle",
       "place": 27,
+      "seedTime": "51.00",
       "splits": [
         {
           "distance": 50,
@@ -4834,6 +5146,7 @@
       "gender": "M",
       "name": "Sands, Will",
       "place": 28,
+      "seedTime": "53.00",
       "splits": [
         {
           "distance": 50,
@@ -4854,6 +5167,7 @@
       "gender": "M",
       "name": "Webb, Case",
       "place": 29,
+      "seedTime": "52.00",
       "splits": [
         {
           "distance": 50,
@@ -4894,6 +5208,7 @@
       "gender": "M",
       "name": "Lingo, Jacob",
       "place": 31,
+      "seedTime": "53.50",
       "splits": [
         {
           "distance": 50,
@@ -4914,6 +5229,7 @@
       "gender": "M",
       "name": "Ralph, Sterling",
       "place": 32,
+      "seedTime": "54.00",
       "splits": [
         {
           "distance": 50,
@@ -4954,6 +5270,7 @@
       "gender": "M",
       "name": "Morey, Eli",
       "place": 34,
+      "seedTime": "55.15",
       "splits": [
         {
           "distance": 50,
@@ -4974,6 +5291,7 @@
       "gender": "M",
       "name": "Jans, Ben",
       "place": 35,
+      "seedTime": "54.47",
       "splits": [
         {
           "distance": 50,
@@ -4994,6 +5312,7 @@
       "gender": "M",
       "name": "Grant, Jake",
       "place": 36,
+      "seedTime": "52.69",
       "splits": [
         {
           "distance": 50,
@@ -5014,6 +5333,7 @@
       "gender": "M",
       "name": "Kane, Braden",
       "place": 37,
+      "seedTime": "55.99",
       "splits": [
         {
           "distance": 50,
@@ -5034,6 +5354,7 @@
       "gender": "M",
       "name": "Yund, Samuel",
       "place": 38,
+      "seedTime": "55.69",
       "splits": [
         {
           "distance": 50,
@@ -5054,6 +5375,7 @@
       "gender": "M",
       "name": "Blust, Joseph",
       "place": 39,
+      "seedTime": "55.50",
       "splits": [
         {
           "distance": 50,
@@ -5074,6 +5396,7 @@
       "gender": "M",
       "name": "Young, Jesse",
       "place": 40,
+      "seedTime": "55.00",
       "splits": [
         {
           "distance": 50,
@@ -5094,6 +5417,7 @@
       "gender": "M",
       "name": "Vale, Adam",
       "place": 41,
+      "seedTime": "53.45",
       "splits": [
         {
           "distance": 50,
@@ -5114,6 +5438,7 @@
       "gender": "M",
       "name": "Weis, Jason",
       "place": 42,
+      "seedTime": "54.69",
       "splits": [
         {
           "distance": 50,
@@ -5134,6 +5459,7 @@
       "gender": "M",
       "name": "Sharma, Agrim",
       "place": 43,
+      "seedTime": "50.69",
       "splits": [
         {
           "distance": 50,
@@ -5154,6 +5480,7 @@
       "gender": "M",
       "name": "Sumner, Max",
       "place": 44,
+      "seedTime": "57.02",
       "splits": [
         {
           "distance": 50,
@@ -5174,6 +5501,7 @@
       "gender": "M",
       "name": "Groman, Misha",
       "place": 45,
+      "seedTime": "55.06",
       "splits": [
         {
           "distance": 50,
@@ -5194,6 +5522,7 @@
       "gender": "M",
       "name": "Sullivan, Sean",
       "place": 46,
+      "seedTime": "54.18",
       "splits": [
         {
           "distance": 50,
@@ -5214,6 +5543,7 @@
       "gender": "M",
       "name": "Meyers, Ryan",
       "place": 47,
+      "seedTime": "54.00",
       "splits": [
         {
           "distance": 50,
@@ -5254,6 +5584,7 @@
       "gender": "M",
       "name": "Steele, Noah",
       "place": 49,
+      "seedTime": "59.67",
       "splits": [
         {
           "distance": 50,
@@ -5274,6 +5605,7 @@
       "gender": "M",
       "name": "D'Zio, Zachary",
       "place": 50,
+      "seedTime": "55.69",
       "splits": [
         {
           "distance": 50,
@@ -5294,6 +5626,7 @@
       "gender": "M",
       "name": "Baste, Jeremy",
       "place": 51,
+      "seedTime": "56.12",
       "splits": [
         {
           "distance": 50,
@@ -5314,6 +5647,7 @@
       "gender": "M",
       "name": "Warren, Gage",
       "place": 52,
+      "seedTime": "56.00",
       "splits": [
         {
           "distance": 50,
@@ -5354,6 +5688,7 @@
       "gender": "M",
       "name": "Kahler, Harold",
       "place": 54,
+      "seedTime": "59.00",
       "splits": [
         {
           "distance": 50,
@@ -5374,6 +5709,7 @@
       "gender": "M",
       "name": "Dickson, Brendan",
       "place": 55,
+      "seedTime": "56.37",
       "splits": [
         {
           "distance": 50,
@@ -5394,6 +5730,7 @@
       "gender": "M",
       "name": "Murphy, Donovan",
       "place": 56,
+      "seedTime": "1:00.08",
       "splits": [
         {
           "distance": 50,
@@ -5434,6 +5771,7 @@
       "gender": "M",
       "name": "Wetzel, Dennis",
       "place": 58,
+      "seedTime": "59.60",
       "splits": [
         {
           "distance": 50,
@@ -5454,6 +5792,7 @@
       "gender": "M",
       "name": "Inman, Stewart",
       "place": 59,
+      "seedTime": "57.67",
       "splits": [
         {
           "distance": 50,
@@ -5494,6 +5833,7 @@
       "gender": "M",
       "name": "Harlow, Cole",
       "place": 61,
+      "seedTime": "1:05.00",
       "splits": [
         {
           "distance": 50,
@@ -5534,6 +5874,7 @@
       "gender": "M",
       "name": "Smart, Wayne",
       "place": 63,
+      "seedTime": "1:11.34",
       "splits": [
         {
           "distance": 50,
@@ -5554,6 +5895,7 @@
       "gender": "M",
       "name": "Byrne, Cameron",
       "place": 64,
+      "seedTime": "1:03.00",
       "splits": [
         {
           "distance": 50,
@@ -5594,6 +5936,7 @@
       "gender": "M",
       "name": "Casto, Benjamin",
       "place": 66,
+      "seedTime": "1:05.66",
       "splits": [
         {
           "distance": 50,
@@ -5614,6 +5957,7 @@
       "gender": "M",
       "name": "Lee, Josh",
       "place": 67,
+      "seedTime": "1:05.99",
       "splits": [
         {
           "distance": 50,
@@ -5634,6 +5978,7 @@
       "gender": "F",
       "name": "Popenov, Elizabeth",
       "place": 1,
+      "seedTime": "33.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "30.92"
@@ -5644,6 +5989,7 @@
       "gender": "F",
       "name": "Oehler, Madison",
       "place": 2,
+      "seedTime": "32.00",
       "tags": "",
       "team": "Vols Swim Club",
       "time": "31.57"
@@ -5654,6 +6000,7 @@
       "gender": "F",
       "name": "Hooten, Kristen",
       "place": 3,
+      "seedTime": "32.25",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "31.58"
@@ -5674,6 +6021,7 @@
       "gender": "F",
       "name": "Salmon, Mandy",
       "place": 5,
+      "seedTime": "33.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "32.33"
@@ -5684,6 +6032,7 @@
       "gender": "F",
       "name": "Hummel, Christina",
       "place": 6,
+      "seedTime": "32.00",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "32.48"
@@ -5694,6 +6043,7 @@
       "gender": "F",
       "name": "Ukai, Kaho",
       "place": 7,
+      "seedTime": "34.18",
       "tags": "",
       "team": "Arkansas State Swim Club",
       "time": "32.52"
@@ -5714,6 +6064,7 @@
       "gender": "F",
       "name": "Garama, Nia",
       "place": 9,
+      "seedTime": "35.00",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "33.15"
@@ -5797,6 +6148,7 @@
       "gender": "F",
       "name": "Umbarger, Taylor",
       "place": 17,
+      "seedTime": "36.48",
       "tags": "",
       "team": "University of Central Arkansas",
       "time": "35.07"
@@ -5847,6 +6199,7 @@
       "gender": "F",
       "name": "Stelter, Gretchen",
       "place": 22,
+      "seedTime": "36.00",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "35.79"
@@ -5857,6 +6210,7 @@
       "gender": "F",
       "name": "Wakefield, Hannah",
       "place": 23,
+      "seedTime": "35.99",
       "tags": "",
       "team": "Arkansas State Swim Club",
       "time": "35.81"
@@ -5897,6 +6251,7 @@
       "gender": "F",
       "name": "Poliner, Annaliese",
       "place": 27,
+      "seedTime": "37.04",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "36.72"
@@ -5937,6 +6292,7 @@
       "gender": "F",
       "name": "Williams, Casey",
       "place": 31,
+      "seedTime": "34.31",
       "tags": "",
       "team": "Arkansas State Swim Club",
       "time": "39.53"
@@ -5947,6 +6303,7 @@
       "gender": "F",
       "name": "Nick, Laurie",
       "place": 32,
+      "seedTime": "38.69",
       "tags": "",
       "team": "University of Central Arkansas",
       "time": "39.75"
@@ -5987,6 +6344,7 @@
       "gender": "F",
       "name": "Calhoun, Meredith",
       "place": 36,
+      "seedTime": "41.61",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "41.34"
@@ -6027,6 +6385,7 @@
       "gender": "F",
       "name": "Hammond, Krymson",
       "place": 40,
+      "seedTime": "55.00",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "46.56"
@@ -6037,6 +6396,7 @@
       "gender": "F",
       "name": "Miller, Meghan",
       "place": 41,
+      "seedTime": "46.77",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "49.60"
@@ -6047,6 +6407,7 @@
       "gender": "M",
       "name": "Griffin, Austin",
       "place": 1,
+      "seedTime": "25.81",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "25.66"
@@ -6057,6 +6418,7 @@
       "gender": "M",
       "name": "Lobitz, Carl",
       "place": 1,
+      "seedTime": "26.37",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "25.66"
@@ -6067,6 +6429,7 @@
       "gender": "M",
       "name": "Fomich, Keanan",
       "place": 3,
+      "seedTime": "27.50",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "25.93"
@@ -6077,6 +6440,7 @@
       "gender": "M",
       "name": "Kurtz, Michael",
       "place": 3,
+      "seedTime": "25.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "25.93"
@@ -6087,6 +6451,7 @@
       "gender": "M",
       "name": "Eibel, Scott",
       "place": 5,
+      "seedTime": "26.37",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "26.32"
@@ -6107,6 +6472,7 @@
       "gender": "M",
       "name": "O'Halloran, Jack",
       "place": 7,
+      "seedTime": "28.50",
       "tags": "",
       "team": "Vanderbilt Swim Club-SE",
       "time": "26.94"
@@ -6117,6 +6483,7 @@
       "gender": "M",
       "name": "Pressly, John",
       "place": 8,
+      "seedTime": "32.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "27.13"
@@ -6127,6 +6494,7 @@
       "gender": "M",
       "name": "Lutterbein, Tyrus",
       "place": 9,
+      "seedTime": "26.45",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "27.58"
@@ -6137,6 +6505,7 @@
       "gender": "M",
       "name": "Violassi, Sam",
       "place": 10,
+      "seedTime": "28.51",
       "tags": "",
       "team": "Mississippi State Swim Club",
       "time": "27.78"
@@ -6157,6 +6526,7 @@
       "gender": "M",
       "name": "Radak, Ben",
       "place": 12,
+      "seedTime": "26.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "27.99"
@@ -6177,6 +6547,7 @@
       "gender": "M",
       "name": "Herrington, William",
       "place": 14,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Mississippi State Swim Club",
       "time": "28.21"
@@ -6187,6 +6558,7 @@
       "gender": "M",
       "name": "Cole, Justin",
       "place": 15,
+      "seedTime": "27.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "28.37"
@@ -6197,6 +6569,7 @@
       "gender": "M",
       "name": "Butz, Steven",
       "place": 16,
+      "seedTime": "29.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "29.25"
@@ -6207,6 +6580,7 @@
       "gender": "M",
       "name": "Borowsky, Alexander",
       "place": 17,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Vanderbilt Swim Club-SE",
       "time": "29.71"
@@ -6217,6 +6591,7 @@
       "gender": "M",
       "name": "Kitchens, Tyler",
       "place": 18,
+      "seedTime": "29.33",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "29.76"
@@ -6237,6 +6612,7 @@
       "gender": "M",
       "name": "Buynak, Adam",
       "place": 20,
+      "seedTime": "30.01",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "30.18"
@@ -6247,6 +6623,7 @@
       "gender": "M",
       "name": "Wu, Derek",
       "place": 21,
+      "seedTime": "25.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "30.52"
@@ -6257,6 +6634,7 @@
       "gender": "M",
       "name": "D'Zio, Zachary",
       "place": 22,
+      "seedTime": "30.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "30.58"
@@ -6267,6 +6645,7 @@
       "gender": "M",
       "name": "Inman, Stewart",
       "place": 23,
+      "seedTime": "30.69",
       "tags": "",
       "team": "Mississippi State Swim Club",
       "time": "31.10"
@@ -6277,6 +6656,7 @@
       "gender": "M",
       "name": "Miller, Kyle",
       "place": 24,
+      "seedTime": "34.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "32.43"
@@ -6297,6 +6677,7 @@
       "gender": "M",
       "name": "Starek, Brad",
       "place": 26,
+      "seedTime": "34.21",
       "tags": "",
       "team": "Radford Swim Club-VA",
       "time": "33.35"
@@ -6317,6 +6698,7 @@
       "gender": "F",
       "name": "Lawson, Taylor",
       "place": 1,
+      "seedTime": "1:10.69",
       "splits": [
         {
           "distance": 50,
@@ -6337,6 +6719,7 @@
       "gender": "F",
       "name": "Clinger, Hannah",
       "place": 2,
+      "seedTime": "1:12.00",
       "splits": [
         {
           "distance": 50,
@@ -6357,6 +6740,7 @@
       "gender": "F",
       "name": "Retondo, Nicole",
       "place": 3,
+      "seedTime": "1:12.94",
       "splits": [
         {
           "distance": 50,
@@ -6377,6 +6761,7 @@
       "gender": "F",
       "name": "Asip, Lexi",
       "place": 4,
+      "seedTime": "1:14.28",
       "splits": [
         {
           "distance": 50,
@@ -6397,6 +6782,7 @@
       "gender": "F",
       "name": "Ridgeway, Ellie",
       "place": 5,
+      "seedTime": "1:20.69",
       "splits": [
         {
           "distance": 50,
@@ -6417,6 +6803,7 @@
       "gender": "F",
       "name": "Kalinowski, Lindsay",
       "place": 6,
+      "seedTime": "1:13.00",
       "splits": [
         {
           "distance": 50,
@@ -6497,6 +6884,7 @@
       "gender": "F",
       "name": "Carlozzi, Josie",
       "place": 10,
+      "seedTime": "1:20.69",
       "splits": [
         {
           "distance": 50,
@@ -6517,6 +6905,7 @@
       "gender": "F",
       "name": "Watkins, Allison",
       "place": 11,
+      "seedTime": "1:25.00",
       "splits": [
         {
           "distance": 50,
@@ -6557,6 +6946,7 @@
       "gender": "F",
       "name": "Pyle, Shannon",
       "place": 13,
+      "seedTime": "1:19.99",
       "splits": [
         {
           "distance": 50,
@@ -6578,6 +6968,7 @@
       "name": "Adams, Breanna",
       "place": 14,
       "points": 3.0,
+      "seedTime": "1:23.00",
       "splits": [
         {
           "distance": 50,
@@ -6599,6 +6990,7 @@
       "name": "Jenkins, Danielle",
       "place": 15,
       "points": 2.0,
+      "seedTime": "1:25.25",
       "splits": [
         {
           "distance": 50,
@@ -6740,6 +7132,7 @@
       "gender": "M",
       "name": "Giesman, Grayton",
       "place": 1,
+      "seedTime": "1:01.00",
       "splits": [
         {
           "distance": 50,
@@ -6760,6 +7153,7 @@
       "gender": "M",
       "name": "Hilton, Mark",
       "place": 2,
+      "seedTime": "1:02.49",
       "splits": [
         {
           "distance": 50,
@@ -6780,6 +7174,7 @@
       "gender": "M",
       "name": "Mikuta, John",
       "place": 3,
+      "seedTime": "1:03.84",
       "splits": [
         {
           "distance": 50,
@@ -6800,6 +7195,7 @@
       "gender": "M",
       "name": "Peyatte, Nick",
       "place": 4,
+      "seedTime": "1:04.33",
       "splits": [
         {
           "distance": 50,
@@ -6820,6 +7216,7 @@
       "gender": "M",
       "name": "Jacobs, Matt",
       "place": 5,
+      "seedTime": "1:09.00",
       "splits": [
         {
           "distance": 50,
@@ -6840,6 +7237,7 @@
       "gender": "M",
       "name": "Ting, Gabriel",
       "place": 6,
+      "seedTime": "1:02.59",
       "splits": [
         {
           "distance": 50,
@@ -6860,6 +7258,7 @@
       "gender": "M",
       "name": "Mau, Alec",
       "place": 7,
+      "seedTime": "1:04.38",
       "splits": [
         {
           "distance": 50,
@@ -6880,6 +7279,7 @@
       "gender": "M",
       "name": "King, Jacob",
       "place": 8,
+      "seedTime": "1:04.00",
       "splits": [
         {
           "distance": 50,
@@ -6900,6 +7300,7 @@
       "gender": "M",
       "name": "Wong, Justin",
       "place": 9,
+      "seedTime": "1:07.69",
       "splits": [
         {
           "distance": 50,
@@ -6920,6 +7321,7 @@
       "gender": "M",
       "name": "Jozwiak, Nicholas",
       "place": 10,
+      "seedTime": "1:09.69",
       "splits": [
         {
           "distance": 50,
@@ -6940,6 +7342,7 @@
       "gender": "M",
       "name": "Strankman, Stone",
       "place": 11,
+      "seedTime": "1:04.33",
       "splits": [
         {
           "distance": 50,
@@ -6960,6 +7363,7 @@
       "gender": "M",
       "name": "Weiland, Ethan",
       "place": 12,
+      "seedTime": "1:06.00",
       "splits": [
         {
           "distance": 50,
@@ -6980,6 +7384,7 @@
       "gender": "M",
       "name": "Vester, Samuel",
       "place": 13,
+      "seedTime": "57.56",
       "splits": [
         {
           "distance": 50,
@@ -7020,6 +7425,7 @@
       "gender": "M",
       "name": "Fulton, Zane",
       "place": 15,
+      "seedTime": "1:14.50",
       "splits": [
         {
           "distance": 50,
@@ -7040,6 +7446,7 @@
       "gender": "M",
       "name": "Tremolada, Eddie",
       "place": 16,
+      "seedTime": "1:07.00",
       "splits": [
         {
           "distance": 50,
@@ -7060,6 +7467,7 @@
       "gender": "M",
       "name": "Huddleston, John",
       "place": 17,
+      "seedTime": "1:10.00",
       "splits": [
         {
           "distance": 50,
@@ -7080,6 +7488,7 @@
       "gender": "M",
       "name": "Webber, James",
       "place": 18,
+      "seedTime": "1:11.00",
       "splits": [
         {
           "distance": 50,
@@ -7120,6 +7529,7 @@
       "gender": "M",
       "name": "Nguyen, Trent",
       "place": 20,
+      "seedTime": "1:07.39",
       "splits": [
         {
           "distance": 50,
@@ -7140,6 +7550,7 @@
       "gender": "M",
       "name": "Williams, Matthew",
       "place": 21,
+      "seedTime": "1:12.69",
       "splits": [
         {
           "distance": 50,
@@ -7160,6 +7571,7 @@
       "gender": "M",
       "name": "Nastasi, Kevin",
       "place": 22,
+      "seedTime": "1:11.00",
       "splits": [
         {
           "distance": 50,
@@ -7180,6 +7592,7 @@
       "gender": "M",
       "name": "LaRocque, Max",
       "place": 23,
+      "seedTime": "1:12.99",
       "splits": [
         {
           "distance": 50,
@@ -7200,6 +7613,7 @@
       "gender": "M",
       "name": "Riddle, Shane",
       "place": 24,
+      "seedTime": "1:10.50",
       "splits": [
         {
           "distance": 50,
@@ -7220,6 +7634,7 @@
       "gender": "M",
       "name": "Cameron, Noah",
       "place": 25,
+      "seedTime": "1:10.00",
       "splits": [
         {
           "distance": 50,
@@ -7280,6 +7695,7 @@
       "gender": "M",
       "name": "Dzurnak, Michael",
       "place": 28,
+      "seedTime": "1:10.00",
       "splits": [
         {
           "distance": 50,
@@ -7340,6 +7756,7 @@
       "gender": "M",
       "name": "Nohl, Adam",
       "place": 31,
+      "seedTime": "1:12.69",
       "splits": [
         {
           "distance": 50,
@@ -7440,6 +7857,7 @@
       "gender": "M",
       "name": "Falciglia, Remy",
       "place": 36,
+      "seedTime": "1:17.39",
       "splits": [
         {
           "distance": 50,
@@ -7460,6 +7878,7 @@
       "gender": "M",
       "name": "Davault, Joseph",
       "place": 37,
+      "seedTime": "1:21.32",
       "splits": [
         {
           "distance": 50,
@@ -7480,6 +7899,7 @@
       "gender": "F",
       "name": "Carlson, Caroline",
       "place": 1,
+      "seedTime": "28.50",
       "tags": "",
       "team": "Vanderbilt Swim Club-SE",
       "time": "27.81"
@@ -7490,6 +7910,7 @@
       "gender": "F",
       "name": "Jarachovic, Jacquelyn",
       "place": 2,
+      "seedTime": "27.00",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "27.97"
@@ -7500,6 +7921,7 @@
       "gender": "F",
       "name": "Zhang, Linsie",
       "place": 3,
+      "seedTime": "28.50",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "28.46"
@@ -7510,6 +7932,7 @@
       "gender": "F",
       "name": "Sparrow, Kat",
       "place": 4,
+      "seedTime": "28.50",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "28.65"
@@ -7520,6 +7943,7 @@
       "gender": "F",
       "name": "Knapp, Lindsay",
       "place": 5,
+      "seedTime": "28.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "28.75"
@@ -7540,6 +7964,7 @@
       "gender": "F",
       "name": "Benson, Anja",
       "place": 7,
+      "seedTime": "28.66",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "29.21"
@@ -7550,6 +7975,7 @@
       "gender": "F",
       "name": "Klingensmith, Elizabeth",
       "place": 8,
+      "seedTime": "28.80",
       "tags": "",
       "team": "Emory Club Swimming-GA",
       "time": "29.23"
@@ -7560,6 +7986,7 @@
       "gender": "F",
       "name": "Sweet, Jordan",
       "place": 9,
+      "seedTime": "30.55",
       "tags": "",
       "team": "University of Central Arkansas",
       "time": "29.28"
@@ -7570,6 +7997,7 @@
       "gender": "F",
       "name": "Macdonald, Mackenzie",
       "place": 10,
+      "seedTime": "28.00",
       "tags": "",
       "team": "Vanderbilt Swim Club-SE",
       "time": "29.44"
@@ -7580,6 +8008,7 @@
       "gender": "F",
       "name": "Pierce, Haley",
       "place": 11,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "29.50"
@@ -7590,6 +8019,7 @@
       "gender": "F",
       "name": "Popenov, Elizabeth",
       "place": 12,
+      "seedTime": "33.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "29.87"
@@ -7600,6 +8030,7 @@
       "gender": "F",
       "name": "Hooten, Kristen",
       "place": 13,
+      "seedTime": "30.14",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "29.97"
@@ -7610,6 +8041,7 @@
       "gender": "F",
       "name": "Chafin, Holly",
       "place": 14,
+      "seedTime": "31.63",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "30.06"
@@ -7650,6 +8082,7 @@
       "gender": "F",
       "name": "Smith, Caroline",
       "place": 18,
+      "seedTime": "32.34",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "30.88"
@@ -7660,6 +8093,7 @@
       "gender": "F",
       "name": "Eisenbeis, Anna",
       "place": 18,
+      "seedTime": "31.13",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "30.88"
@@ -7670,6 +8104,7 @@
       "gender": "F",
       "name": "Eberhardt, Mallorie",
       "place": 20,
+      "seedTime": "32.00",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "30.91"
@@ -7680,6 +8115,7 @@
       "gender": "F",
       "name": "Tomasko, Amanda",
       "place": 21,
+      "seedTime": "32.50",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "31.39"
@@ -7700,6 +8136,7 @@
       "gender": "F",
       "name": "Moschella, Emily",
       "place": 23,
+      "seedTime": "33.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "31.64"
@@ -7710,6 +8147,7 @@
       "gender": "F",
       "name": "Kemmerly, Christine",
       "place": 24,
+      "seedTime": "30.04",
       "tags": "",
       "team": "Miami University Club Swimming-OH",
       "time": "31.82"
@@ -7720,6 +8158,7 @@
       "gender": "F",
       "name": "Williams, Margaret",
       "place": 25,
+      "seedTime": "35.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "31.90"
@@ -7750,6 +8189,7 @@
       "gender": "F",
       "name": "von Hollen, Katie",
       "place": 28,
+      "seedTime": "31.00",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "31.99"
@@ -7760,6 +8200,7 @@
       "gender": "F",
       "name": "Zukaitis, Jillien",
       "place": 29,
+      "seedTime": "31.81",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "32.03"
@@ -7780,6 +8221,7 @@
       "gender": "F",
       "name": "Foster, Darby",
       "place": 31,
+      "seedTime": "32.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "32.44"
@@ -7790,6 +8232,7 @@
       "gender": "F",
       "name": "Adams, Breanna",
       "place": 32,
+      "seedTime": "33.00",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "32.52"
@@ -7800,6 +8243,7 @@
       "gender": "F",
       "name": "Skaines, Nikki",
       "place": 33,
+      "seedTime": "28.03",
       "tags": "",
       "team": "Mississippi State Swim Club",
       "time": "32.63"
@@ -7810,6 +8254,7 @@
       "gender": "F",
       "name": "Massirer, Anna",
       "place": 34,
+      "seedTime": "33.63",
       "tags": "",
       "team": "University of Central Arkansas",
       "time": "33.13"
@@ -7820,6 +8265,7 @@
       "gender": "F",
       "name": "Kinnear, Claire",
       "place": 35,
+      "seedTime": "31.50",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "33.24"
@@ -7830,6 +8276,7 @@
       "gender": "F",
       "name": "Long, Lillian",
       "place": 36,
+      "seedTime": "32.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "33.48"
@@ -7840,6 +8287,7 @@
       "gender": "F",
       "name": "Kantor, Emma",
       "place": 37,
+      "seedTime": "33.00",
       "tags": "",
       "team": "Emory Club Swimming-GA",
       "time": "33.74"
@@ -7860,6 +8308,7 @@
       "gender": "F",
       "name": "Dedic, Iva",
       "place": 39,
+      "seedTime": "30.30",
       "tags": "",
       "team": "Vols Swim Club",
       "time": "34.14"
@@ -7870,6 +8319,7 @@
       "gender": "F",
       "name": "Wakefield, Sydney",
       "place": 40,
+      "seedTime": "34.06",
       "tags": "",
       "team": "Arkansas State Swim Club",
       "time": "34.41"
@@ -7890,6 +8340,7 @@
       "gender": "F",
       "name": "Koschella, Alice",
       "place": 42,
+      "seedTime": "33.00",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "34.63"
@@ -7900,6 +8351,7 @@
       "gender": "F",
       "name": "Santi, Gina",
       "place": 43,
+      "seedTime": "33.00",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "35.50"
@@ -7930,6 +8382,7 @@
       "gender": "F",
       "name": "Hopkins, Nadia",
       "place": 46,
+      "seedTime": "56.51",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "59.87"
@@ -7940,6 +8393,7 @@
       "gender": "M",
       "name": "Hathaway, Caleb",
       "place": 1,
+      "seedTime": "24.53",
       "tags": "",
       "team": "University of Central Arkansas",
       "time": "23.40"
@@ -7950,6 +8404,7 @@
       "gender": "M",
       "name": "Hopkins, Matthew",
       "place": 2,
+      "seedTime": "28.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "24.79"
@@ -7960,6 +8415,7 @@
       "gender": "M",
       "name": "Rogatinsky, Jacob",
       "place": 3,
+      "seedTime": "25.00",
       "tags": "",
       "team": "Vanderbilt Swim Club-SE",
       "time": "24.96"
@@ -7980,6 +8436,7 @@
       "gender": "M",
       "name": "Pressly, John",
       "place": 5,
+      "seedTime": "30.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "25.10"
@@ -8010,6 +8467,7 @@
       "gender": "M",
       "name": "Zhang, Daniel",
       "place": 8,
+      "seedTime": "26.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "25.23"
@@ -8030,6 +8488,7 @@
       "gender": "M",
       "name": "Barnhart, Joshua",
       "place": 10,
+      "seedTime": "25.99",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "25.32"
@@ -8050,6 +8509,7 @@
       "gender": "M",
       "name": "Jozwiak, Nicholas",
       "place": 12,
+      "seedTime": "25.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "25.48"
@@ -8070,6 +8530,7 @@
       "gender": "M",
       "name": "McCormick, Winston",
       "place": 14,
+      "seedTime": "28.00",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "25.86"
@@ -8080,6 +8541,7 @@
       "gender": "M",
       "name": "Violassi, Sam",
       "place": 15,
+      "seedTime": "27.45",
       "tags": "",
       "team": "Mississippi State Swim Club",
       "time": "25.93"
@@ -8090,6 +8552,7 @@
       "gender": "M",
       "name": "Maloney, Kyle",
       "place": 16,
+      "seedTime": "26.39",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "26.06"
@@ -8120,6 +8583,7 @@
       "gender": "M",
       "name": "Penniman, George",
       "place": 19,
+      "seedTime": "27.00",
       "tags": "",
       "team": "Mississippi State Swim Club",
       "time": "26.19"
@@ -8130,6 +8594,7 @@
       "gender": "M",
       "name": "Vollino, Garrett",
       "place": 20,
+      "seedTime": "26.67",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "26.24"
@@ -8140,6 +8605,7 @@
       "gender": "M",
       "name": "Saccocio, Devon",
       "place": 21,
+      "seedTime": "26.26",
       "tags": "",
       "team": "UC Club Swim Team-OH",
       "time": "26.26"
@@ -8150,6 +8616,7 @@
       "gender": "M",
       "name": "Mazurek, Tyler",
       "place": 22,
+      "seedTime": "26.86",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "26.27"
@@ -8170,6 +8637,7 @@
       "gender": "M",
       "name": "Morey, Eli",
       "place": 24,
+      "seedTime": "27.58",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "26.59"
@@ -8180,6 +8648,7 @@
       "gender": "M",
       "name": "Coves, Jose",
       "place": 25,
+      "seedTime": "27.43",
       "tags": "",
       "team": "Emory Club Swimming-GA",
       "time": "26.65"
@@ -8200,6 +8669,7 @@
       "gender": "M",
       "name": "Lehrer, Jarrad",
       "place": 27,
+      "seedTime": "27.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "26.83"
@@ -8220,6 +8690,7 @@
       "gender": "M",
       "name": "Dickson, Brendan",
       "place": 29,
+      "seedTime": "27.02",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "27.12"
@@ -8230,6 +8701,7 @@
       "gender": "M",
       "name": "Buynak, Adam",
       "place": 29,
+      "seedTime": "27.37",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "27.12"
@@ -8240,6 +8712,7 @@
       "gender": "M",
       "name": "Borowsky, Alexander",
       "place": 31,
+      "seedTime": "27.00",
       "tags": "",
       "team": "Vanderbilt Swim Club-SE",
       "time": "27.18"
@@ -8250,6 +8723,7 @@
       "gender": "M",
       "name": "Kitchens, Tyler",
       "place": 32,
+      "seedTime": "27.00",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "27.21"
@@ -8270,6 +8744,7 @@
       "gender": "M",
       "name": "Butz, Steven",
       "place": 34,
+      "seedTime": "29.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "27.28"
@@ -8300,6 +8775,7 @@
       "gender": "M",
       "name": "Torpy, Fred",
       "place": 37,
+      "seedTime": "32.36",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "27.73"
@@ -8310,6 +8786,7 @@
       "gender": "M",
       "name": "King, Jacob",
       "place": 38,
+      "seedTime": "25.99",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "27.89"
@@ -8330,6 +8807,7 @@
       "gender": "M",
       "name": "Sumner, Max",
       "place": 39,
+      "seedTime": "28.83",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "27.98"
@@ -8350,6 +8828,7 @@
       "gender": "M",
       "name": "Young, Jesse",
       "place": 42,
+      "seedTime": "28.50",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "28.51"
@@ -8380,6 +8859,7 @@
       "gender": "M",
       "name": "Krumenaker, Dema",
       "place": 45,
+      "seedTime": "28.50",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "28.83"
@@ -8390,6 +8870,7 @@
       "gender": "M",
       "name": "Murphy, Donovan",
       "place": 46,
+      "seedTime": "30.13",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "29.54"
@@ -8400,6 +8881,7 @@
       "gender": "M",
       "name": "Holmquist, David",
       "place": 47,
+      "seedTime": "35.40",
       "tags": "",
       "team": "Arkansas State Swim Club",
       "time": "29.86"
@@ -8420,6 +8902,7 @@
       "gender": "M",
       "name": "Wyatt, Nick",
       "place": 49,
+      "seedTime": "31.00",
       "tags": "",
       "team": "Mississippi State Swim Club",
       "time": "29.94"
@@ -8430,6 +8913,7 @@
       "gender": "M",
       "name": "Byrne, Cameron",
       "place": 50,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Mississippi State Swim Club",
       "time": "30.32"
@@ -8440,6 +8924,7 @@
       "gender": "M",
       "name": "Starek, Brad",
       "place": 51,
+      "seedTime": "29.96",
       "tags": "",
       "team": "Radford Swim Club-VA",
       "time": "30.40"
@@ -8460,6 +8945,7 @@
       "gender": "M",
       "name": "Casto, Benjamin",
       "place": 53,
+      "seedTime": "34.66",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "34.04"
@@ -8470,6 +8956,7 @@
       "gender": "M",
       "name": "Lee, Josh",
       "place": 54,
+      "seedTime": "34.62",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "34.50"
@@ -8480,6 +8967,7 @@
       "gender": "F",
       "name": "Knapp, Lindsay",
       "place": 1,
+      "seedTime": "2:03.69",
       "splits": [
         {
           "distance": 50,
@@ -8508,6 +8996,7 @@
       "gender": "F",
       "name": "Nastasi, Allison",
       "place": 2,
+      "seedTime": "2:03.69",
       "splits": [
         {
           "distance": 50,
@@ -8564,6 +9053,7 @@
       "gender": "F",
       "name": "Kennedy, Kaitlyn",
       "place": 4,
+      "seedTime": "2:20.00",
       "splits": [
         {
           "distance": 50,
@@ -8620,6 +9110,7 @@
       "gender": "F",
       "name": "Franchi, Madeleine",
       "place": 6,
+      "seedTime": "2:12.00",
       "splits": [
         {
           "distance": 50,
@@ -8676,6 +9167,7 @@
       "gender": "F",
       "name": "Donovan, Katie",
       "place": 8,
+      "seedTime": "2:20.00",
       "splits": [
         {
           "distance": 50,
@@ -8704,6 +9196,7 @@
       "gender": "F",
       "name": "Racioppi, Elesabeth",
       "place": 9,
+      "seedTime": "2:15.00",
       "splits": [
         {
           "distance": 50,
@@ -8760,6 +9253,7 @@
       "gender": "F",
       "name": "Gugliotta, Gina",
       "place": 11,
+      "seedTime": "2:21.83",
       "splits": [
         {
           "distance": 50,
@@ -8788,6 +9282,7 @@
       "gender": "F",
       "name": "Speece, Madison",
       "place": 12,
+      "seedTime": "2:18.47",
       "splits": [
         {
           "distance": 50,
@@ -8817,6 +9312,7 @@
       "name": "Keller, Amelia",
       "place": 13,
       "points": 4.0,
+      "seedTime": "2:20.00",
       "splits": [
         {
           "distance": 50,
@@ -8872,9 +9368,10 @@
       "course": "SCY",
       "event": "200 Free",
       "gender": "F",
-      "name": "Mahaffey, Mary",
+      "name": "Mahaffey, Mary Beth",
       "place": 15,
       "points": 2.0,
+      "seedTime": "2:22.38",
       "splits": [
         {
           "distance": 50,
@@ -8904,6 +9401,7 @@
       "name": "Bailey, Shauna",
       "place": 16,
       "points": 1.0,
+      "seedTime": "2:22.85",
       "splits": [
         {
           "distance": 50,
@@ -8932,6 +9430,7 @@
       "gender": "F",
       "name": "Foster, Darby",
       "place": 17,
+      "seedTime": "2:24.69",
       "splits": [
         {
           "distance": 50,
@@ -8960,6 +9459,7 @@
       "gender": "F",
       "name": "Kantor, Emma",
       "place": 18,
+      "seedTime": "2:24.00",
       "splits": [
         {
           "distance": 50,
@@ -8988,6 +9488,7 @@
       "gender": "M",
       "name": "Zacarias, Mathias",
       "place": 1,
+      "seedTime": "1:47.69",
       "splits": [
         {
           "distance": 50,
@@ -9016,6 +9517,7 @@
       "gender": "M",
       "name": "Wu, Derek",
       "place": 2,
+      "seedTime": "1:53.69",
       "splits": [
         {
           "distance": 50,
@@ -9044,6 +9546,7 @@
       "gender": "M",
       "name": "Quillen, Michael",
       "place": 3,
+      "seedTime": "1:49.69",
       "splits": [
         {
           "distance": 50,
@@ -9072,6 +9575,7 @@
       "gender": "M",
       "name": "Fregosi, Carson",
       "place": 4,
+      "seedTime": "1:45.32",
       "splits": [
         {
           "distance": 50,
@@ -9100,6 +9604,7 @@
       "gender": "M",
       "name": "Lumley, Isaac",
       "place": 5,
+      "seedTime": "1:50.00",
       "splits": [
         {
           "distance": 50,
@@ -9128,6 +9633,7 @@
       "gender": "M",
       "name": "Van De Velde, Cameron",
       "place": 6,
+      "seedTime": "1:49.75",
       "splits": [
         {
           "distance": 50,
@@ -9156,6 +9662,7 @@
       "gender": "M",
       "name": "Riordan, Bryan",
       "place": 7,
+      "seedTime": "1:55.00",
       "splits": [
         {
           "distance": 50,
@@ -9184,6 +9691,7 @@
       "gender": "M",
       "name": "Chou, Max",
       "place": 8,
+      "seedTime": "1:55.00",
       "splits": [
         {
           "distance": 50,
@@ -9212,6 +9720,7 @@
       "gender": "M",
       "name": "Grunert, Ryan",
       "place": 9,
+      "seedTime": "1:55.54",
       "splits": [
         {
           "distance": 50,
@@ -9240,6 +9749,7 @@
       "gender": "M",
       "name": "Borchers, Alex",
       "place": 10,
+      "seedTime": "1:53.95",
       "splits": [
         {
           "distance": 50,
@@ -9268,6 +9778,7 @@
       "gender": "M",
       "name": "Mikuta, John",
       "place": 11,
+      "seedTime": "1:55.00",
       "splits": [
         {
           "distance": 50,
@@ -9296,6 +9807,7 @@
       "gender": "M",
       "name": "Barnhart, Joshua",
       "place": 12,
+      "seedTime": "1:56.79",
       "splits": [
         {
           "distance": 50,
@@ -9324,6 +9836,7 @@
       "gender": "M",
       "name": "Niu, Rick",
       "place": 13,
+      "seedTime": "1:53.00",
       "splits": [
         {
           "distance": 50,
@@ -9352,6 +9865,7 @@
       "gender": "M",
       "name": "Grant, Jake",
       "place": 14,
+      "seedTime": "1:54.69",
       "splits": [
         {
           "distance": 50,
@@ -9436,6 +9950,7 @@
       "gender": "M",
       "name": "Lutterbein, Tyrus",
       "place": 17,
+      "seedTime": "1:50.00",
       "splits": [
         {
           "distance": 50,
@@ -9492,6 +10007,7 @@
       "gender": "M",
       "name": "Baird, Braxton",
       "place": 19,
+      "seedTime": "1:56.00",
       "splits": [
         {
           "distance": 50,
@@ -9520,6 +10036,7 @@
       "gender": "M",
       "name": "Jabbari, Poria",
       "place": 20,
+      "seedTime": "2:10.00",
       "splits": [
         {
           "distance": 50,
@@ -9548,6 +10065,7 @@
       "gender": "M",
       "name": "Deshmukh, Atharva",
       "place": 21,
+      "seedTime": "2:00.69",
       "splits": [
         {
           "distance": 50,
@@ -9576,6 +10094,7 @@
       "gender": "M",
       "name": "Hopkins, Kyle",
       "place": 22,
+      "seedTime": "1:52.00",
       "splits": [
         {
           "distance": 50,
@@ -9604,6 +10123,7 @@
       "gender": "M",
       "name": "Sands, Will",
       "place": 23,
+      "seedTime": "1:58.00",
       "splits": [
         {
           "distance": 50,
@@ -9632,6 +10152,7 @@
       "gender": "M",
       "name": "Cathapermal, Dylan",
       "place": 24,
+      "seedTime": "1:58.00",
       "splits": [
         {
           "distance": 50,
@@ -9688,6 +10209,7 @@
       "gender": "M",
       "name": "Herrington, William",
       "place": 26,
+      "seedTime": "2:05.00",
       "splits": [
         {
           "distance": 50,
@@ -9726,6 +10248,7 @@
       "gender": "F",
       "name": "Ridgeway, Ellie",
       "place": 1,
+      "seedTime": "1:05.69",
       "splits": [
         {
           "distance": 50,
@@ -9746,6 +10269,7 @@
       "gender": "F",
       "name": "Nastasi, Allison",
       "place": 2,
+      "seedTime": "1:03.69",
       "splits": [
         {
           "distance": 50,
@@ -9766,6 +10290,7 @@
       "gender": "F",
       "name": "Lawson, Taylor",
       "place": 3,
+      "seedTime": "1:05.69",
       "splits": [
         {
           "distance": 50,
@@ -9806,6 +10331,7 @@
       "gender": "F",
       "name": "Retondo, Nicole",
       "place": 5,
+      "seedTime": "1:06.71",
       "splits": [
         {
           "distance": 50,
@@ -9826,6 +10352,7 @@
       "gender": "F",
       "name": "Kennedy, Kaitlyn",
       "place": 6,
+      "seedTime": "1:15.00",
       "splits": [
         {
           "distance": 50,
@@ -9846,6 +10373,7 @@
       "gender": "F",
       "name": "Klingensmith, Elizabeth",
       "place": 7,
+      "seedTime": "1:09.18",
       "splits": [
         {
           "distance": 50,
@@ -9886,6 +10414,7 @@
       "gender": "F",
       "name": "Oehler, Madison",
       "place": 9,
+      "seedTime": "1:15.00",
       "splits": [
         {
           "distance": 50,
@@ -9948,6 +10477,7 @@
       "name": "Eisenbeis, Anna",
       "place": 12,
       "points": 5.0,
+      "seedTime": "1:13.35",
       "splits": [
         {
           "distance": 50,
@@ -9969,6 +10499,7 @@
       "name": "Dragon, Haylee",
       "place": 13,
       "points": 4.0,
+      "seedTime": "1:14.62",
       "splits": [
         {
           "distance": 50,
@@ -10001,7 +10532,7 @@
         }
       ],
       "tags": "",
-      "team": null,
+      "team": "St. Louis University Club Swim-MW",
       "time": "1:13.66"
     },
     {
@@ -10011,6 +10542,7 @@
       "name": "Carlozzi, Josie",
       "place": 15,
       "points": 2.0,
+      "seedTime": "1:11.69",
       "splits": [
         {
           "distance": 50,
@@ -10052,6 +10584,7 @@
       "gender": "F",
       "name": "Ukai, Kaho",
       "place": 17,
+      "seedTime": "1:15.23",
       "splits": [
         {
           "distance": 50,
@@ -10072,6 +10605,7 @@
       "gender": "F",
       "name": "Zukaitis, Jillien",
       "place": 18,
+      "seedTime": "1:20.13",
       "splits": [
         {
           "distance": 50,
@@ -10090,8 +10624,9 @@
       "course": "SCY",
       "event": "100 IM",
       "gender": "F",
-      "name": "Mahaffey, Mary",
+      "name": "Mahaffey, Mary Beth",
       "place": 18,
+      "seedTime": "1:15.54",
       "splits": [
         {
           "distance": 50,
@@ -10152,6 +10687,7 @@
       "gender": "F",
       "name": "Koschella, Alice",
       "place": 22,
+      "seedTime": "1:18.47",
       "splits": [
         {
           "distance": 50,
@@ -10172,6 +10708,7 @@
       "gender": "F",
       "name": "Keown, Chelsea",
       "place": 23,
+      "seedTime": "1:17.35",
       "splits": [
         {
           "distance": 50,
@@ -10212,6 +10749,7 @@
       "gender": "F",
       "name": "Jenkins, Danielle",
       "place": 25,
+      "seedTime": "1:18.18",
       "splits": [
         {
           "distance": 50,
@@ -10232,6 +10770,7 @@
       "gender": "F",
       "name": "Long, Lillian",
       "place": 26,
+      "seedTime": "1:15.69",
       "splits": [
         {
           "distance": 50,
@@ -10272,6 +10811,7 @@
       "gender": "F",
       "name": "Bailey, Shauna",
       "place": 28,
+      "seedTime": "1:20.84",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "1:20.54"
@@ -10282,6 +10822,7 @@
       "gender": "F",
       "name": "Eberhardt, Mallorie",
       "place": 29,
+      "seedTime": "1:23.40",
       "splits": [
         {
           "distance": 50,
@@ -10302,6 +10843,7 @@
       "gender": "F",
       "name": "Rowcliffe, Claire",
       "place": 30,
+      "seedTime": "1:25.00",
       "splits": [
         {
           "distance": 50,
@@ -10322,6 +10864,7 @@
       "gender": "F",
       "name": "Wakefield, Hannah",
       "place": 31,
+      "seedTime": "1:18.63",
       "splits": [
         {
           "distance": 50,
@@ -10420,8 +10963,9 @@
       "course": "SCY",
       "event": "100 IM",
       "gender": "F",
-      "name": "Demmin, Mary",
+      "name": "Demmin, Mary Elizabeth",
       "place": 36,
+      "seedTime": "1:45.38",
       "splits": [
         {
           "distance": 50,
@@ -10442,6 +10986,7 @@
       "gender": "F",
       "name": "Behnke, Carys",
       "place": 37,
+      "seedTime": "1:24.11",
       "splits": [
         {
           "distance": 50,
@@ -10482,6 +11027,7 @@
       "gender": "M",
       "name": "Kryski, Colton",
       "place": 2,
+      "seedTime": "56.00",
       "splits": [
         {
           "distance": 50,
@@ -10522,6 +11068,7 @@
       "gender": "M",
       "name": "Weiland, Ethan",
       "place": 4,
+      "seedTime": "59.00",
       "splits": [
         {
           "distance": 50,
@@ -10542,6 +11089,7 @@
       "gender": "M",
       "name": "Wong, Justin",
       "place": 5,
+      "seedTime": "1:02.69",
       "splits": [
         {
           "distance": 50,
@@ -10562,6 +11110,7 @@
       "gender": "M",
       "name": "Mau, Alec",
       "place": 6,
+      "seedTime": "57.64",
       "splits": [
         {
           "distance": 50,
@@ -10602,6 +11151,7 @@
       "gender": "M",
       "name": "Zhang, Daniel",
       "place": 8,
+      "seedTime": "1:00.69",
       "splits": [
         {
           "distance": 50,
@@ -10622,6 +11172,7 @@
       "gender": "M",
       "name": "Pankey, Joe",
       "place": 9,
+      "seedTime": "59.00",
       "splits": [
         {
           "distance": 50,
@@ -10642,6 +11193,7 @@
       "gender": "M",
       "name": "Nastasi, Kevin",
       "place": 10,
+      "seedTime": "1:01.00",
       "splits": [
         {
           "distance": 50,
@@ -10682,6 +11234,7 @@
       "gender": "M",
       "name": "Quillen, Josh",
       "place": 12,
+      "seedTime": "58.80",
       "splits": [
         {
           "distance": 50,
@@ -10702,6 +11255,7 @@
       "gender": "M",
       "name": "Saccocio, Devon",
       "place": 13,
+      "seedTime": "1:01.88",
       "splits": [
         {
           "distance": 50,
@@ -10722,6 +11276,7 @@
       "gender": "M",
       "name": "Bunnell, Blake",
       "place": 14,
+      "seedTime": "1:00.69",
       "splits": [
         {
           "distance": 50,
@@ -10762,6 +11317,7 @@
       "gender": "M",
       "name": "O'Halloran, Jack",
       "place": 16,
+      "seedTime": "1:02.00",
       "splits": [
         {
           "distance": 50,
@@ -10782,6 +11338,7 @@
       "gender": "M",
       "name": "Cameron, Noah",
       "place": 17,
+      "seedTime": "1:10.00",
       "splits": [
         {
           "distance": 50,
@@ -10842,6 +11399,7 @@
       "gender": "M",
       "name": "Vollino, Garrett",
       "place": 20,
+      "seedTime": "1:02.02",
       "splits": [
         {
           "distance": 50,
@@ -10862,6 +11420,7 @@
       "gender": "M",
       "name": "Penniman, George",
       "place": 21,
+      "seedTime": "1:01.57",
       "splits": [
         {
           "distance": 50,
@@ -10882,6 +11441,7 @@
       "gender": "M",
       "name": "Murphy, Lachlan",
       "place": 22,
+      "seedTime": "1:00.51",
       "splits": [
         {
           "distance": 50,
@@ -10902,6 +11462,7 @@
       "gender": "M",
       "name": "Kane, Braden",
       "place": 23,
+      "seedTime": "1:03.99",
       "splits": [
         {
           "distance": 50,
@@ -10922,6 +11483,7 @@
       "gender": "M",
       "name": "Riddle, Shane",
       "place": 24,
+      "seedTime": "1:05.00",
       "splits": [
         {
           "distance": 50,
@@ -10942,6 +11504,7 @@
       "gender": "M",
       "name": "Violassi, Sam",
       "place": 25,
+      "seedTime": "1:01.17",
       "splits": [
         {
           "distance": 50,
@@ -10962,6 +11525,7 @@
       "gender": "M",
       "name": "Vale, Adam",
       "place": 26,
+      "seedTime": "1:02.78",
       "splits": [
         {
           "distance": 50,
@@ -11022,6 +11586,7 @@
       "gender": "M",
       "name": "Inman, Stewart",
       "place": 29,
+      "seedTime": "1:13.11",
       "splits": [
         {
           "distance": 50,
@@ -11062,6 +11627,7 @@
       "gender": "M",
       "name": "Krumenaker, Dema",
       "place": 31,
+      "seedTime": "1:05.87",
       "splits": [
         {
           "distance": 50,
@@ -11102,6 +11668,7 @@
       "gender": "M",
       "name": "Buynak, Adam",
       "place": 33,
+      "seedTime": "1:05.91",
       "splits": [
         {
           "distance": 50,
@@ -11142,6 +11709,7 @@
       "gender": "M",
       "name": "Torpy, Fred",
       "place": 35,
+      "seedTime": "1:15.53",
       "splits": [
         {
           "distance": 50,
@@ -11192,6 +11760,7 @@
       "gender": "F",
       "name": "Spencer, Julia",
       "place": 2,
+      "seedTime": "26.88",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "26.83"
@@ -11212,6 +11781,7 @@
       "gender": "F",
       "name": "Jarachovic, Jacquelyn",
       "place": 4,
+      "seedTime": "26.00",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "26.90"
@@ -11222,6 +11792,7 @@
       "gender": "F",
       "name": "Clinger, Hannah",
       "place": 5,
+      "seedTime": "27.00",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "27.01"
@@ -11232,6 +11803,7 @@
       "gender": "F",
       "name": "McDermott, Maggie",
       "place": 5,
+      "seedTime": "25.90",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "27.01"
@@ -11242,6 +11814,7 @@
       "gender": "F",
       "name": "McMullen, Haley",
       "place": 7,
+      "seedTime": "27.53",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "27.02"
@@ -11262,6 +11835,7 @@
       "gender": "F",
       "name": "Pierce, Haley",
       "place": 9,
+      "seedTime": "27.71",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "27.53"
@@ -11282,6 +11856,7 @@
       "gender": "F",
       "name": "Stelter, Gretchen",
       "place": 11,
+      "seedTime": "27.20",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "27.65"
@@ -11292,6 +11867,7 @@
       "gender": "F",
       "name": "Sparrow, Kat",
       "place": 12,
+      "seedTime": "27.00",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "27.74"
@@ -11302,6 +11878,7 @@
       "gender": "F",
       "name": "Medrano, Camila",
       "place": 13,
+      "seedTime": "30.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "27.81"
@@ -11312,6 +11889,7 @@
       "gender": "F",
       "name": "Hummel, Christina",
       "place": 14,
+      "seedTime": "27.00",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "27.85"
@@ -11332,6 +11910,7 @@
       "gender": "F",
       "name": "Ortega, Claudia",
       "place": 16,
+      "seedTime": "29.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "28.09"
@@ -11342,6 +11921,7 @@
       "gender": "F",
       "name": "Skaines, Nikki",
       "place": 17,
+      "seedTime": "28.03",
       "tags": "",
       "team": "Mississippi State Swim Club",
       "time": "28.10"
@@ -11352,6 +11932,7 @@
       "gender": "F",
       "name": "Salmon, Mandy",
       "place": 18,
+      "seedTime": "27.50",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "28.12"
@@ -11362,6 +11943,7 @@
       "gender": "F",
       "name": "Eisenbeis, Anna",
       "place": 19,
+      "seedTime": "28.78",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "28.30"
@@ -11372,6 +11954,7 @@
       "gender": "F",
       "name": "Hoover, Annalise",
       "place": 20,
+      "seedTime": "28.00",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "28.36"
@@ -11382,6 +11965,7 @@
       "gender": "F",
       "name": "Johnson, Rachel",
       "place": 21,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "28.37"
@@ -11392,6 +11976,7 @@
       "gender": "F",
       "name": "Benson, Anja",
       "place": 22,
+      "seedTime": "28.35",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "28.39"
@@ -11402,6 +11987,7 @@
       "gender": "F",
       "name": "Dragon, Haylee",
       "place": 23,
+      "seedTime": "28.54",
       "tags": "",
       "team": "Arkansas State Swim Club",
       "time": "28.41"
@@ -11422,6 +12008,7 @@
       "gender": "F",
       "name": "LaPlante, Emilie",
       "place": 25,
+      "seedTime": "28.00",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "28.46"
@@ -11432,6 +12019,7 @@
       "gender": "F",
       "name": "Hooten, Kristen",
       "place": 26,
+      "seedTime": "28.93",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "28.51"
@@ -11462,6 +12050,7 @@
       "gender": "F",
       "name": "Smith, Caroline",
       "place": 29,
+      "seedTime": "29.34",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "28.75"
@@ -11482,6 +12071,7 @@
       "gender": "F",
       "name": "Keller, Amelia",
       "place": 31,
+      "seedTime": "28.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "29.09"
@@ -11492,6 +12082,7 @@
       "gender": "F",
       "name": "Speece, Madison",
       "place": 32,
+      "seedTime": "28.03",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "29.33"
@@ -11512,6 +12103,7 @@
       "gender": "F",
       "name": "Flomerfelt, Belle",
       "place": 34,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Vols Swim Club",
       "time": "29.40"
@@ -11532,6 +12124,7 @@
       "gender": "F",
       "name": "Watkins, Allison",
       "place": 36,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "29.47"
@@ -11572,6 +12165,7 @@
       "gender": "F",
       "name": "Lee, Patricia",
       "place": 40,
+      "seedTime": "28.05",
       "tags": "",
       "team": "Radford Swim Club-VA",
       "time": "29.91"
@@ -11582,6 +12176,7 @@
       "gender": "F",
       "name": "Ross, Chloe",
       "place": 41,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Vols Swim Club",
       "time": "29.94"
@@ -11592,6 +12187,7 @@
       "gender": "F",
       "name": "Bailey, Shauna",
       "place": 42,
+      "seedTime": "29.61",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "30.08"
@@ -11612,6 +12208,7 @@
       "gender": "F",
       "name": "Dedic, Iva",
       "place": 44,
+      "seedTime": "29.10",
       "tags": "",
       "team": "Vols Swim Club",
       "time": "30.29"
@@ -11632,6 +12229,7 @@
       "gender": "F",
       "name": "Collier, Lydia",
       "place": 46,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "30.45"
@@ -11642,6 +12240,7 @@
       "gender": "F",
       "name": "Wakefield, Sydney",
       "place": 47,
+      "seedTime": "30.02",
       "tags": "",
       "team": "Arkansas State Swim Club",
       "time": "30.64"
@@ -11652,6 +12251,7 @@
       "gender": "F",
       "name": "Rowcliffe, Claire",
       "place": 48,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Vols Swim Club",
       "time": "30.67"
@@ -11662,6 +12262,7 @@
       "gender": "F",
       "name": "Eberhardt, Mallorie",
       "place": 49,
+      "seedTime": "32.03",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "30.72"
@@ -11682,6 +12283,7 @@
       "gender": "F",
       "name": "Wright, Irene",
       "place": 51,
+      "seedTime": "30.21",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "30.98"
@@ -11702,6 +12304,7 @@
       "gender": "F",
       "name": "Pruitt, Anna",
       "place": 53,
+      "seedTime": "31.52",
       "tags": "",
       "team": "Radford Swim Club-VA",
       "time": "31.16"
@@ -11712,6 +12315,7 @@
       "gender": "F",
       "name": "Santi, Gina",
       "place": 54,
+      "seedTime": "30.40",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "31.28"
@@ -11722,6 +12326,7 @@
       "gender": "F",
       "name": "Henderson, Natalie",
       "place": 55,
+      "seedTime": "32.03",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "31.62"
@@ -11742,6 +12347,7 @@
       "gender": "F",
       "name": "Long, Lillian",
       "place": 57,
+      "seedTime": "29.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "31.99"
@@ -11802,6 +12408,7 @@
       "gender": "F",
       "name": "Galley, Christine",
       "place": 63,
+      "seedTime": "34.10",
       "tags": "",
       "team": "Radford Swim Club-VA",
       "time": "33.28"
@@ -11832,6 +12439,7 @@
       "gender": "F",
       "name": "Calhoun, Meredith",
       "place": 66,
+      "seedTime": "34.42",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "33.42"
@@ -11842,6 +12450,7 @@
       "gender": "F",
       "name": "Siragusa, Samantha",
       "place": 67,
+      "seedTime": "34.73",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "33.45"
@@ -11852,6 +12461,7 @@
       "gender": "F",
       "name": "Cantor, Isabella",
       "place": 68,
+      "seedTime": "31.00",
       "tags": "",
       "team": "Emory Club Swimming-GA",
       "time": "33.84"
@@ -11892,6 +12502,7 @@
       "gender": "F",
       "name": "Poliner, Annaliese",
       "place": 72,
+      "seedTime": "34.81",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "35.11"
@@ -11902,6 +12513,7 @@
       "gender": "F",
       "name": "Brozynski, Rachael",
       "place": 73,
+      "seedTime": "34.22",
       "tags": "",
       "team": "Arkansas State Swim Club",
       "time": "35.65"
@@ -11912,6 +12524,7 @@
       "gender": "F",
       "name": "Moore, Kobie",
       "place": 74,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "36.25"
@@ -11952,6 +12565,7 @@
       "gender": "M",
       "name": "Vester, Samuel",
       "place": 1,
+      "seedTime": "21.09",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "22.18"
@@ -11962,6 +12576,7 @@
       "gender": "M",
       "name": "Radak, Ben",
       "place": 2,
+      "seedTime": "22.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "22.22"
@@ -11972,6 +12587,7 @@
       "gender": "M",
       "name": "Srdanovic, Ivan",
       "place": 3,
+      "seedTime": "22.50",
       "tags": "",
       "team": "Vanderbilt Swim Club-SE",
       "time": "22.50"
@@ -11992,6 +12608,7 @@
       "gender": "M",
       "name": "Shumeyko, Kyle",
       "place": 5,
+      "seedTime": "23.00",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "22.60"
@@ -12002,6 +12619,7 @@
       "gender": "M",
       "name": "Van De Velde, Cameron",
       "place": 6,
+      "seedTime": "21.98",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "22.72"
@@ -12012,6 +12630,7 @@
       "gender": "M",
       "name": "Kryski, Colton",
       "place": 6,
+      "seedTime": "22.77",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "22.72"
@@ -12022,6 +12641,7 @@
       "gender": "M",
       "name": "Webb, Case",
       "place": 8,
+      "seedTime": "23.00",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "22.80"
@@ -12032,6 +12652,7 @@
       "gender": "M",
       "name": "Grunert, Ryan",
       "place": 9,
+      "seedTime": "23.86",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "22.82"
@@ -12072,6 +12693,7 @@
       "gender": "M",
       "name": "Brumagin, Josh",
       "place": 13,
+      "seedTime": "23.00",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "23.09"
@@ -12082,6 +12704,7 @@
       "gender": "M",
       "name": "Cole, Justin",
       "place": 14,
+      "seedTime": "23.22",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "23.10"
@@ -12112,6 +12735,7 @@
       "gender": "M",
       "name": "Webber, James",
       "place": 17,
+      "seedTime": "23.05",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "23.28"
@@ -12122,6 +12746,7 @@
       "gender": "M",
       "name": "Strankman, Stone",
       "place": 18,
+      "seedTime": "23.73",
       "tags": "",
       "team": "Mississippi State Swim Club",
       "time": "23.34"
@@ -12142,6 +12767,7 @@
       "gender": "M",
       "name": "Hopkins, Matthew",
       "place": 20,
+      "seedTime": "23.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "23.47"
@@ -12152,6 +12778,7 @@
       "gender": "M",
       "name": "Racke, Michael",
       "place": 21,
+      "seedTime": "23.31",
       "tags": "",
       "team": "Miami University Club Swimming-OH",
       "time": "23.61"
@@ -12162,6 +12789,7 @@
       "gender": "M",
       "name": "Allen, Neal",
       "place": 22,
+      "seedTime": "23.00",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "23.68"
@@ -12172,6 +12800,7 @@
       "gender": "M",
       "name": "Jozwiak, Nicholas",
       "place": 23,
+      "seedTime": "23.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "23.76"
@@ -12192,6 +12821,7 @@
       "gender": "M",
       "name": "Jordan, Will",
       "place": 25,
+      "seedTime": "25.00",
       "tags": "",
       "team": "Mississippi State Swim Club",
       "time": "23.86"
@@ -12202,6 +12832,7 @@
       "gender": "M",
       "name": "Weiland, Ethan",
       "place": 26,
+      "seedTime": "23.50",
       "tags": "",
       "team": "Vols Swim Club",
       "time": "23.87"
@@ -12212,6 +12843,7 @@
       "gender": "M",
       "name": "Lutterbein, Tyrus",
       "place": 27,
+      "seedTime": "23.00",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "23.88"
@@ -12222,6 +12854,7 @@
       "gender": "M",
       "name": "Blust, Joseph",
       "place": 28,
+      "seedTime": "24.10",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "23.94"
@@ -12232,6 +12865,7 @@
       "gender": "M",
       "name": "Keaton, Davis",
       "place": 29,
+      "seedTime": "25.00",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "23.98"
@@ -12242,6 +12876,7 @@
       "gender": "M",
       "name": "Murphy, Lachlan",
       "place": 30,
+      "seedTime": "23.29",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "24.02"
@@ -12252,6 +12887,7 @@
       "gender": "M",
       "name": "Fregosi, Carson",
       "place": 31,
+      "seedTime": "23.20",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "24.04"
@@ -12272,6 +12908,7 @@
       "gender": "M",
       "name": "Vale, Adam",
       "place": 33,
+      "seedTime": "23.84",
       "tags": "",
       "team": "UC Club Swim Team-OH",
       "time": "24.09"
@@ -12282,6 +12919,7 @@
       "gender": "M",
       "name": "Maloney, Kyle",
       "place": 34,
+      "seedTime": "24.17",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "24.13"
@@ -12302,6 +12940,7 @@
       "gender": "M",
       "name": "Sharma, Agrim",
       "place": 35,
+      "seedTime": "23.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "24.17"
@@ -12312,6 +12951,7 @@
       "gender": "M",
       "name": "Lehrer, Jarrad",
       "place": 37,
+      "seedTime": "24.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "24.21"
@@ -12322,6 +12962,7 @@
       "gender": "M",
       "name": "Jans, Ben",
       "place": 38,
+      "seedTime": "24.55",
       "tags": "",
       "team": "UC Club Swim Team-OH",
       "time": "24.28"
@@ -12332,6 +12973,7 @@
       "gender": "M",
       "name": "Dickson, Brendan",
       "place": 39,
+      "seedTime": "24.61",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "24.34"
@@ -12342,6 +12984,7 @@
       "gender": "M",
       "name": "Butz, Steven",
       "place": 40,
+      "seedTime": "25.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "24.35"
@@ -12352,6 +12995,7 @@
       "gender": "M",
       "name": "Morey, Eli",
       "place": 41,
+      "seedTime": "24.88",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "24.50"
@@ -12362,6 +13006,7 @@
       "gender": "M",
       "name": "Sullivan, Sean",
       "place": 42,
+      "seedTime": "23.61",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "24.51"
@@ -12372,6 +13017,7 @@
       "gender": "M",
       "name": "Weis, Jason",
       "place": 43,
+      "seedTime": "24.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "24.56"
@@ -12392,6 +13038,7 @@
       "gender": "M",
       "name": "Sumner, Max",
       "place": 45,
+      "seedTime": "24.70",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "24.66"
@@ -12402,6 +13049,7 @@
       "gender": "M",
       "name": "Groman, Misha",
       "place": 46,
+      "seedTime": "24.60",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "24.67"
@@ -12412,6 +13060,7 @@
       "gender": "M",
       "name": "Davis, Lee",
       "place": 47,
+      "seedTime": "25.00",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "24.71"
@@ -12422,6 +13071,7 @@
       "gender": "M",
       "name": "Warren, Gage",
       "place": 48,
+      "seedTime": "25.00",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "24.72"
@@ -12432,6 +13082,7 @@
       "gender": "M",
       "name": "Nohl, Adam",
       "place": 49,
+      "seedTime": "24.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "24.74"
@@ -12442,6 +13093,7 @@
       "gender": "M",
       "name": "Steele, Noah",
       "place": 50,
+      "seedTime": "26.05",
       "tags": "",
       "team": "University of Central Arkansas",
       "time": "24.76"
@@ -12472,6 +13124,7 @@
       "gender": "M",
       "name": "Meyers, Ryan",
       "place": 53,
+      "seedTime": "25.50",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "24.90"
@@ -12482,6 +13135,7 @@
       "gender": "M",
       "name": "Kitchens, Tyler",
       "place": 54,
+      "seedTime": "25.00",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "25.08"
@@ -12492,6 +13146,7 @@
       "gender": "M",
       "name": "Young, Jesse",
       "place": 55,
+      "seedTime": "25.00",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "25.18"
@@ -12502,6 +13157,7 @@
       "gender": "M",
       "name": "D'Zio, Zachary",
       "place": 56,
+      "seedTime": "25.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "25.20"
@@ -12512,6 +13168,7 @@
       "gender": "M",
       "name": "Baste, Jeremy",
       "place": 57,
+      "seedTime": "25.04",
       "tags": "",
       "team": "University of Central Arkansas",
       "time": "25.43"
@@ -12522,6 +13179,7 @@
       "gender": "M",
       "name": "Kahler, Harold",
       "place": 58,
+      "seedTime": "26.00",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "25.77"
@@ -12552,6 +13210,7 @@
       "gender": "M",
       "name": "Coves, Jose",
       "place": 61,
+      "seedTime": "26.56",
       "tags": "",
       "team": "Emory Club Swimming-GA",
       "time": "26.00"
@@ -12592,6 +13251,7 @@
       "gender": "M",
       "name": "Wetzel, Dennis",
       "place": 65,
+      "seedTime": "26.87",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "26.49"
@@ -12632,6 +13292,7 @@
       "gender": "M",
       "name": "Harlow, Cole",
       "place": 69,
+      "seedTime": "26.60",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "26.79"
@@ -12642,6 +13303,7 @@
       "gender": "M",
       "name": "Welch, Sam",
       "place": 70,
+      "seedTime": "27.22",
       "tags": "",
       "team": "Radford Swim Club-VA",
       "time": "27.12"
@@ -12662,6 +13324,7 @@
       "gender": "M",
       "name": "Holmquist, David",
       "place": 72,
+      "seedTime": "29.34",
       "tags": "",
       "team": "Arkansas State Swim Club",
       "time": "27.42"
@@ -12672,6 +13335,7 @@
       "gender": "M",
       "name": "Peterson, Jeremy",
       "place": 73,
+      "seedTime": "27.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "27.47"
@@ -12682,6 +13346,7 @@
       "gender": "M",
       "name": "Starek, Brad",
       "place": 74,
+      "seedTime": "27.43",
       "tags": "",
       "team": "Radford Swim Club-VA",
       "time": "27.58"
@@ -12692,6 +13357,7 @@
       "gender": "M",
       "name": "Davault, Joseph",
       "place": 75,
+      "seedTime": "27.32",
       "tags": "",
       "team": "Arkansas State Swim Club",
       "time": "27.72"
@@ -12702,6 +13368,7 @@
       "gender": "M",
       "name": "Byrne, Cameron",
       "place": 76,
+      "seedTime": "28.00",
       "tags": "",
       "team": "Mississippi State Swim Club",
       "time": "27.75"
@@ -12712,6 +13379,7 @@
       "gender": "M",
       "name": "Wyatt, Nick",
       "place": 77,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Mississippi State Swim Club",
       "time": "27.90"
@@ -12722,6 +13390,7 @@
       "gender": "M",
       "name": "Smart, Wayne",
       "place": 78,
+      "seedTime": "32.45",
       "tags": "",
       "team": "Arkansas State Swim Club",
       "time": "28.08"
@@ -12742,6 +13411,7 @@
       "gender": "M",
       "name": "Falciglia, Remy",
       "place": 80,
+      "seedTime": "27.00",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "28.71"
@@ -12752,6 +13422,7 @@
       "gender": "M",
       "name": "Brock, Andrew",
       "place": 81,
+      "seedTime": "29.69",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "29.23"
@@ -12762,6 +13433,7 @@
       "gender": "M",
       "name": "Casto, Benjamin",
       "place": 82,
+      "seedTime": "29.66",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "29.33"
@@ -12772,6 +13444,7 @@
       "gender": "M",
       "name": "Christie, Alexander",
       "place": 83,
+      "seedTime": "30.07",
       "tags": "",
       "team": "Radford Swim Club-VA",
       "time": "29.64"
@@ -12782,6 +13455,7 @@
       "gender": "M",
       "name": "Lee, Josh",
       "place": 84,
+      "seedTime": "28.94",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "29.80"
@@ -12792,6 +13466,7 @@
       "gender": "M",
       "name": "Scharm, Kenny",
       "place": 85,
+      "seedTime": "31.59",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "31.06"
@@ -12812,6 +13487,7 @@
       "gender": "F",
       "name": "Durham, Rebecca",
       "place": 1,
+      "seedTime": "1:01.69",
       "splits": [
         {
           "distance": 50,
@@ -12832,6 +13508,7 @@
       "gender": "F",
       "name": "Smith, Sabrina",
       "place": 2,
+      "seedTime": "1:05.00",
       "splits": [
         {
           "distance": 50,
@@ -12852,6 +13529,7 @@
       "gender": "F",
       "name": "Laffey, Makenna",
       "place": 3,
+      "seedTime": "1:06.69",
       "splits": [
         {
           "distance": 50,
@@ -12872,6 +13550,7 @@
       "gender": "F",
       "name": "Shi, Kelly",
       "place": 4,
+      "seedTime": "1:05.00",
       "splits": [
         {
           "distance": 50,
@@ -12892,6 +13571,7 @@
       "gender": "F",
       "name": "Macdonald, Mackenzie",
       "place": 5,
+      "seedTime": "1:01.01",
       "splits": [
         {
           "distance": 50,
@@ -12912,6 +13592,7 @@
       "gender": "F",
       "name": "Popenov, Elizabeth",
       "place": 6,
+      "seedTime": "1:15.69",
       "splits": [
         {
           "distance": 50,
@@ -12983,7 +13664,7 @@
         }
       ],
       "tags": "",
-      "team": null,
+      "team": "St. Louis University Club Swim-MW",
       "time": "1:10.16"
     },
     {
@@ -13012,6 +13693,7 @@
       "gender": "F",
       "name": "Ukai, Kaho",
       "place": 11,
+      "seedTime": "1:15.62",
       "splits": [
         {
           "distance": 50,
@@ -13032,6 +13714,7 @@
       "gender": "F",
       "name": "Racioppi, Elesabeth",
       "place": 12,
+      "seedTime": "1:07.00",
       "splits": [
         {
           "distance": 50,
@@ -13052,6 +13735,7 @@
       "gender": "F",
       "name": "Kemmerly, Christine",
       "place": 13,
+      "seedTime": "1:09.81",
       "splits": [
         {
           "distance": 50,
@@ -13072,6 +13756,7 @@
       "gender": "F",
       "name": "Moschella, Emily",
       "place": 14,
+      "seedTime": "1:13.69",
       "splits": [
         {
           "distance": 50,
@@ -13134,6 +13819,7 @@
       "gender": "F",
       "name": "Adams, Breanna",
       "place": 17,
+      "seedTime": "1:15.00",
       "splits": [
         {
           "distance": 50,
@@ -13174,6 +13860,7 @@
       "gender": "F",
       "name": "Poliner, Annaliese",
       "place": 19,
+      "seedTime": "1:24.21",
       "splits": [
         {
           "distance": 50,
@@ -13214,6 +13901,7 @@
       "gender": "F",
       "name": "Nick, Laurie",
       "place": 21,
+      "seedTime": "1:25.67",
       "splits": [
         {
           "distance": 50,
@@ -13244,6 +13932,7 @@
       "gender": "M",
       "name": "Fomich, Keanan",
       "place": 1,
+      "seedTime": "56.50",
       "splits": [
         {
           "distance": 50,
@@ -13264,6 +13953,7 @@
       "gender": "M",
       "name": "Borchers, Alex",
       "place": 2,
+      "seedTime": "56.66",
       "splits": [
         {
           "distance": 50,
@@ -13304,6 +13994,7 @@
       "gender": "M",
       "name": "Eibel, Scott",
       "place": 4,
+      "seedTime": "56.00",
       "splits": [
         {
           "distance": 50,
@@ -13324,6 +14015,7 @@
       "gender": "M",
       "name": "Kurtz, Michael",
       "place": 5,
+      "seedTime": "54.69",
       "splits": [
         {
           "distance": 50,
@@ -13344,6 +14036,7 @@
       "gender": "M",
       "name": "Griffin, Austin",
       "place": 6,
+      "seedTime": "57.47",
       "splits": [
         {
           "distance": 50,
@@ -13364,6 +14057,7 @@
       "gender": "M",
       "name": "Wong, Justin",
       "place": 7,
+      "seedTime": "1:05.69",
       "splits": [
         {
           "distance": 50,
@@ -13384,6 +14078,7 @@
       "gender": "M",
       "name": "Perry, Damon",
       "place": 8,
+      "seedTime": "57.30",
       "splits": [
         {
           "distance": 50,
@@ -13404,6 +14099,7 @@
       "gender": "M",
       "name": "O'Halloran, Jack",
       "place": 9,
+      "seedTime": "57.50",
       "splits": [
         {
           "distance": 50,
@@ -13424,6 +14120,7 @@
       "gender": "M",
       "name": "Bunnell, Blake",
       "place": 10,
+      "seedTime": "1:02.69",
       "splits": [
         {
           "distance": 50,
@@ -13444,6 +14141,7 @@
       "gender": "M",
       "name": "Keerthi, Arjun",
       "place": 11,
+      "seedTime": "59.90",
       "splits": [
         {
           "distance": 50,
@@ -13484,6 +14182,7 @@
       "gender": "M",
       "name": "Brumagin, Josh",
       "place": 13,
+      "seedTime": "1:05.00",
       "splits": [
         {
           "distance": 50,
@@ -13504,6 +14203,7 @@
       "gender": "M",
       "name": "Mau, Alec",
       "place": 14,
+      "seedTime": "57.99",
       "splits": [
         {
           "distance": 50,
@@ -13524,6 +14224,7 @@
       "gender": "M",
       "name": "Grant, Jake",
       "place": 15,
+      "seedTime": "1:02.69",
       "splits": [
         {
           "distance": 50,
@@ -13544,6 +14245,7 @@
       "gender": "M",
       "name": "Cameron, Noah",
       "place": 16,
+      "seedTime": "1:10.00",
       "splits": [
         {
           "distance": 50,
@@ -13564,6 +14266,7 @@
       "gender": "M",
       "name": "Dzurnak, Michael",
       "place": 17,
+      "seedTime": "1:05.00",
       "splits": [
         {
           "distance": 50,
@@ -13584,6 +14287,7 @@
       "gender": "M",
       "name": "Riddle, Shane",
       "place": 18,
+      "seedTime": "1:04.00",
       "splits": [
         {
           "distance": 50,
@@ -13604,6 +14308,7 @@
       "gender": "M",
       "name": "Lingo, Jacob",
       "place": 19,
+      "seedTime": "59.50",
       "splits": [
         {
           "distance": 50,
@@ -13624,6 +14329,7 @@
       "gender": "M",
       "name": "Herrington, William",
       "place": 20,
+      "seedTime": "1:05.00",
       "splits": [
         {
           "distance": 50,
@@ -13664,6 +14370,7 @@
       "gender": "M",
       "name": "Borowsky, Alexander",
       "place": 22,
+      "seedTime": "1:03.00",
       "splits": [
         {
           "distance": 50,
@@ -13684,6 +14391,7 @@
       "gender": "M",
       "name": "Meyers, Ryan",
       "place": 23,
+      "seedTime": "1:03.00",
       "splits": [
         {
           "distance": 50,
@@ -13704,6 +14412,7 @@
       "gender": "M",
       "name": "Deshmukh, Atharva",
       "place": 24,
+      "seedTime": "1:07.69",
       "splits": [
         {
           "distance": 50,
@@ -13724,6 +14433,7 @@
       "gender": "M",
       "name": "Murphy, Donovan",
       "place": 25,
+      "seedTime": "1:12.66",
       "splits": [
         {
           "distance": 50,
@@ -13744,6 +14454,7 @@
       "gender": "M",
       "name": "Huntley, Steven",
       "place": 26,
+      "seedTime": "1:03.10",
       "splits": [
         {
           "distance": 50,
@@ -13784,6 +14495,7 @@
       "gender": "F",
       "name": "Lawson, Taylor",
       "place": 1,
+      "seedTime": "31.90",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "31.65"
@@ -13804,6 +14516,7 @@
       "gender": "F",
       "name": "Asip, Lexi",
       "place": 3,
+      "seedTime": "33.62",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "33.84"
@@ -13824,6 +14537,7 @@
       "gender": "F",
       "name": "Kalinowski, Lindsay",
       "place": 5,
+      "seedTime": "35.00",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "35.47"
@@ -13834,6 +14548,7 @@
       "gender": "F",
       "name": "McMullen, Haley",
       "place": 6,
+      "seedTime": "36.49",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "35.62"
@@ -13844,6 +14559,7 @@
       "gender": "F",
       "name": "Benson, Anja",
       "place": 7,
+      "seedTime": "34.54",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "36.24"
@@ -13854,6 +14570,7 @@
       "gender": "F",
       "name": "Johnson, Rachel",
       "place": 8,
+      "seedTime": "37.00",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "36.37"
@@ -13864,6 +14581,7 @@
       "gender": "F",
       "name": "Watkins, Allison",
       "place": 9,
+      "seedTime": "38.00",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "36.62"
@@ -13894,6 +14612,7 @@
       "gender": "F",
       "name": "Pyle, Shannon",
       "place": 12,
+      "seedTime": "36.99",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "37.27"
@@ -13924,6 +14643,7 @@
       "gender": "F",
       "name": "Jenkins, Danielle",
       "place": 15,
+      "seedTime": "38.68",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "37.95"
@@ -13935,6 +14655,7 @@
       "name": "Keown, Chelsea",
       "place": 16,
       "points": 1.0,
+      "seedTime": "36.83",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "38.10"
@@ -13945,6 +14666,7 @@
       "gender": "F",
       "name": "Stitt, Sydney",
       "place": 17,
+      "seedTime": "38.00",
       "tags": "",
       "team": "Emory Club Swimming-GA",
       "time": "38.62"
@@ -13955,6 +14677,7 @@
       "gender": "F",
       "name": "Garama, Nia",
       "place": 18,
+      "seedTime": "40.00",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "38.69"
@@ -13965,6 +14688,7 @@
       "gender": "F",
       "name": "Wakefield, Hannah",
       "place": 19,
+      "seedTime": "39.85",
       "tags": "",
       "team": "Arkansas State Swim Club",
       "time": "38.71"
@@ -13975,6 +14699,7 @@
       "gender": "F",
       "name": "Kinnear, Claire",
       "place": 20,
+      "seedTime": "36.00",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "38.78"
@@ -13985,6 +14710,7 @@
       "gender": "F",
       "name": "Koschella, Alice",
       "place": 21,
+      "seedTime": "39.56",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "38.88"
@@ -14005,6 +14731,7 @@
       "gender": "F",
       "name": "Williams, Margaret",
       "place": 23,
+      "seedTime": "40.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "39.21"
@@ -14025,6 +14752,7 @@
       "gender": "F",
       "name": "Wakefield, Sydney",
       "place": 25,
+      "seedTime": "38.78",
       "tags": "",
       "team": "Arkansas State Swim Club",
       "time": "39.70"
@@ -14035,6 +14763,7 @@
       "gender": "F",
       "name": "Wright, Irene",
       "place": 26,
+      "seedTime": "39.87",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "39.72"
@@ -14065,6 +14794,7 @@
       "gender": "F",
       "name": "Williams, Casey",
       "place": 29,
+      "seedTime": "42.89",
       "tags": "",
       "team": "Arkansas State Swim Club",
       "time": "40.80"
@@ -14085,6 +14815,7 @@
       "gender": "F",
       "name": "Siragusa, Samantha",
       "place": 31,
+      "seedTime": "41.50",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "41.50"
@@ -14095,6 +14826,7 @@
       "gender": "F",
       "name": "Galley, Christine",
       "place": 32,
+      "seedTime": "43.46",
       "tags": "",
       "team": "Radford Swim Club-VA",
       "time": "42.24"
@@ -14175,6 +14907,7 @@
       "gender": "F",
       "name": "Brozynski, Rachael",
       "place": 40,
+      "seedTime": "43.92",
       "tags": "",
       "team": "Arkansas State Swim Club",
       "time": "45.75"
@@ -14205,6 +14938,7 @@
       "gender": "F",
       "name": "Miller, Meghan",
       "place": 43,
+      "seedTime": "54.43",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "55.81"
@@ -14213,8 +14947,9 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "F",
-      "name": "Demmin, Mary",
+      "name": "Demmin, Mary Elizabeth",
       "place": 44,
+      "seedTime": "59.21",
       "tags": "",
       "team": "Radford Swim Club-VA",
       "time": "58.25"
@@ -14225,6 +14960,7 @@
       "gender": "M",
       "name": "Hilton, Mark",
       "place": 1,
+      "seedTime": "28.20",
       "tags": "",
       "team": "Vanderbilt Swim Club-SE",
       "time": "28.10"
@@ -14245,6 +14981,7 @@
       "gender": "M",
       "name": "Saccocio, Devon",
       "place": 3,
+      "seedTime": "28.29",
       "tags": "",
       "team": "UC Club Swim Team-OH",
       "time": "28.49"
@@ -14255,6 +14992,7 @@
       "gender": "M",
       "name": "King, Jacob",
       "place": 4,
+      "seedTime": "28.73",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "28.81"
@@ -14265,6 +15003,7 @@
       "gender": "M",
       "name": "McCormick, Winston",
       "place": 5,
+      "seedTime": "28.72",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "28.96"
@@ -14275,6 +15014,7 @@
       "gender": "M",
       "name": "Kryski, Colton",
       "place": 6,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "29.13"
@@ -14285,6 +15025,7 @@
       "gender": "M",
       "name": "Maloney, Kyle",
       "place": 7,
+      "seedTime": "30.10",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "29.32"
@@ -14295,6 +15036,7 @@
       "gender": "M",
       "name": "Vannest, Jeremiah",
       "place": 8,
+      "seedTime": "29.80",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "29.35"
@@ -14315,6 +15057,7 @@
       "gender": "M",
       "name": "Ting, Gabriel",
       "place": 10,
+      "seedTime": "28.52",
       "tags": "",
       "team": "Vanderbilt Swim Club-SE",
       "time": "29.45"
@@ -14325,6 +15068,7 @@
       "gender": "M",
       "name": "Strankman, Stone",
       "place": 11,
+      "seedTime": "29.55",
       "tags": "",
       "team": "Mississippi State Swim Club",
       "time": "29.48"
@@ -14335,6 +15079,7 @@
       "gender": "M",
       "name": "Tremolada, Eddie",
       "place": 12,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "29.62"
@@ -14355,6 +15100,7 @@
       "gender": "M",
       "name": "LaRocque, Max",
       "place": 14,
+      "seedTime": "30.99",
       "tags": "",
       "team": "Alabama Club Swimming-SE",
       "time": "29.94"
@@ -14365,6 +15111,7 @@
       "gender": "M",
       "name": "Nguyen, Trent",
       "place": 15,
+      "seedTime": "30.03",
       "tags": "",
       "team": "UC Club Swim Team-OH",
       "time": "30.14"
@@ -14395,6 +15142,7 @@
       "gender": "M",
       "name": "Zhang, Daniel",
       "place": 18,
+      "seedTime": "30.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "30.58"
@@ -14425,6 +15173,7 @@
       "gender": "M",
       "name": "Shumeyko, Kyle",
       "place": 21,
+      "seedTime": "32.00",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "31.18"
@@ -14435,6 +15184,7 @@
       "gender": "M",
       "name": "Ellett, Jackson",
       "place": 22,
+      "seedTime": "34.00",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "31.32"
@@ -14445,6 +15195,7 @@
       "gender": "M",
       "name": "Withycombe, Owen",
       "place": 23,
+      "seedTime": "33.09",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "31.66"
@@ -14465,6 +15216,7 @@
       "gender": "M",
       "name": "Muni, Alex",
       "place": 25,
+      "seedTime": "33.37",
       "tags": "",
       "team": "Miami University Club Swimming-OH",
       "time": "31.94"
@@ -14475,6 +15227,7 @@
       "gender": "M",
       "name": "Pressly, John",
       "place": 26,
+      "seedTime": "35.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "32.32"
@@ -14485,6 +15238,7 @@
       "gender": "M",
       "name": "Kane, Braden",
       "place": 27,
+      "seedTime": "33.99",
       "tags": "",
       "team": "Club Swimming at Ohio State-OH",
       "time": "32.36"
@@ -14505,6 +15259,7 @@
       "gender": "M",
       "name": "Krumenaker, Dema",
       "place": 29,
+      "seedTime": "32.92",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "33.08"
@@ -14515,6 +15270,7 @@
       "gender": "M",
       "name": "Fulton, Zane",
       "place": 30,
+      "seedTime": "32.12",
       "tags": "",
       "team": "UC Club Swim Team-OH",
       "time": "33.37"
@@ -14535,6 +15291,7 @@
       "gender": "M",
       "name": "Warren, Gage",
       "place": 32,
+      "seedTime": "36.00",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "33.79"
@@ -14545,6 +15302,7 @@
       "gender": "M",
       "name": "Falciglia, Remy",
       "place": 33,
+      "seedTime": "32.59",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "33.92"
@@ -14555,6 +15313,7 @@
       "gender": "M",
       "name": "Wetzel, Dennis",
       "place": 34,
+      "seedTime": "34.95",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "34.00"
@@ -14565,6 +15324,7 @@
       "gender": "M",
       "name": "Reid, Anthony",
       "place": 35,
+      "seedTime": "33.00",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "34.14"
@@ -14575,6 +15335,7 @@
       "gender": "M",
       "name": "Davis, Lee",
       "place": 36,
+      "seedTime": "33.00",
       "tags": "",
       "team": "Clemson Club Swimming-SC",
       "time": "34.40"
@@ -14585,6 +15346,7 @@
       "gender": "M",
       "name": "Scharm, Kenny",
       "place": 37,
+      "seedTime": "34.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "34.86"
@@ -14595,6 +15357,7 @@
       "gender": "M",
       "name": "Davault, Joseph",
       "place": 38,
+      "seedTime": "35.90",
       "tags": "",
       "team": "Arkansas State Swim Club",
       "time": "35.27"
@@ -14605,6 +15368,7 @@
       "gender": "M",
       "name": "Peterson, Jeremy",
       "place": 39,
+      "seedTime": "34.69",
       "tags": "",
       "team": "Georgia Tech Swim Club-GA",
       "time": "35.28"
@@ -14625,6 +15389,7 @@
       "gender": "M",
       "name": "Brock, Andrew",
       "place": 41,
+      "seedTime": "37.47",
       "tags": "",
       "team": "Uga Swim Club-GA",
       "time": "37.81"
@@ -14635,6 +15400,7 @@
       "gender": "F",
       "name": "Carlson, Caroline",
       "place": 1,
+      "seedTime": "1:01.40",
       "splits": [
         {
           "distance": 50,
@@ -14655,6 +15421,7 @@
       "gender": "F",
       "name": "Klingensmith, Elizabeth",
       "place": 2,
+      "seedTime": "1:02.84",
       "splits": [
         {
           "distance": 50,
@@ -14695,6 +15462,7 @@
       "gender": "F",
       "name": "Zhang, Linsie",
       "place": 4,
+      "seedTime": "1:07.80",
       "splits": [
         {
           "distance": 50,
@@ -14715,6 +15483,7 @@
       "gender": "F",
       "name": "McDermott, Maggie",
       "place": 5,
+      "seedTime": "1:02.00",
       "splits": [
         {
           "distance": 50,
@@ -14755,6 +15524,7 @@
       "gender": "F",
       "name": "Kalinowski, Lindsay",
       "place": 7,
+      "seedTime": "1:05.00",
       "splits": [
         {
           "distance": 50,
@@ -14837,6 +15607,7 @@
       "name": "von Hollen, Katie",
       "place": 11,
       "points": 6.0,
+      "seedTime": "1:11.00",
       "splits": [
         {
           "distance": 50,
@@ -14858,6 +15629,7 @@
       "name": "Tomasko, Amanda",
       "place": 12,
       "points": 5.0,
+      "seedTime": "1:18.00",
       "splits": [
         {
           "distance": 50,
@@ -14899,6 +15671,7 @@
       "gender": "M",
       "name": "Chou, Max",
       "place": 1,
+      "seedTime": "54.00",
       "splits": [
         {
           "distance": 50,
@@ -14919,6 +15692,7 @@
       "gender": "M",
       "name": "Lobitz, Carl",
       "place": 2,
+      "seedTime": "53.69",
       "splits": [
         {
           "distance": 50,
@@ -14939,6 +15713,7 @@
       "gender": "M",
       "name": "Van De Velde, Cameron",
       "place": 3,
+      "seedTime": "51.89",
       "splits": [
         {
           "distance": 50,
@@ -14959,6 +15734,7 @@
       "gender": "M",
       "name": "Kis, Tamas",
       "place": 4,
+      "seedTime": "53.49",
       "splits": [
         {
           "distance": 50,
@@ -14979,6 +15755,7 @@
       "gender": "M",
       "name": "Waters, Jacob",
       "place": 5,
+      "seedTime": "55.07",
       "splits": [
         {
           "distance": 50,
@@ -14999,6 +15776,7 @@
       "gender": "M",
       "name": "Perry, Damon",
       "place": 6,
+      "seedTime": "55.70",
       "splits": [
         {
           "distance": 50,
@@ -15059,6 +15837,7 @@
       "gender": "M",
       "name": "Mazurek, Tyler",
       "place": 9,
+      "seedTime": "58.74",
       "splits": [
         {
           "distance": 50,
@@ -15079,6 +15858,7 @@
       "gender": "M",
       "name": "Barnhart, Joshua",
       "place": 10,
+      "seedTime": "58.59",
       "splits": [
         {
           "distance": 50,
@@ -15099,6 +15879,7 @@
       "gender": "M",
       "name": "Cameron, Noah",
       "place": 11,
+      "seedTime": "1:10.00",
       "splits": [
         {
           "distance": 50,
@@ -15119,6 +15900,7 @@
       "gender": "M",
       "name": "Aukerman, Nick",
       "place": 12,
+      "seedTime": "56.89",
       "splits": [
         {
           "distance": 50,
@@ -15140,6 +15922,7 @@
       "name": "Sands, Will",
       "place": 13,
       "points": 4.0,
+      "seedTime": "59.00",
       "splits": [
         {
           "distance": 50,
@@ -15161,6 +15944,7 @@
       "name": "Jordan, Will",
       "place": 14,
       "points": 3.0,
+      "seedTime": "1:05.00",
       "splits": [
         {
           "distance": 50,
@@ -15182,6 +15966,7 @@
       "name": "Ralph, Sterling",
       "place": 15,
       "points": 2.0,
+      "seedTime": "59.00",
       "splits": [
         {
           "distance": 50,
@@ -15203,6 +15988,7 @@
       "name": "Vollino, Garrett",
       "place": 16,
       "points": 1.0,
+      "seedTime": "59.05",
       "splits": [
         {
           "distance": 50,
@@ -15263,6 +16049,7 @@
       "gender": "M",
       "name": "Hopkins, Matthew",
       "place": 19,
+      "seedTime": "59.69",
       "splits": [
         {
           "distance": 50,
@@ -15283,6 +16070,7 @@
       "gender": "M",
       "name": "Coves, Jose",
       "place": 20,
+      "seedTime": "1:04.32",
       "splits": [
         {
           "distance": 50,
@@ -15323,6 +16111,7 @@
       "gender": "M",
       "name": "Deshmukh, Atharva",
       "place": 22,
+      "seedTime": "1:01.69",
       "splits": [
         {
           "distance": 50,
@@ -15343,6 +16132,7 @@
       "gender": "F",
       "name": "Ridgeway, Ellie",
       "place": 1,
+      "seedTime": "2:20.69",
       "splits": [
         {
           "distance": 50,
@@ -15399,6 +16189,7 @@
       "gender": "F",
       "name": "Nastasi, Allison",
       "place": 3,
+      "seedTime": "2:21.69",
       "splits": [
         {
           "distance": 50,
@@ -15427,6 +16218,7 @@
       "gender": "F",
       "name": "Laffey, Makenna",
       "place": 4,
+      "seedTime": "2:25.69",
       "splits": [
         {
           "distance": 50,
@@ -15455,6 +16247,7 @@
       "gender": "F",
       "name": "Smith, Sabrina",
       "place": 5,
+      "seedTime": "2:30.00",
       "splits": [
         {
           "distance": 50,
@@ -15483,6 +16276,7 @@
       "gender": "F",
       "name": "Clinger, Hannah",
       "place": 6,
+      "seedTime": "2:30.00",
       "splits": [
         {
           "distance": 50,
@@ -15511,6 +16305,7 @@
       "gender": "F",
       "name": "Shi, Kelly",
       "place": 7,
+      "seedTime": "2:20.00",
       "splits": [
         {
           "distance": 50,
@@ -15595,6 +16390,7 @@
       "gender": "F",
       "name": "Chafin, Holly",
       "place": 10,
+      "seedTime": "2:35.50",
       "splits": [
         {
           "distance": 50,
@@ -15623,6 +16419,7 @@
       "gender": "F",
       "name": "Pierce, Haley",
       "place": 11,
+      "seedTime": "2:35.00",
       "splits": [
         {
           "distance": 50,
@@ -15681,6 +16478,7 @@
       "name": "Carlozzi, Josie",
       "place": 13,
       "points": 4.0,
+      "seedTime": "2:34.69",
       "splits": [
         {
           "distance": 50,
@@ -15739,6 +16537,7 @@
       "name": "Massirer, Anna",
       "place": 15,
       "points": 2.0,
+      "seedTime": "3:06.33",
       "splits": [
         {
           "distance": 50,
@@ -15768,6 +16567,7 @@
       "name": "Hopkins, Nadia",
       "place": 16,
       "points": 1.0,
+      "seedTime": "4:26.55",
       "splits": [
         {
           "distance": 50,
@@ -15796,6 +16596,7 @@
       "gender": "M",
       "name": "Giesman, Grayton",
       "place": 1,
+      "seedTime": "2:01.00",
       "splits": [
         {
           "distance": 50,
@@ -15824,6 +16625,7 @@
       "gender": "M",
       "name": "Wu, Derek",
       "place": 2,
+      "seedTime": "2:05.69",
       "splits": [
         {
           "distance": 50,
@@ -15852,6 +16654,7 @@
       "gender": "M",
       "name": "Riordan, Bryan",
       "place": 3,
+      "seedTime": "2:08.00",
       "splits": [
         {
           "distance": 50,
@@ -15880,6 +16683,7 @@
       "gender": "M",
       "name": "Mikuta, John",
       "place": 4,
+      "seedTime": "2:05.00",
       "splits": [
         {
           "distance": 50,
@@ -15936,6 +16740,7 @@
       "gender": "M",
       "name": "Quillen, Michael",
       "place": 6,
+      "seedTime": "2:05.69",
       "splits": [
         {
           "distance": 50,
@@ -15964,6 +16769,7 @@
       "gender": "M",
       "name": "Fregosi, Carson",
       "place": 7,
+      "seedTime": "2:02.65",
       "splits": [
         {
           "distance": 50,
@@ -15992,6 +16798,7 @@
       "gender": "M",
       "name": "Bunnell, Blake",
       "place": 8,
+      "seedTime": "2:15.69",
       "splits": [
         {
           "distance": 50,
@@ -16020,6 +16827,7 @@
       "gender": "M",
       "name": "Baird, Braxton",
       "place": 9,
+      "seedTime": "2:20.00",
       "splits": [
         {
           "distance": 50,
@@ -16048,6 +16856,7 @@
       "gender": "M",
       "name": "Hopkins, Kyle",
       "place": 10,
+      "seedTime": "2:06.00",
       "splits": [
         {
           "distance": 50,
@@ -16076,6 +16885,7 @@
       "gender": "M",
       "name": "Cochenour, Michael",
       "place": 11,
+      "seedTime": "2:10.00",
       "splits": [
         {
           "distance": 50,
@@ -16104,6 +16914,7 @@
       "gender": "M",
       "name": "Dzurnak, Michael",
       "place": 12,
+      "seedTime": "2:15.00",
       "splits": [
         {
           "distance": 50,
@@ -16161,6 +16972,7 @@
       "name": "Cathapermal, Dylan",
       "place": 14,
       "points": 3.0,
+      "seedTime": "2:20.00",
       "splits": [
         {
           "distance": 50,
@@ -16190,6 +17002,7 @@
       "name": "Keerthi, Arjun",
       "place": 15,
       "points": 2.0,
+      "seedTime": "2:15.00",
       "splits": [
         {
           "distance": 50,
@@ -16247,6 +17060,7 @@
       "gender": "M",
       "name": "Withycombe, Owen",
       "place": 17,
+      "seedTime": "2:15.79",
       "splits": [
         {
           "distance": 50,
@@ -16303,36 +17117,7 @@
       "gender": "X",
       "name": "Waters, Jacob",
       "place": 1,
-      "splits": [
-        {
-          "distance": 71,
-          "splitTime": "27.92"
-        },
-        {
-          "distance": 142,
-          "splitTime": "58.09"
-        },
-        {
-          "distance": 213,
-          "splitTime": "1:28.87"
-        },
-        {
-          "distance": 284,
-          "splitTime": "1:59.63"
-        },
-        {
-          "distance": 355,
-          "splitTime": "4:36.32"
-        },
-        {
-          "distance": 426,
-          "splitTime": "5:14.81"
-        },
-        {
-          "distance": 497,
-          "splitTime": "5:14.80"
-        }
-      ],
+      "seedTime": "5:20.00",
       "tags": "",
       "team": "UC Club Swim Team-OH",
       "time": "5:14.80"
@@ -16343,40 +17128,6 @@
       "gender": "X",
       "name": "O'Halloran, Jack",
       "place": 2,
-      "splits": [
-        {
-          "distance": 62,
-          "splitTime": "28.08"
-        },
-        {
-          "distance": 124,
-          "splitTime": "59.37"
-        },
-        {
-          "distance": 186,
-          "splitTime": "1:31.27"
-        },
-        {
-          "distance": 248,
-          "splitTime": "2:03.38"
-        },
-        {
-          "distance": 310,
-          "splitTime": "4:12.31"
-        },
-        {
-          "distance": 372,
-          "splitTime": "4:45.64"
-        },
-        {
-          "distance": 434,
-          "splitTime": "5:18.08"
-        },
-        {
-          "distance": 496,
-          "splitTime": "5:17.90"
-        }
-      ],
       "tags": "",
       "team": "Vanderbilt Swim Club-SE",
       "time": "5:17.90"
@@ -16387,33 +17138,34 @@
       "gender": "X",
       "name": "Vester, Samuel",
       "place": 3,
+      "seedTime": "4:57.69",
       "splits": [
         {
-          "distance": 71,
+          "distance": 50,
           "splitTime": "29.28"
         },
         {
-          "distance": 142,
+          "distance": 100,
           "splitTime": "32.19"
         },
         {
-          "distance": 213,
+          "distance": 150,
           "splitTime": "34.08"
         },
         {
-          "distance": 284,
+          "distance": 200,
           "splitTime": "35.02"
         },
         {
-          "distance": 355,
+          "distance": 400,
           "splitTime": "2:22.91"
         },
         {
-          "distance": 426,
+          "distance": 450,
           "splitTime": "36.07"
         },
         {
-          "distance": 497,
+          "distance": 500,
           "splitTime": "35.01"
         }
       ],
@@ -16429,31 +17181,31 @@
       "place": 4,
       "splits": [
         {
-          "distance": 71,
+          "distance": 50,
           "splitTime": "32.78"
         },
         {
-          "distance": 142,
+          "distance": 100,
           "splitTime": "36.17"
         },
         {
-          "distance": 213,
+          "distance": 150,
           "splitTime": "36.70"
         },
         {
-          "distance": 284,
+          "distance": 200,
           "splitTime": "37.89"
         },
         {
-          "distance": 355,
+          "distance": 350,
           "splitTime": "1:59.15"
         },
         {
-          "distance": 426,
+          "distance": 400,
           "splitTime": "40.13"
         },
         {
-          "distance": 497,
+          "distance": 500,
           "splitTime": "1:19.17"
         }
       ],
@@ -16579,6 +17331,7 @@
       "gender": "X",
       "name": "Pyle, Shannon",
       "place": 5,
+      "seedTime": "2:25.99",
       "splits": [
         {
           "distance": 50,
@@ -16663,6 +17416,7 @@
       "gender": "X",
       "name": "Das, Chirag",
       "place": 1,
+      "seedTime": "2:10.96",
       "splits": [
         {
           "distance": 50,
@@ -16691,6 +17445,7 @@
       "gender": "X",
       "name": "Hilton, Mark",
       "place": 2,
+      "seedTime": "2:20.00",
       "splits": [
         {
           "distance": 50,
@@ -16719,6 +17474,7 @@
       "gender": "X",
       "name": "Retondo, Nicole",
       "place": 3,
+      "seedTime": "2:54.71",
       "splits": [
         {
           "distance": 50,
@@ -16831,6 +17587,7 @@
       "gender": "X",
       "name": "Carlozzi, Josie",
       "place": 7,
+      "seedTime": "3:02.69",
       "splits": [
         {
           "distance": 50,
@@ -16897,6 +17654,7 @@
       "gender": "X",
       "name": "Jones, Shiloh",
       "place": 2,
+      "seedTime": "2:18.49",
       "splits": [
         {
           "distance": 50,
@@ -16925,6 +17683,7 @@
       "gender": "X",
       "name": "Giesman, Grayton",
       "place": 1,
+      "seedTime": "4:15.00",
       "splits": [
         {
           "distance": 50,
@@ -17013,6 +17772,7 @@
       "gender": "X",
       "name": "Deshmukh, Atharva",
       "place": 3,
+      "seedTime": "4:50.69",
       "splits": [
         {
           "distance": 50,
@@ -17145,6 +17905,7 @@
       "gender": "X",
       "name": "Gugliotta, Gina",
       "place": 6,
+      "seedTime": "5:30.87",
       "splits": [
         {
           "distance": 50,
@@ -17189,6 +17950,7 @@
       "gender": "X",
       "name": "Sequeira, Amanda",
       "place": 7,
+      "seedTime": "6:00.00",
       "splits": [
         {
           "distance": 50,

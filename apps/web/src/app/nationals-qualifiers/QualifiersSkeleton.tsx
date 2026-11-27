@@ -55,10 +55,13 @@ const rowGridClass = "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 p
  * A swim line: lead, time, margin, standard, meet and date (QualifiersList's columns). Phones: lead
  * and time (with margin), then meet · date and the cut.
  */
-function SwimLineSkeleton({ lead, cols }: { lead: string; cols: string }) {
+function SwimLineSkeleton({ lead, cols, badge }: { lead: string; cols: string; badge: boolean }) {
   return (
     <div className={`${rowGridClass} ${cols} gap-y-1.5 border-t border-border-subtle py-2.5 first:border-t-0`}>
-      <Skeleton className={`h-4 max-w-full ${lead}`} />
+      <div className="flex min-w-0 items-center gap-2">
+        {badge ? <Skeleton className="h-5 w-5 shrink-0 rounded-full" /> : null}
+        <Skeleton className={`h-4 max-w-full ${lead}`} />
+      </div>
       <Skeleton className="h-4 w-14 justify-self-end max-md:col-start-2 max-md:row-start-1 max-md:w-24" />
       <Skeleton className="h-4 w-12 justify-self-end max-md:hidden" />
       <Skeleton className="h-4 w-14 justify-self-end max-md:col-start-2 max-md:row-start-2" />
@@ -75,7 +78,7 @@ function ListSkeleton({ byEvent }: { byEvent: boolean }) {
       {NAME_WIDTHS.map((name, i) => (
         <div key={i} className="border-t border-border-secondary first:border-t-0">
           <div className={`flex min-h-12 items-center gap-2.5 px-4 py-2 max-sm:px-3 ${qualifierHeaderBgClass}`}>
-            {byEvent ? null : <Skeleton className="h-8 w-8 shrink-0 rounded-full" />}
+            <Skeleton className={`shrink-0 rounded-full ${byEvent ? "h-[26px] w-[26px]" : "h-8 w-8"}`} />
             <Skeleton className={`h-4 ${byEvent ? "w-28" : name}`} />
             <Skeleton className="ml-auto h-3 w-20" />
           </div>
@@ -84,6 +87,7 @@ function ListSkeleton({ byEvent }: { byEvent: boolean }) {
               <SwimLineSkeleton
                 key={j}
                 cols={cols}
+                badge={!byEvent}
                 lead={byEvent ? NAME_WIDTHS[(i + j + 3) % NAME_WIDTHS.length] : "w-16"}
               />
             ))}
@@ -94,10 +98,10 @@ function ListSkeleton({ byEvent }: { byEvent: boolean }) {
   )
 }
 
-/** Same slot as QualifiersView's JumpRail: beside the list, just outside it in the right margin when wide. */
+/** Same slot as QualifiersView's JumpRail: just right of the list, out in the page's right margin. */
 function RailSkeleton() {
   return (
-    <div className="shrink-0 self-stretch min-[1040px]:absolute min-[1040px]:inset-y-0 min-[1040px]:left-full min-[1040px]:ml-3">
+    <div className="jump-rail-slot">
       <div className="flex flex-col items-center gap-[7px] py-[5px]">
         {Array.from({ length: 26 }, (_, i) => (
           <Skeleton key={i} className="h-2.5 w-2.5 rounded-sm" />
@@ -114,7 +118,10 @@ function GallerySkeleton({ byEvent }: { byEvent: boolean }) {
         <div key={i} className="flex flex-col rounded-xl border border-border-secondary bg-background p-4">
           {byEvent ? (
             <div className="flex items-center justify-between gap-2">
-              <Skeleton className="h-4 w-28" />
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-[21px] w-[21px] shrink-0 rounded-full" />
+                <Skeleton className="h-4 w-28" />
+              </div>
               <Skeleton className="h-3 w-24" />
             </div>
           ) : (
@@ -128,8 +135,15 @@ function GallerySkeleton({ byEvent }: { byEvent: boolean }) {
           )}
           <div className="mt-3 flex flex-col gap-1">
             {Array.from({ length: Math.min(LINE_COUNTS[i], byEvent ? 4 : 3) }, (_, j) => (
-              <div key={j} className="flex items-center justify-between gap-3 py-1">
-                <Skeleton className={`h-3.5 ${byEvent ? NAME_WIDTHS[(i + j + 3) % NAME_WIDTHS.length] : "w-16"}`} />
+              <div key={j} className={`flex items-center justify-between gap-3 ${byEvent ? "py-1" : "py-0.5"}`}>
+                {byEvent ? (
+                  <Skeleton className={`h-3.5 ${NAME_WIDTHS[(i + j + 3) % NAME_WIDTHS.length]}`} />
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-5 w-5 shrink-0 rounded-full" />
+                    <Skeleton className="h-3.5 w-16" />
+                  </div>
+                )}
                 <Skeleton className="h-3.5 w-20" />
               </div>
             ))}
@@ -152,8 +166,8 @@ export default function QualifiersSkeleton({ layout, byEvent = false }: { layout
           <GallerySkeleton byEvent />
         )
       ) : (
-        // JumpRail's JUMP_RAIL_LAYOUT_CLASS, inlined (a client module's exports aren't values here).
-        <div className="relative flex items-start gap-1 min-[1040px]:block">
+        // JumpRail's JUMP_RAIL_LAYOUT_CLASS (a client module's exports aren't values here).
+        <div className="jump-rail-layout">
           <div className="min-w-0 flex-1">
             {layout === "list" ? <ListSkeleton byEvent={false} /> : <GallerySkeleton byEvent={false} />}
           </div>

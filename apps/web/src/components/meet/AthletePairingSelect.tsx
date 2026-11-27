@@ -61,6 +61,7 @@ export default function AthletePairingSelect({
   label,
   season,
   allSeasons,
+  tagOtherSeasons = false,
   createLabel,
   onCreate,
   placeholder,
@@ -75,6 +76,8 @@ export default function AthletePairingSelect({
   season?: string
   /** Every athlete, all seasons: null until `load` has fetched them. */
   allSeasons?: { athletes: RosterPairingOption[] | null; load: () => void }
+  /** `roster` already holds every season's athletes: tag the ones from other seasons. */
+  tagOtherSeasons?: boolean
   /** The create row's label, e.g. "Create athlete “Cole Page”…". */
   createLabel?: string
   onCreate?: () => void
@@ -107,10 +110,10 @@ export default function AthletePairingSelect({
         id: a.id,
         label: lastFirst(a),
         search: fold(`${a.firstName} ${a.lastName}`),
-        hint: scope === "all" ? otherSeasonHint(a, season) : undefined,
+        hint: scope === "all" || tagOtherSeasons ? otherSeasonHint(a, season) : undefined,
       })),
     ]
-  }, [scope, everyone, roster, season, placeholder])
+  }, [scope, everyone, roster, season, placeholder, tagOtherSeasons])
   const selected = value
     ? (roster.find((a) => a.id === value) ?? everyone?.find((a) => a.id === value))
     : undefined
@@ -206,7 +209,7 @@ export default function AthletePairingSelect({
         autoComplete="off"
         value={open ? query : selectedLabel}
         placeholder={
-          open ? (scope === "all" ? "Search all seasons" : `Search ${roster.length} athletes`) : placeholder
+          open ? (scope === "all" || tagOtherSeasons ? "Search all seasons" : `Search ${roster.length} athletes`) : placeholder
         }
         onFocus={openList}
         onClick={openList}
@@ -234,7 +237,7 @@ export default function AthletePairingSelect({
             close()
           }
         }}
-        className={`w-full cursor-pointer rounded-lg border border-border-secondary bg-background py-2 pl-3 pr-9 text-sm text-foreground outline-none transition-[border-color,box-shadow] placeholder:text-foreground-tertiary focus:cursor-text focus:border-primary focus:ring-[3px] focus:ring-primary/35 ${
+        className={`w-full cursor-pointer rounded-lg border border-border-secondary bg-background py-2 pl-3 pr-9 text-sm text-foreground outline-none transition-[border-color,box-shadow] placeholder:text-foreground-tertiary focus:cursor-text ${
           !open && !value ? "text-foreground-secondary" : ""
         }`}
       />

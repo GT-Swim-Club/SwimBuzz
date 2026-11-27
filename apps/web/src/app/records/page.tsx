@@ -11,6 +11,8 @@ async function RecordsContent() {
   return <RecordsView initial={await listTeamRecords()} />
 }
 
+export const metadata = { title: "Records" }
+
 export default async function RecordsPage() {
   const session = await getSession()
   if (!session) redirect("/signin")

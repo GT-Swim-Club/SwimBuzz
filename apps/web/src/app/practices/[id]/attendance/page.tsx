@@ -10,6 +10,12 @@ import { serializeAttendance } from "@/lib/practice/practice-attendance"
 import { missingClearanceByAthlete, withAttendanceClearance } from "@/lib/athlete/athlete-clearance"
 import AttendanceManager from "./AttendanceManager"
 import AttendanceList from "./AttendanceList"
+import { practicePageMetadata } from "@/lib/page-title"
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id: param } = await params
+  return practicePageMetadata(param, "Attendance")
+}
 
 export default async function PracticeAttendancePage({
   params,
@@ -21,41 +27,45 @@ export default async function PracticeAttendancePage({
   if (!session) {
     redirect(`/signin?callbackUrl=/practices/${encodeURIComponent(param)}/attendance`)
   }
-  const isCoach = await isStaffUi(session.user.role)
-
-  const practice = await prisma.practice.findFirst({
-    where: isCuid(param) ? { OR: [{ id: param }, { slug: param }] } : { slug: param },
-    select: {
-      id: true,
-      slug: true,
-      title: true,
-      published: true,
-      visibility: true,
-      ownerId: true,
-      createdAt: true,
-      startsAt: true,
-      endsAt: true,
-      timeZone: true,
-      location: true,
-      attendance: {
-        orderBy: { recordedAt: "desc" },
-        include: {
-          athlete: {
-            select: {
-              slug: true,
-              firstName: true,
-              lastName: true,
-              gender: true,
-              year: true,
-              yearBySeason: true,
-              seasons: true,
-              user: { select: { staffTitle: true } },
+  const [isCoach, practice] = await Promise.all([
+    isStaffUi(session.user.role),
+    prisma.practice.findFirst({
+      where: isCuid(param) ? { OR: [{ id: param }, { slug: param }] } : { slug: param },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        published: true,
+        visibility: true,
+        ownerId: true,
+        createdAt: true,
+        startsAt: true,
+        endsAt: true,
+        timeZone: true,
+        location: true,
+        attendance: {
+          orderBy: { recordedAt: "desc" },
+          include: {
+            athlete: {
+              select: {
+                slug: true,
+                firstName: true,
+                lastName: true,
+                gender: true,
+                year: true,
+                yearBySeason: true,
+                seasons: true,
+                user: { select: { staffTitle: true } },
+              },
             },
           },
         },
       },
-    },
-  })
+    }),
+    // Athletes' "you" lookup doesn't need the practice; resolveViewerAthleteId is cache()d, so the
+    // call below reuses this one.
+    isStaffRole(session.user.role) ? null : resolveViewerAthleteId(session.user.id),
+  ])
 
   // Athletes see attendance only for practices they can otherwise view. Private practices have none.
   if (!practice) notFound()

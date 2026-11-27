@@ -74,7 +74,7 @@ export const emptyMeetForm: MeetFormState = {
 }
 
 const inputClass =
-  "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-[border-color,box-shadow] focus:border-primary focus:ring-[3px] focus:ring-primary/35"
+  "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-[border-color,box-shadow]"
 const labelClass = "mb-1 block text-xs font-medium text-foreground-secondary"
 
 /**
@@ -918,7 +918,7 @@ function MeetSwitch({
         aria-checked={on}
         aria-label={label}
         onClick={() => onChange(!on)}
-        className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full outline-none transition-[background-color,box-shadow] focus-visible:ring-[3px] focus-visible:ring-primary/35 ${
+        className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full transition-colors ${
           on ? "bg-primary" : "bg-fill-secondary"
         }`}
       >

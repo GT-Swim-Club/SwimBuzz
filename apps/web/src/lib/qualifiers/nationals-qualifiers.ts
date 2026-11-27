@@ -9,6 +9,7 @@ import {
 import { isRelayLeadoffSwimTag } from "@/lib/meet/relay-results"
 import { isRelaySignupEvent } from "@/lib/meet/meet-signup"
 import { formatDisplayTime, formatTime, formatSwimDate } from "@/lib/utils"
+import { loadNationalsMeet, type NationalsMeetRef } from "@/lib/qualifiers/nationals-meet"
 
 export type NqtParsedCut = {
   event: string
@@ -37,6 +38,8 @@ export type QualifierRow = {
   lastName: string
   gender: Gender
   event: string
+  /** The event's number at Nationals for the athlete's gender (the season's linked Nationals meet), if known. */
+  eventNumber: number | null
   timeMs: number
   time: string
   cutMs: number
@@ -241,12 +244,18 @@ export const computeNationalsQualifiers = cache(async function computeNationalsQ
   cuts: NationalsCutRow[]
   /** Courses that have standards this season — lets clients offer a course switch only when it matters. */
   courses: Course[]
+  /** The meet linked as the season's Nationals, whose order of events numbers the events. */
+  nationalsMeet: NationalsMeetRef | null
 }> {
-  const sets = await prisma.nationalsStandardSet.findMany({
-    where: { season: opts.season },
-    include: { cuts: true },
-    orderBy: { course: "asc" },
-  })
+  const [sets, nationals] = await Promise.all([
+    prisma.nationalsStandardSet.findMany({
+      where: { season: opts.season },
+      include: { cuts: true },
+      orderBy: { course: "asc" },
+    }),
+    loadNationalsMeet(opts.season),
+  ])
+  const nationalsMeet = nationals.meet
   const courses = sets.map((s) => s.course)
 
   // A requested course shows only that course; otherwise prefer SCY.
@@ -263,6 +272,7 @@ export const computeNationalsQualifiers = cache(async function computeNationalsQ
       standards: [],
       cuts: [],
       courses,
+      nationalsMeet,
     }
   }
 
@@ -307,6 +317,7 @@ export const computeNationalsQualifiers = cache(async function computeNationalsQ
       standards,
       cuts: allCuts,
       courses,
+      nationalsMeet,
     }
   }
 
@@ -383,6 +394,7 @@ export const computeNationalsQualifiers = cache(async function computeNationalsQ
       lastName: athlete.lastName,
       gender: athlete.gender,
       event: cut.event,
+      eventNumber: nationals.eventNumber(athlete.gender, cut.event),
       timeMs: best.timeMs,
       time: formatDisplayTime(formatTime(best.timeMs)),
       cutMs: cut.timeMs,
@@ -440,6 +452,7 @@ export const computeNationalsQualifiers = cache(async function computeNationalsQ
     standards,
     cuts: allCuts,
     courses,
+    nationalsMeet,
   }
 })
 

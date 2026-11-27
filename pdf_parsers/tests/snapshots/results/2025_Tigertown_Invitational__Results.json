@@ -82,6 +82,232 @@
   },
   "meet_date": "2025-11-15",
   "meet_name": "2025 Tiger Town Invitational Fall",
+  "place_times": [
+    {
+      "champion": "1:10.43",
+      "eighth": "1:15.95",
+      "event": "100 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:23.49"
+    },
+    {
+      "champion": "1:00.40",
+      "eighth": null,
+      "event": "100 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "27.74",
+      "eighth": "28.79",
+      "event": "50 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "29.47"
+    },
+    {
+      "champion": "23.53",
+      "eighth": "24.39",
+      "event": "50 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "24.94"
+    },
+    {
+      "champion": "5:29.81",
+      "eighth": "6:52.13",
+      "event": "500 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "5:02.88",
+      "eighth": "5:40.73",
+      "event": "500 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:03.42",
+      "eighth": null,
+      "event": "100 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:09.79"
+    },
+    {
+      "champion": "54.91",
+      "eighth": "56.88",
+      "event": "100 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "59.82"
+    },
+    {
+      "champion": "28.64",
+      "eighth": "31.09",
+      "event": "50 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "32.93"
+    },
+    {
+      "champion": "23.11",
+      "eighth": "26.59",
+      "event": "50 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "29.85"
+    },
+    {
+      "champion": "55.94",
+      "eighth": "57.33",
+      "event": "100 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:00.46"
+    },
+    {
+      "champion": "48.34",
+      "eighth": "49.86",
+      "event": "100 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "53.83"
+    },
+    {
+      "champion": "2:03.59",
+      "eighth": "2:10.39",
+      "event": "200 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:49.13",
+      "eighth": "1:58.00",
+      "event": "200 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "33.42",
+      "eighth": "35.12",
+      "event": "50 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "37.74"
+    },
+    {
+      "champion": "27.15",
+      "eighth": "29.55",
+      "event": "50 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "33.30"
+    },
+    {
+      "champion": "1:04.47",
+      "eighth": "1:09.10",
+      "event": "100 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "50.63",
+      "eighth": "58.62",
+      "event": "100 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:01.21",
+      "eighth": "1:04.79",
+      "event": "100 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "54.00",
+      "eighth": "56.63",
+      "event": "100 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:18.38",
+      "eighth": "2:33.99",
+      "event": "200 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:00.40",
+      "eighth": "2:14.91",
+      "event": "200 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "25.61",
+      "eighth": "26.22",
+      "event": "50 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "27.80"
+    },
+    {
+      "champion": "21.95",
+      "eighth": null,
+      "event": "50 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "23.59"
+    },
+    {
+      "champion": "1:42.53",
+      "eighth": "1:51.02",
+      "event": "200 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:27.44",
+      "eighth": "1:34.00",
+      "event": "200 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:55.66",
+      "eighth": "2:02.53",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": "2:18.66"
+    },
+    {
+      "champion": "1:37.75",
+      "eighth": "1:43.34",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    }
+  ],
   "relay_results": [
     {
       "course": "SCY",
@@ -2455,7 +2681,7 @@
       "relaySwimmers": [
         {
           "leg": 1,
-          "name": "De Gracia, Mark"
+          "name": "De Gracia, Mark Andre"
         },
         {
           "leg": 2,
@@ -2633,7 +2859,7 @@
       "course": "SCY",
       "event": "100 Breast",
       "gender": "F",
-      "name": "Bal, Anna",
+      "name": "Bal, Anna Marie",
       "place": 9,
       "points": 9.0,
       "seedTime": "1:16.00",
@@ -5617,7 +5843,7 @@
       "course": "SCY",
       "event": "100 IM",
       "gender": "F",
-      "name": "Bal, Anna",
+      "name": "Bal, Anna Marie",
       "place": 26,
       "seedTime": "1:09.00",
       "tags": "",
@@ -5746,7 +5972,7 @@
       "course": "SCY",
       "event": "100 IM",
       "gender": "F",
-      "name": "Maher, Anna",
+      "name": "Maher, Anna Cate",
       "place": 38,
       "tags": "",
       "team": "Gamecock Club Swimming-SC",
@@ -6930,7 +7156,7 @@
       "course": "SCY",
       "event": "50 Back",
       "gender": "F",
-      "name": "Crosby, Lilly",
+      "name": "Crosby, Lilly May",
       "place": 25,
       "seedTime": "34.00",
       "tags": "",
@@ -8072,7 +8298,7 @@
       "course": "SCY",
       "event": "100 Free",
       "gender": "F",
-      "name": "Maher, Anna",
+      "name": "Maher, Anna Cate",
       "place": 31,
       "tags": "",
       "team": "Gamecock Club Swimming-SC",
@@ -9518,7 +9744,7 @@
       "course": "SCY",
       "event": "50 Breast",
       "gender": "F",
-      "name": "Bal, Anna",
+      "name": "Bal, Anna Marie",
       "place": 9,
       "points": 9.0,
       "seedTime": "35.00",

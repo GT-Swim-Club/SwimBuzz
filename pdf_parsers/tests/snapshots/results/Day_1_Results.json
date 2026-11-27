@@ -57,6 +57,152 @@
   },
   "meet_date": "2024-11-16",
   "meet_name": "2024 Raleighwood Invitational",
+  "place_times": [
+    {
+      "champion": "4:54.86",
+      "eighth": "5:39.77",
+      "event": "400 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "4:21.88",
+      "eighth": "4:57.56",
+      "event": "400 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "25.16",
+      "eighth": "28.04",
+      "event": "50 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "22.35",
+      "eighth": "23.98",
+      "event": "50 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "24.66"
+    },
+    {
+      "champion": "1:00.85",
+      "eighth": "1:05.49",
+      "event": "100 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:10.89"
+    },
+    {
+      "champion": "51.36",
+      "eighth": "56.93",
+      "event": "100 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "1:01.71"
+    },
+    {
+      "champion": "1:59.06",
+      "eighth": "2:08.55",
+      "event": "200 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "2:31.73"
+    },
+    {
+      "champion": "1:39.77",
+      "eighth": "1:51.38",
+      "event": "200 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "2:01.23"
+    },
+    {
+      "champion": "58.91",
+      "eighth": "1:05.78",
+      "event": "100 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:07.87"
+    },
+    {
+      "champion": "52.47",
+      "eighth": "55.63",
+      "event": "100 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "58.36"
+    },
+    {
+      "champion": "2:23.10",
+      "eighth": null,
+      "event": "200 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:52.15",
+      "eighth": "2:06.43",
+      "event": "200 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "22.91",
+      "eighth": "25.79",
+      "event": "50 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "26.42"
+    },
+    {
+      "champion": "21.09",
+      "eighth": "22.12",
+      "event": "50 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "22.56"
+    },
+    {
+      "champion": "1:09.10",
+      "eighth": "1:14.97",
+      "event": "100 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:18.31"
+    },
+    {
+      "champion": "58.27",
+      "eighth": "1:02.28",
+      "event": "100 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "1:07.23"
+    },
+    {
+      "champion": "1:54.46",
+      "eighth": "2:00.07",
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": "2:20.99"
+    },
+    {
+      "champion": "1:35.35",
+      "eighth": "1:41.95",
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": "2:16.49"
+    }
+  ],
   "relay_results": [
     {
       "course": "SCY",
@@ -2679,7 +2825,7 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "F",
-      "name": "Smith, Hanna",
+      "name": "Smith, Hanna Elks",
       "place": 16,
       "points": 1.0,
       "tags": "",
@@ -2800,7 +2946,7 @@
       "course": "SCY",
       "event": "50 Fly",
       "gender": "F",
-      "name": "Reese, Mary",
+      "name": "Reese, Mary Lauren",
       "place": 28,
       "tags": "",
       "team": "Coastal Carolina Universtiy-SC",
@@ -4677,7 +4823,7 @@
       "course": "SCY",
       "event": "100 Back",
       "gender": "F",
-      "name": "Smith, Hanna",
+      "name": "Smith, Hanna Elks",
       "place": 2,
       "points": 17.0,
       "splits": [
@@ -6581,7 +6727,7 @@
       "course": "SCY",
       "event": "200 Free",
       "gender": "F",
-      "name": "Reese, Mary",
+      "name": "Reese, Mary Lauren",
       "place": 8,
       "points": 11.0,
       "splits": [
@@ -8354,7 +8500,7 @@
       "course": "SCY",
       "event": "100 IM",
       "gender": "F",
-      "name": "Smith, Hanna",
+      "name": "Smith, Hanna Elks",
       "place": 5,
       "points": 14.0,
       "splits": [
@@ -13079,7 +13225,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "Smith, Hanna",
+      "name": "Smith, Hanna Elks",
       "place": 39,
       "tags": "",
       "team": "Duke Club Swimming-NC",
@@ -13579,7 +13725,7 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "Reese, Mary",
+      "name": "Reese, Mary Lauren",
       "place": 89,
       "tags": "",
       "team": "Coastal Carolina Universtiy-SC",

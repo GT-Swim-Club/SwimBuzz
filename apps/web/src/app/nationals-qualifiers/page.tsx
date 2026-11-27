@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import { parseSeason, resolveListedSeason } from "@/lib/season"
 import { listSeasons } from "@/lib/season-store"
 import { computeNationalsQualifiers } from "@/lib/qualifiers/nationals-qualifiers"
+import { listNationalsMeetOptions } from "@/lib/qualifiers/nationals-meet"
 import { compareSwimEvents } from "@/lib/swim/swim-parse"
 import { isStaffUi, resolveViewerAthleteId } from "@/lib/athlete/athlete-view-server"
 import { getSession } from "@/lib/auth/session"
@@ -25,13 +26,15 @@ async function QualifiersContent({
   userId: string
   role: string
 }) {
-  const [isCoach, currentAthleteId, { set, qualifiers }, seasons] = await Promise.all([
-    isStaffUi(role),
+  const isCoach = await isStaffUi(role)
+  const [currentAthleteId, { set, qualifiers, nationalsMeet }, seasons, meetOptions] = await Promise.all([
     resolveViewerAthleteId(userId),
     // Every gender: the gender filter, grouping and search apply client-side
     // from the URL (see QualifiersView), so switching them is instant.
     computeNationalsQualifiers({ season }),
     listSeasons(),
+    // Staff pick which of the season's meets is its Nationals (it numbers the events).
+    isCoach ? listNationalsMeetOptions(season) : Promise.resolve([]),
   ])
 
   // Rank events in swim order here — compareSwimEvents is server-only.
@@ -45,11 +48,15 @@ async function QualifiersContent({
       standards={set ? { yearLabel: set.yearLabel, sourceUrl: set.sourceUrl, course: set.course } : null}
       qualifiers={qualifiers}
       eventRank={eventRank}
+      nationalsMeetId={nationalsMeet?.id ?? null}
+      meetOptions={meetOptions}
       currentAthleteId={currentAthleteId}
       isCoach={isCoach}
     />
   )
 }
+
+export const metadata = { title: "Nationals" }
 
 export default async function QualifiersPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const session = await getSession()

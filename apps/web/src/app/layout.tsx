@@ -25,7 +25,8 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: "SwimBuzz",
+  // Pages set just their own name ("Meets"); the template adds the app name.
+  title: { default: "SwimBuzz", template: "%s | SwimBuzz" },
   description: "SwimBuzz is a tool for Georgia Tech Swim Club to manage their athletes and results.",
   icons: {
     icon: "/swimbuzz-logo.png",

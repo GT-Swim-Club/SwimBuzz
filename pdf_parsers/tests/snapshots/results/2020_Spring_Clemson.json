@@ -97,6 +97,256 @@
   },
   "meet_date": "2020-03-07",
   "meet_name": "Clemson Spring Invitational 2020",
+  "place_times": [
+    {
+      "champion": "1:11.84",
+      "eighth": "1:19.76",
+      "event": "100 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "59.83",
+      "eighth": "1:07.03",
+      "event": "100 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "28.13",
+      "eighth": "30.40",
+      "event": "50 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "32.78"
+    },
+    {
+      "champion": "24.05",
+      "eighth": "25.92",
+      "event": "50 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "28.85"
+    },
+    {
+      "champion": "6:23.85",
+      "eighth": null,
+      "event": "500 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "4:55.91",
+      "eighth": null,
+      "event": "500 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:03.41",
+      "eighth": "1:10.92",
+      "event": "100 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:16.63"
+    },
+    {
+      "champion": "54.28",
+      "eighth": "1:02.04",
+      "event": "100 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "29.72",
+      "eighth": "34.04",
+      "event": "50 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "25.90",
+      "eighth": "32.98",
+      "event": "50 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "56.69",
+      "eighth": "1:03.46",
+      "event": "100 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "1:12.70"
+    },
+    {
+      "champion": "49.68",
+      "eighth": "52.24",
+      "event": "100 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "1:01.90"
+    },
+    {
+      "champion": "2:03.91",
+      "eighth": "2:24.56",
+      "event": "200 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:51.42",
+      "eighth": "2:13.38",
+      "event": "200 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "34.24",
+      "eighth": "37.02",
+      "event": "50 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "28.37",
+      "eighth": "29.99",
+      "event": "50 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "34.48"
+    },
+    {
+      "champion": "1:04.92",
+      "eighth": null,
+      "event": "100 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "56.39",
+      "eighth": "1:10.18",
+      "event": "100 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:02.47",
+      "eighth": "1:11.69",
+      "event": "100 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "52.19",
+      "eighth": "1:02.14",
+      "event": "100 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:23.70",
+      "eighth": null,
+      "event": "200 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "2:04.76",
+      "eighth": "2:19.65",
+      "event": "200 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "26.16",
+      "eighth": "28.24",
+      "event": "50 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": "29.63"
+    },
+    {
+      "champion": "22.33",
+      "eighth": "23.67",
+      "event": "50 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": "25.20"
+    },
+    {
+      "champion": "2:39.42",
+      "eighth": null,
+      "event": "200 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:44.58",
+      "eighth": null,
+      "event": "200 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:29.88",
+      "eighth": null,
+      "event": "200 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:57.63",
+      "eighth": null,
+      "event": "200 Medley Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:42.60",
+      "eighth": null,
+      "event": "200 Medley Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "4:03.62",
+      "eighth": null,
+      "event": "400 Free Relay",
+      "gender": "F",
+      "relay": true,
+      "twentyFourth": null
+    },
+    {
+      "champion": "3:19.57",
+      "eighth": null,
+      "event": "400 Free Relay",
+      "gender": "M",
+      "relay": true,
+      "twentyFourth": null
+    }
+  ],
   "relay_results": [
     {
       "course": "SCY",

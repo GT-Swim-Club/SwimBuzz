@@ -57,6 +57,152 @@
   },
   "meet_date": "2017-09-29",
   "meet_name": "AuburnVSGeorgiaTech2017",
+  "place_times": [
+    {
+      "champion": "29.96",
+      "eighth": "35.97",
+      "event": "50 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "26.45",
+      "eighth": "30.02",
+      "event": "50 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "56.91",
+      "eighth": "1:02.90",
+      "event": "100 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "48.28",
+      "eighth": "52.87",
+      "event": "100 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "33.68",
+      "eighth": "38.63",
+      "event": "50 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "28.27",
+      "eighth": "30.96",
+      "event": "50 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:04.14",
+      "eighth": null,
+      "event": "100 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "54.47",
+      "eighth": null,
+      "event": "100 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:04.44",
+      "eighth": null,
+      "event": "100 Back",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "58.83",
+      "eighth": null,
+      "event": "100 Back",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "26.20",
+      "eighth": "28.97",
+      "event": "50 Free",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "21.96",
+      "eighth": "24.13",
+      "event": "50 Free",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:13.70",
+      "eighth": null,
+      "event": "100 Breast",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:01.58",
+      "eighth": "1:20.44",
+      "event": "100 Breast",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "29.34",
+      "eighth": "32.15",
+      "event": "50 Fly",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "23.46",
+      "eighth": "27.40",
+      "event": "50 Fly",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "1:06.33",
+      "eighth": "1:14.32",
+      "event": "100 IM",
+      "gender": "F",
+      "relay": false,
+      "twentyFourth": null
+    },
+    {
+      "champion": "53.90",
+      "eighth": "1:01.68",
+      "event": "100 IM",
+      "gender": "M",
+      "relay": false,
+      "twentyFourth": null
+    }
+  ],
   "relay_results": [],
   "results": [
     {
@@ -66,6 +212,7 @@
       "name": "Rice, Genevieve",
       "place": 1,
       "points": 9.0,
+      "seedTime": "28.93",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "29.96"
@@ -77,6 +224,7 @@
       "name": "Laffey, Makenna",
       "place": 2,
       "points": 7.0,
+      "seedTime": "30.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "30.34"
@@ -99,6 +247,7 @@
       "name": "Gerwe, Janae",
       "place": 4,
       "points": 5.0,
+      "seedTime": "34.83",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "33.21"
@@ -120,6 +269,7 @@
       "gender": "F",
       "name": "Thaeler, Chloe",
       "place": 5,
+      "seedTime": "32.00",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "33.53"
@@ -130,6 +280,7 @@
       "gender": "F",
       "name": "Almy, Taylor",
       "place": 7,
+      "seedTime": "36.50",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "34.39"
@@ -161,6 +312,7 @@
       "name": "Johnson, Mark",
       "place": 1,
       "points": 9.0,
+      "seedTime": "25.99",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "26.45"
@@ -183,6 +335,7 @@
       "name": "Gant, Sean",
       "place": 3,
       "points": 6.0,
+      "seedTime": "29.80",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "28.59"
@@ -194,6 +347,7 @@
       "name": "Zhou, Maxwell",
       "place": 4,
       "points": 5.0,
+      "seedTime": "27.00",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "28.89"
@@ -205,6 +359,7 @@
       "name": "Grant, Jake",
       "place": 5,
       "points": 4.0,
+      "seedTime": "29.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "28.93"
@@ -237,6 +392,7 @@
       "gender": "M",
       "name": "Holtslander, Thomas",
       "place": 8,
+      "seedTime": "30.14",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "30.02"
@@ -248,6 +404,7 @@
       "name": "Vallamattam, Ashok",
       "place": 9,
       "points": 1.0,
+      "seedTime": "35.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "30.52"
@@ -268,6 +425,7 @@
       "gender": "M",
       "name": "Phillips, Connor",
       "place": 11,
+      "seedTime": "32.15",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "32.01"
@@ -278,6 +436,7 @@
       "gender": "M",
       "name": "Nohl, Adam",
       "place": 12,
+      "seedTime": "30.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "32.13"
@@ -288,6 +447,7 @@
       "gender": "M",
       "name": "McManus, Sam",
       "place": 13,
+      "seedTime": "31.39",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "32.94"
@@ -309,6 +469,7 @@
       "name": "Rice, Genevieve",
       "place": 1,
       "points": 9.0,
+      "seedTime": "55.30",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "56.91"
@@ -320,6 +481,7 @@
       "name": "Knapp, Lindsay",
       "place": 2,
       "points": 7.0,
+      "seedTime": "55.00",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "57.01"
@@ -342,6 +504,7 @@
       "name": "Boland, Casey",
       "place": 4,
       "points": 5.0,
+      "seedTime": "58.28",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "1:00.52"
@@ -353,6 +516,7 @@
       "name": "Garguilo, Emily",
       "place": 5,
       "points": 4.0,
+      "seedTime": "1:01.68",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:00.53"
@@ -364,6 +528,7 @@
       "name": "Sibilia, Maddie",
       "place": 6,
       "points": 3.0,
+      "seedTime": "1:01.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "1:02.10"
@@ -374,6 +539,7 @@
       "gender": "F",
       "name": "Keller, Amelia",
       "place": 7,
+      "seedTime": "59.00",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "1:02.33"
@@ -395,6 +561,7 @@
       "gender": "F",
       "name": "Williams, Margaret",
       "place": 9,
+      "seedTime": "1:05.00",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "1:03.43"
@@ -406,6 +573,7 @@
       "name": "Stokes, Kelly",
       "place": 10,
       "points": 1.0,
+      "seedTime": "1:07.22",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:04.83"
@@ -416,6 +584,7 @@
       "gender": "F",
       "name": "Ortega, Claudia",
       "place": 11,
+      "seedTime": "1:05.00",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "1:04.87"
@@ -426,6 +595,7 @@
       "gender": "F",
       "name": "Foster, Darby",
       "place": 12,
+      "seedTime": "1:04.88",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "1:05.13"
@@ -436,6 +606,7 @@
       "gender": "F",
       "name": "Blair, Holly",
       "place": 13,
+      "seedTime": "1:09.99",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:07.97"
@@ -456,6 +627,7 @@
       "gender": "F",
       "name": "Freeman, Grace",
       "place": 15,
+      "seedTime": "1:03.00",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:08.87"
@@ -487,6 +659,7 @@
       "name": "Pinon, Julien",
       "place": 1,
       "points": 9.0,
+      "seedTime": "44.76",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "48.28"
@@ -498,6 +671,7 @@
       "name": "Quillen, Michael",
       "place": 2,
       "points": 7.0,
+      "seedTime": "50.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "48.60"
@@ -509,6 +683,7 @@
       "name": "Zacarias, Mathias",
       "place": 3,
       "points": 6.0,
+      "seedTime": "48.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "49.06"
@@ -520,6 +695,7 @@
       "name": "Kurtz, Michael",
       "place": 4,
       "points": 5.0,
+      "seedTime": "48.00",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "49.72"
@@ -531,6 +707,7 @@
       "name": "Lrbedev, Peter",
       "place": 5,
       "points": 4.0,
+      "seedTime": "50.00",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "50.07"
@@ -542,6 +719,7 @@
       "name": "Turrall, Teddy",
       "place": 6,
       "points": 3.0,
+      "seedTime": "49.60",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "50.25"
@@ -552,6 +730,7 @@
       "gender": "M",
       "name": "Fregosi, Carson",
       "place": 7,
+      "seedTime": "50.23",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "51.00"
@@ -562,6 +741,7 @@
       "gender": "M",
       "name": "Grant, Jake",
       "place": 8,
+      "seedTime": "52.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "52.87"
@@ -572,6 +752,7 @@
       "gender": "M",
       "name": "Xiao, Michael",
       "place": 9,
+      "seedTime": "56.54",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "53.21"
@@ -583,6 +764,7 @@
       "name": "Paradis, Bennett",
       "place": 10,
       "points": 2.0,
+      "seedTime": "53.50",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "53.44"
@@ -594,6 +776,7 @@
       "name": "Jones, Jacob",
       "place": 11,
       "points": 1.0,
+      "seedTime": "53.82",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "53.77"
@@ -604,6 +787,7 @@
       "gender": "M",
       "name": "Sturgill, John",
       "place": 12,
+      "seedTime": "52.00",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "54.38"
@@ -644,6 +828,7 @@
       "gender": "M",
       "name": "Deshmukh, Atharva",
       "place": 16,
+      "seedTime": "1:00.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "56.21"
@@ -654,6 +839,7 @@
       "gender": "M",
       "name": "Nohl, Adam",
       "place": 17,
+      "seedTime": "56.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "56.81"
@@ -664,6 +850,7 @@
       "gender": "M",
       "name": "Schumacher, Jason",
       "place": 18,
+      "seedTime": "56.15",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "56.82"
@@ -694,6 +881,7 @@
       "gender": "M",
       "name": "McManus, Sam",
       "place": 21,
+      "seedTime": "54.31",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:00.01"
@@ -725,6 +913,7 @@
       "name": "Wilson, Michaela",
       "place": 1,
       "points": 9.0,
+      "seedTime": "35.00",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "33.68"
@@ -736,6 +925,7 @@
       "name": "Fassett, Olivia",
       "place": 2,
       "points": 7.0,
+      "seedTime": "32.25",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "33.85"
@@ -747,6 +937,7 @@
       "name": "Cuccinelli, Reilly",
       "place": 3,
       "points": 6.0,
+      "seedTime": "34.95",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "36.58"
@@ -769,6 +960,7 @@
       "name": "Higby, Leigh",
       "place": 5,
       "points": 4.0,
+      "seedTime": "37.50",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "36.94"
@@ -790,6 +982,7 @@
       "name": "Sanders, Isabella",
       "place": 7,
       "points": 3.0,
+      "seedTime": "39.00",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "38.20"
@@ -801,6 +994,7 @@
       "name": "Keller, Amelia",
       "place": 8,
       "points": 2.0,
+      "seedTime": "35.90",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "38.63"
@@ -811,6 +1005,7 @@
       "gender": "F",
       "name": "LaMontagne, Sarah",
       "place": 9,
+      "seedTime": "40.03",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "39.07"
@@ -832,6 +1027,7 @@
       "name": "Ellwanger, Robbie",
       "place": 1,
       "points": 9.0,
+      "seedTime": "27.05",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "28.27"
@@ -843,6 +1039,7 @@
       "name": "Kalontarov, Ziv",
       "place": 2,
       "points": 7.0,
+      "seedTime": "28.50",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "28.46"
@@ -854,6 +1051,7 @@
       "name": "Sterns, Andrew",
       "place": 3,
       "points": 6.0,
+      "seedTime": "27.30",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "28.51"
@@ -865,6 +1063,7 @@
       "name": "Pease, Nathan",
       "place": 4,
       "points": 5.0,
+      "seedTime": "28.34",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "29.47"
@@ -876,6 +1075,7 @@
       "name": "Wong, Justin",
       "place": 5,
       "points": 4.0,
+      "seedTime": "29.90",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "29.83"
@@ -887,6 +1087,7 @@
       "name": "Robertson, Stephen",
       "place": 6,
       "points": 3.0,
+      "seedTime": "33.00",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "30.78"
@@ -898,6 +1099,7 @@
       "name": "Zhou, Maxwell",
       "place": 7,
       "points": 2.0,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "30.94"
@@ -908,6 +1110,7 @@
       "gender": "M",
       "name": "Sykora, Connor",
       "place": 8,
+      "seedTime": "30.09",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "30.96"
@@ -919,6 +1122,7 @@
       "name": "Zhang, Daniel",
       "place": 9,
       "points": 1.0,
+      "seedTime": "30.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "31.21"
@@ -929,6 +1133,7 @@
       "gender": "M",
       "name": "Ragoowansi, Evan",
       "place": 10,
+      "seedTime": "32.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "31.64"
@@ -939,6 +1144,7 @@
       "gender": "M",
       "name": "Howard, Collin",
       "place": 11,
+      "seedTime": "27.70",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "31.88"
@@ -949,6 +1155,7 @@
       "gender": "M",
       "name": "Deshmukh, Atharva",
       "place": 12,
+      "seedTime": "32.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "32.71"
@@ -959,6 +1166,7 @@
       "gender": "M",
       "name": "Lehrer, Jarrad",
       "place": 13,
+      "seedTime": "33.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "32.89"
@@ -979,6 +1187,7 @@
       "gender": "M",
       "name": "Schumacher, Jason",
       "place": 15,
+      "seedTime": "34.03",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "34.84"
@@ -989,6 +1198,7 @@
       "gender": "M",
       "name": "Mavrakos, Alex",
       "place": 16,
+      "seedTime": "35.82",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "36.15"
@@ -1021,6 +1231,7 @@
       "name": "Fassett, Olivia",
       "place": 2,
       "points": 7.0,
+      "seedTime": "1:00.46",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "1:05.72"
@@ -1032,6 +1243,7 @@
       "name": "Herron, Tori",
       "place": 3,
       "points": 6.0,
+      "seedTime": "1:08.70",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:05.93"
@@ -1043,6 +1255,7 @@
       "name": "Blair, Holly",
       "place": 4,
       "points": 5.0,
+      "seedTime": "1:13.50",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:14.89"
@@ -1054,6 +1267,7 @@
       "name": "Johnson, Mark",
       "place": 1,
       "points": 9.0,
+      "seedTime": "53.00",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "54.47"
@@ -1065,6 +1279,7 @@
       "name": "Pinon, Julien",
       "place": 2,
       "points": 7.0,
+      "seedTime": "47.52",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "54.63"
@@ -1076,6 +1291,7 @@
       "name": "Thrift, Josh",
       "place": 3,
       "points": 6.0,
+      "seedTime": "57.00",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "55.83"
@@ -1087,6 +1303,7 @@
       "name": "He, Byron",
       "place": 4,
       "points": 5.0,
+      "seedTime": "1:00.00",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:02.57"
@@ -1098,6 +1315,7 @@
       "name": "Fregosi, Carson",
       "place": 5,
       "points": 4.0,
+      "seedTime": "58.59",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "1:03.26"
@@ -1109,6 +1327,7 @@
       "name": "Morris, Evan",
       "place": 6,
       "points": 3.0,
+      "seedTime": "59.58",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:04.02"
@@ -1120,6 +1339,7 @@
       "name": "Xiao, Michael",
       "place": 7,
       "points": 2.0,
+      "seedTime": "59.16",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "1:07.94"
@@ -1131,6 +1351,7 @@
       "name": "Laffey, Makenna",
       "place": 1,
       "points": 9.0,
+      "seedTime": "1:05.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "1:04.44"
@@ -1142,6 +1363,7 @@
       "name": "Sibilia, Maddie",
       "place": 2,
       "points": 7.0,
+      "seedTime": "1:06.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "1:05.02"
@@ -1153,6 +1375,7 @@
       "name": "Gerwe, Janae",
       "place": 3,
       "points": 6.0,
+      "seedTime": "1:08.00",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:12.81"
@@ -1164,6 +1387,7 @@
       "name": "Thaeler, Chloe",
       "place": 4,
       "points": 5.0,
+      "seedTime": "1:13.00",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:13.46"
@@ -1175,6 +1399,7 @@
       "name": "Blair, Holly",
       "place": 5,
       "points": 4.0,
+      "seedTime": "1:12.99",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:19.72"
@@ -1197,6 +1422,7 @@
       "name": "Lrbedev, Peter",
       "place": 1,
       "points": 9.0,
+      "seedTime": "56.00",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "58.83"
@@ -1208,6 +1434,7 @@
       "name": "Johnson, Mark",
       "place": 2,
       "points": 7.0,
+      "seedTime": "56.50",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:01.34"
@@ -1219,6 +1446,7 @@
       "name": "Zacarias, Mathias",
       "place": 3,
       "points": 6.0,
+      "seedTime": "55.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "1:01.44"
@@ -1241,6 +1469,7 @@
       "name": "Carvalhedo, Rodrigo",
       "place": 5,
       "points": 4.0,
+      "seedTime": "1:07.00",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:09.33"
@@ -1252,6 +1481,7 @@
       "name": "Phillips, Connor",
       "place": 6,
       "points": 3.0,
+      "seedTime": "1:08.63",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:09.94"
@@ -1263,6 +1493,7 @@
       "name": "Rice, Genevieve",
       "place": 1,
       "points": 9.0,
+      "seedTime": "25.07",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "26.20"
@@ -1274,6 +1505,7 @@
       "name": "Knapp, Lindsay",
       "place": 2,
       "points": 7.0,
+      "seedTime": "26.00",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "26.51"
@@ -1285,6 +1517,7 @@
       "name": "Falejczyk, Erin",
       "place": 3,
       "points": 6.0,
+      "seedTime": "25.25",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "27.32"
@@ -1296,6 +1529,7 @@
       "name": "Boland, Casey",
       "place": 4,
       "points": 5.0,
+      "seedTime": "25.80",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "27.46"
@@ -1307,6 +1541,7 @@
       "name": "Sanders, Isabella",
       "place": 5,
       "points": 4.0,
+      "seedTime": "29.00",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "28.63"
@@ -1317,6 +1552,7 @@
       "gender": "F",
       "name": "Keller, Amelia",
       "place": 6,
+      "seedTime": "27.10",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "28.68"
@@ -1328,6 +1564,7 @@
       "name": "Cuccinelli, Reilly",
       "place": 7,
       "points": 3.0,
+      "seedTime": "28.00",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "28.75"
@@ -1339,6 +1576,7 @@
       "name": "Thaeler, Chloe",
       "place": 8,
       "points": 2.0,
+      "seedTime": "26.00",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "28.97"
@@ -1350,6 +1588,7 @@
       "name": "Spinosa, Olivia",
       "place": 9,
       "points": 1.0,
+      "seedTime": "30.00",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "29.83"
@@ -1360,6 +1599,7 @@
       "gender": "F",
       "name": "Stokes, Kelly",
       "place": 10,
+      "seedTime": "29.82",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "30.20"
@@ -1370,6 +1610,7 @@
       "gender": "F",
       "name": "Foster, Darby",
       "place": 11,
+      "seedTime": "29.57",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "30.41"
@@ -1380,6 +1621,7 @@
       "gender": "F",
       "name": "Ortega, Claudia",
       "place": 12,
+      "seedTime": "27.70",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "30.46"
@@ -1390,6 +1632,7 @@
       "gender": "F",
       "name": "Freeman, Grace",
       "place": 13,
+      "seedTime": "26.00",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "30.51"
@@ -1410,6 +1653,7 @@
       "gender": "F",
       "name": "Gerwe, Janae",
       "place": 15,
+      "seedTime": "29.94",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "32.12"
@@ -1430,6 +1674,7 @@
       "gender": "F",
       "name": "Zwiercan, Cate",
       "place": 17,
+      "seedTime": "34.09",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "35.22"
@@ -1438,8 +1683,9 @@
       "course": "SCY",
       "event": "50 Free",
       "gender": "F",
-      "name": "Stanley, Mary",
+      "name": "Stanley, Mary Grace",
       "place": 18,
+      "seedTime": "34.60",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "36.09"
@@ -1471,6 +1717,7 @@
       "name": "Kalontarov, Ziv",
       "place": 1,
       "points": 9.0,
+      "seedTime": "22.60",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "21.96"
@@ -1482,6 +1729,7 @@
       "name": "Kurtz, Michael",
       "place": 2,
       "points": 7.0,
+      "seedTime": "21.67",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "22.69"
@@ -1493,6 +1741,7 @@
       "name": "Turrall, Teddy",
       "place": 3,
       "points": 6.0,
+      "seedTime": "22.80",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "22.70"
@@ -1504,6 +1753,7 @@
       "name": "Zhang, Daniel",
       "place": 4,
       "points": 5.0,
+      "seedTime": "23.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "23.37"
@@ -1515,6 +1765,7 @@
       "name": "Paradis, Bennett",
       "place": 5,
       "points": 4.0,
+      "seedTime": "23.70",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "23.59"
@@ -1526,6 +1777,7 @@
       "name": "Jones, Jacob",
       "place": 6,
       "points": 3.0,
+      "seedTime": "23.80",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "23.82"
@@ -1536,6 +1788,7 @@
       "gender": "M",
       "name": "He, Byron",
       "place": 7,
+      "seedTime": "23.69",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "24.00"
@@ -1547,6 +1800,7 @@
       "name": "Fregosi, Carson",
       "place": 8,
       "points": 2.0,
+      "seedTime": "23.20",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "24.13"
@@ -1558,6 +1812,7 @@
       "name": "Hopkins, Matthew",
       "place": 9,
       "points": 1.0,
+      "seedTime": "23.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "24.20"
@@ -1568,6 +1823,7 @@
       "gender": "M",
       "name": "Sturgill, John",
       "place": 10,
+      "seedTime": "23.70",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "24.46"
@@ -1578,6 +1834,7 @@
       "gender": "M",
       "name": "Xiao, Michael",
       "place": 11,
+      "seedTime": "24.50",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "24.56"
@@ -1588,6 +1845,7 @@
       "gender": "M",
       "name": "Sykora, Connor",
       "place": 12,
+      "seedTime": "25.00",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "24.96"
@@ -1598,6 +1856,7 @@
       "gender": "M",
       "name": "Nohl, Adam",
       "place": 13,
+      "seedTime": "24.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "25.06"
@@ -1608,6 +1867,7 @@
       "gender": "M",
       "name": "Mavrakos, Alex",
       "place": 14,
+      "seedTime": "26.86",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "25.25"
@@ -1618,6 +1878,7 @@
       "gender": "M",
       "name": "Gant, Sean",
       "place": 15,
+      "seedTime": "25.50",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "25.32"
@@ -1638,6 +1899,7 @@
       "gender": "M",
       "name": "Ragoowansi, Evan",
       "place": 17,
+      "seedTime": "24.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "25.72"
@@ -1648,6 +1910,7 @@
       "gender": "M",
       "name": "McManus, Sam",
       "place": 18,
+      "seedTime": "25.10",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "26.16"
@@ -1658,6 +1921,7 @@
       "gender": "M",
       "name": "Purdy, Jack",
       "place": 19,
+      "seedTime": "26.40",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "26.44"
@@ -1668,6 +1932,7 @@
       "gender": "M",
       "name": "Scharm, Kenny",
       "place": 20,
+      "seedTime": "30.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "26.53"
@@ -1678,6 +1943,7 @@
       "gender": "M",
       "name": "Rhoda, Jack",
       "place": 21,
+      "seedTime": "24.14",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "26.64"
@@ -1709,6 +1975,7 @@
       "name": "Fassett, Olivia",
       "place": 1,
       "points": 9.0,
+      "seedTime": "1:08.56",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "1:13.70"
@@ -1720,6 +1987,7 @@
       "name": "Wilson, Michaela",
       "place": 2,
       "points": 7.0,
+      "seedTime": "1:14.70",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:14.82"
@@ -1731,6 +1999,7 @@
       "name": "Higby, Leigh",
       "place": 3,
       "points": 6.0,
+      "seedTime": "1:20.90",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:20.72"
@@ -1742,6 +2011,7 @@
       "name": "Spinosa, Olivia",
       "place": 4,
       "points": 5.0,
+      "seedTime": "1:22.00",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:22.44"
@@ -1753,6 +2023,7 @@
       "name": "Falejczyk, Erin",
       "place": 5,
       "points": 4.0,
+      "seedTime": "1:13.49",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "1:22.59"
@@ -1775,6 +2046,7 @@
       "name": "Sterns, Andrew",
       "place": 1,
       "points": 9.0,
+      "seedTime": "58.90",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:01.58"
@@ -1786,6 +2058,7 @@
       "name": "Ellwanger, Robbie",
       "place": 2,
       "points": 7.0,
+      "seedTime": "1:01.00",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:02.71"
@@ -1797,6 +2070,7 @@
       "name": "Pease, Nathan",
       "place": 3,
       "points": 6.0,
+      "seedTime": "1:01.56",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:05.00"
@@ -1808,6 +2082,7 @@
       "name": "Zhou, Maxwell",
       "place": 4,
       "points": 5.0,
+      "seedTime": "1:04.00",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "1:08.26"
@@ -1819,6 +2094,7 @@
       "name": "Sykora, Connor",
       "place": 5,
       "points": 4.0,
+      "seedTime": "1:10.00",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:10.40"
@@ -1830,6 +2106,7 @@
       "name": "Deshmukh, Atharva",
       "place": 6,
       "points": 3.0,
+      "seedTime": "1:10.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "1:11.58"
@@ -1840,6 +2117,7 @@
       "gender": "M",
       "name": "Howard, Collin",
       "place": 7,
+      "seedTime": "1:02.80",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:13.87"
@@ -1862,6 +2140,7 @@
       "name": "Knapp, Lindsay",
       "place": 1,
       "points": 9.0,
+      "seedTime": "28.00",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "29.34"
@@ -1873,6 +2152,7 @@
       "name": "Garguilo, Emily",
       "place": 2,
       "points": 7.0,
+      "seedTime": "31.34",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "30.40"
@@ -1917,6 +2197,7 @@
       "name": "Almy, Taylor",
       "place": 6,
       "points": 3.0,
+      "seedTime": "32.75",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "31.75"
@@ -1928,6 +2209,7 @@
       "name": "Freeman, Grace",
       "place": 7,
       "points": 2.0,
+      "seedTime": "28.00",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "31.89"
@@ -1949,6 +2231,7 @@
       "gender": "F",
       "name": "Foster, Darby",
       "place": 9,
+      "seedTime": "34.94",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "33.84"
@@ -1969,6 +2252,7 @@
       "gender": "F",
       "name": "LaMontagne, Sarah",
       "place": 11,
+      "seedTime": "36.46",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "34.37"
@@ -1979,6 +2263,7 @@
       "gender": "F",
       "name": "Ortega, Claudia",
       "place": 12,
+      "seedTime": "33.54",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "35.20"
@@ -1990,6 +2275,7 @@
       "name": "Pinon, Julien",
       "place": 1,
       "points": 9.0,
+      "seedTime": "21.89",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "23.46"
@@ -2001,6 +2287,7 @@
       "name": "Thrift, Josh",
       "place": 2,
       "points": 7.0,
+      "seedTime": "25.50",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "24.94"
@@ -2012,6 +2299,7 @@
       "name": "Wong, Justin",
       "place": 3,
       "points": 6.0,
+      "seedTime": "26.40",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "25.63"
@@ -2023,6 +2311,7 @@
       "name": "Sturgill, John",
       "place": 4,
       "points": 5.0,
+      "seedTime": "25.70",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "27.03"
@@ -2034,6 +2323,7 @@
       "name": "Paradis, Bennett",
       "place": 5,
       "points": 4.0,
+      "seedTime": "27.70",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "27.07"
@@ -2045,6 +2335,7 @@
       "name": "Morris, Evan",
       "place": 6,
       "points": 3.0,
+      "seedTime": "28.00",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "27.18"
@@ -2066,6 +2357,7 @@
       "name": "Purdy, Jack",
       "place": 8,
       "points": 2.0,
+      "seedTime": "27.59",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "27.40"
@@ -2077,6 +2369,7 @@
       "name": "Vallamattam, Ashok",
       "place": 9,
       "points": 1.0,
+      "seedTime": "35.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "27.64"
@@ -2087,6 +2380,7 @@
       "gender": "M",
       "name": "Mastando, Nick",
       "place": 10,
+      "seedTime": "28.50",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "28.83"
@@ -2097,6 +2391,7 @@
       "gender": "M",
       "name": "Lehrer, Jarrad",
       "place": 11,
+      "seedTime": "28.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "28.96"
@@ -2107,6 +2402,7 @@
       "gender": "M",
       "name": "Schumacher, Jason",
       "place": 12,
+      "seedTime": "31.50",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "29.58"
@@ -2118,6 +2414,7 @@
       "name": "Laffey, Makenna",
       "place": 1,
       "points": 9.0,
+      "seedTime": "1:09.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "1:06.33"
@@ -2140,6 +2437,7 @@
       "name": "Wilson, Michaela",
       "place": 3,
       "points": 6.0,
+      "seedTime": "1:08.00",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:07.69"
@@ -2151,6 +2449,7 @@
       "name": "Higby, Leigh",
       "place": 4,
       "points": 5.0,
+      "seedTime": "1:10.98",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:10.00"
@@ -2162,6 +2461,7 @@
       "name": "Cuccinelli, Reilly",
       "place": 5,
       "points": 4.0,
+      "seedTime": "1:18.00",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:11.90"
@@ -2194,6 +2494,7 @@
       "name": "Sibilia, Maddie",
       "place": 8,
       "points": 2.0,
+      "seedTime": "1:12.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "1:14.32"
@@ -2215,6 +2516,7 @@
       "gender": "F",
       "name": "Almy, Taylor",
       "place": 10,
+      "seedTime": "1:18.00",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:15.95"
@@ -2226,6 +2528,7 @@
       "name": "Kalontarov, Ziv",
       "place": 1,
       "points": 9.0,
+      "seedTime": "1:01.00",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "53.90"
@@ -2237,6 +2540,7 @@
       "name": "Sterns, Andrew",
       "place": 2,
       "points": 7.0,
+      "seedTime": "58.90",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "55.95"
@@ -2248,6 +2552,7 @@
       "name": "Quillen, Michael",
       "place": 3,
       "points": 6.0,
+      "seedTime": "57.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "57.58"
@@ -2259,6 +2564,7 @@
       "name": "Zacarias, Mathias",
       "place": 4,
       "points": 5.0,
+      "seedTime": "1:09.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "58.16"
@@ -2270,6 +2576,7 @@
       "name": "Thrift, Josh",
       "place": 5,
       "points": 4.0,
+      "seedTime": "58.00",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "58.52"
@@ -2281,6 +2588,7 @@
       "name": "Wong, Justin",
       "place": 6,
       "points": 3.0,
+      "seedTime": "58.70",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "58.64"
@@ -2292,6 +2600,7 @@
       "name": "Ellwanger, Robbie",
       "place": 7,
       "points": 2.0,
+      "seedTime": "56.80",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:00.47"
@@ -2303,6 +2612,7 @@
       "name": "Pease, Nathan",
       "place": 8,
       "points": 1.0,
+      "seedTime": "1:02.65",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:01.68"
@@ -2313,6 +2623,7 @@
       "gender": "M",
       "name": "Robertson, Stephen",
       "place": 9,
+      "seedTime": "1:05.00",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "1:01.76"
@@ -2323,6 +2634,7 @@
       "gender": "M",
       "name": "Grant, Jake",
       "place": 10,
+      "seedTime": "1:03.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "1:01.78"
@@ -2333,6 +2645,7 @@
       "gender": "M",
       "name": "He, Byron",
       "place": 11,
+      "seedTime": "1:00.00",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:05.00"
@@ -2343,6 +2656,7 @@
       "gender": "M",
       "name": "Ragoowansi, Evan",
       "place": 12,
+      "seedTime": "1:04.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "1:06.20"
@@ -2353,6 +2667,7 @@
       "gender": "M",
       "name": "Vallamattam, Ashok",
       "place": 13,
+      "seedTime": "1:16.69",
       "tags": "",
       "team": "Georgia Tech Club Swim",
       "time": "1:08.91"
@@ -2363,6 +2678,7 @@
       "gender": "M",
       "name": "Phillips, Connor",
       "place": 14,
+      "seedTime": "1:15.37",
       "tags": "",
       "team": "Auburn Club Swim Team",
       "time": "1:12.44"
